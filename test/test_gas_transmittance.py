@@ -1,6 +1,6 @@
 import numpy as np
 
-import lib.gas_transmittance as gas_transmittance
+import bin.gas_transmittance as gas_transmittance
 
 def test_ozone_transmittance():
     k_oz = np.load('test/ozone_data/koz.npy')
