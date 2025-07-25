@@ -41,6 +41,9 @@ std::tuple<py::array_t<double>, py::array_t<double>, py::array_t<double>> ozone_
 
     double tau_oz{std::numeric_limits<double>::quiet_NaN()};
 
+    // TODO: Possibly factor out the core for loop that can be written entirely in C into a separate file. 
+    // May be able to offer a purely C-based API that just takes the pointers to the arrays in addition to the Python API
+
     // Input arrays have values for each pixel at each wavelength
     // If the array is considered as a 2D matrix then each row contains the values at every wavelength for a given pixel
     for (int ip = 0; ip < num_pixels; ip++)
