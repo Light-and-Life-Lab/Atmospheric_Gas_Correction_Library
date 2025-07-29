@@ -13,8 +13,8 @@ def test_ozone_transmittance():
     tg_sol_benchmark = np.load('test/ozone_data/tg_sol_oz.npy')
     tg_sen_benchmark = np.load('test/ozone_data/tg_sen_oz.npy')
 
-    assert np.allclose(tg_sol, tg_sol_benchmark)
-    assert np.allclose(tg_sen, tg_sen_benchmark)
+    np.testing.assert_allclose(tg_sol, tg_sol_benchmark)
+    np.testing.assert_allclose(tg_sen, tg_sen_benchmark)
 
 
 def test_no2_transmittance():
@@ -30,5 +30,5 @@ def test_no2_transmittance():
     tg_sol_benchmark = np.load('test/no2_data/tg_sol_no2.npy')
     tg_sen_benchmark = np.load('test/no2_data/tg_sen_no2.npy')
 
-    assert np.allclose(tg_sol, tg_sol_benchmark)
-    assert np.allclose(tg_sen, tg_sen_benchmark)
+    np.testing.assert_allclose(tg_sol, tg_sol_benchmark)
+    np.testing.assert_allclose(tg_sen, tg_sen_benchmark)
