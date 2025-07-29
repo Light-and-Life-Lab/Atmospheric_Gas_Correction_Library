@@ -153,12 +153,32 @@ std::tuple<py::array_t<double>, py::array_t<double>, py::array_t<double>> no2_tr
 }
 
 
+std::tuple<py::array_t<double>, py::array_t<double>, py::array_t<double>> no2_transmittance(
+    const L1_Record& l1_rec,
+    const bool do_amf_correction) 
+{
+    return no2_transmittance(
+        l1_rec.k_no2, 
+        l1_rec.l1b_no2_frac,
+        l1_rec.l1b_no2_tropo,
+        l1_rec.l1b_no2_strat,
+        l1_rec.l1b_csolz,
+        l1_rec.l1b_csenz,
+        do_amf_correction
+        );
+}
+
+
 PYBIND11_MODULE(gas_transmittance, m) 
 {
     py::class_<L1_Record>(m, "L1_Record", py::module_local())
         .def(py::init<>())
         .def_readwrite("k_oz", &L1_Record::k_oz)
         .def_readwrite("l1b_oz", &L1_Record::l1b_oz)
+        .def_readwrite("k_no2", &L1_Record::k_no2)
+        .def_readwrite("l1b_no2_frac", &L1_Record::l1b_no2_frac)
+        .def_readwrite("l1b_no2_tropo", &L1_Record::l1b_no2_tropo)
+        .def_readwrite("l1b_no2_strat", &L1_Record::l1b_no2_strat)
         .def_readwrite("l1b_csolz", &L1_Record::l1b_csolz)
         .def_readwrite("l1b_csenz", &L1_Record::l1b_csenz);
 
@@ -169,5 +189,14 @@ PYBIND11_MODULE(gas_transmittance, m)
         const py::array_t<double, py::array::c_style>&,
         const py::array_t<double, py::array::c_style>&, 
         bool> (&ozone_transmittance));
-    m.def("no2_transmittance", &no2_transmittance);
+
+    m.def("no2_transmittance", py::overload_cast<const L1_Record&, bool>(&no2_transmittance));
+    m.def("no2_transmittance", py::overload_cast<
+        const py::array_t<double, py::array::c_style>&,
+        const py::array_t<double, py::array::c_style>&,
+        const py::array_t<double, py::array::c_style>&,
+        const py::array_t<double, py::array::c_style>&,
+        const py::array_t<double, py::array::c_style>&,
+        const py::array_t<double, py::array::c_style>&,
+        bool>(&no2_transmittance));
 }
