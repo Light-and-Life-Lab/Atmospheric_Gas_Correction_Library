@@ -1,5 +1,6 @@
 <%
-cfg['compiler_args'] = ['-std=c++17', '-O3']
+cfg['compiler_args'] = ['-std=c++17', '-O3', '-fopenmp']
+cfg['linker_args'] = ['-fopenmp']
 setup_pybind11(cfg)
 %>
 
@@ -7,6 +8,7 @@ setup_pybind11(cfg)
 #include <iostream>
 #include <cmath>
 #include <tuple>
+#include <omp.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 
@@ -39,20 +41,19 @@ std::tuple<py::array_t<double>, py::array_t<double>, py::array_t<double>> ozone_
     double* tg_sen_ptr = static_cast<double*>(tg_sen.request().ptr);
     double* tg_ptr = static_cast<double*>(tg.request().ptr);
 
-    double tau_oz{std::numeric_limits<double>::quiet_NaN()};
-
     // TODO: Possibly factor out the core for loop that can be written entirely in C into a separate file. 
     // May be able to offer a purely C-based API that just takes the pointers to the arrays in addition to the Python API
 
     // Input arrays have values for each pixel at each wavelength
     // If the array is considered as a 2D matrix then each row contains the values at every wavelength for a given pixel
+    #pragma omp parallel for
     for (int ip = 0; ip < num_pixels; ip++)
     {
         int row_offset = ip*num_wavelengths; // Each row represents a single pixel and has num_wavelengths elements
 
         for (int iw = 0; iw < num_wavelengths; iw++) 
         {
-            tau_oz = l1b_oz_ptr[ip] * k_oz_ptr[iw];
+            double tau_oz = l1b_oz_ptr[ip] * k_oz_ptr[iw];
             tg_sol_ptr[row_offset + iw] = exp(-(tau_oz / l1b_csolz_ptr[ip]));
 
             if (do_amf_correction) 
@@ -99,15 +100,12 @@ std::tuple<py::array_t<double>, py::array_t<double>, py::array_t<double>> no2_tr
     double* tg_sen_ptr = static_cast<double*>(tg_sen.request().ptr);
     double* tg_ptr = static_cast<double*>(tg.request().ptr);
 
-    double a_285{std::numeric_limits<double>::quiet_NaN()};
-    double a_225{std::numeric_limits<double>::quiet_NaN()};
-    double tau_to200{std::numeric_limits<double>::quiet_NaN()};
-    double no2_tr200{std::numeric_limits<double>::quiet_NaN()};
-
+    #pragma omp parallel for
     for (int ip = 0; ip < num_pixels; ip++)
     {
         double sec0 = 1.0 / l1b_csolz_ptr[ip];
         double sec = 1.0 / l1b_csenz_ptr[ip];
+        double no2_tr200{0.0};
 
         if (l1b_no2_tropo_ptr[ip] > 0.0)
         {
@@ -116,8 +114,6 @@ std::tuple<py::array_t<double>, py::array_t<double>, py::array_t<double>> no2_tr
             new, location-dependent method */
             no2_tr200 = l1b_no2_frac_ptr[ip] * l1b_no2_tropo_ptr[ip];
         }
-        else
-            no2_tr200 = 0.0;
 
         int row_offset = ip*num_wavelengths; // Each row represents a single pixel and has num_wavelengths elements
 
@@ -125,10 +121,10 @@ std::tuple<py::array_t<double>, py::array_t<double>, py::array_t<double>> no2_tr
         {
             if (k_no2_ptr[iw] > 0.0) 
             {
-                a_285 = k_no2_ptr[iw] * (1.0 - 0.003 * (285.0 - 294.0));
-                a_225 = k_no2_ptr[iw] * (1.0 - 0.003 * (225.0 - 294.0));
+                double a_285 = k_no2_ptr[iw] * (1.0 - 0.003 * (285.0 - 294.0));
+                double a_225 = k_no2_ptr[iw] * (1.0 - 0.003 * (225.0 - 294.0));
 
-                tau_to200 = a_285 * no2_tr200 + a_225 * l1b_no2_strat_ptr[ip];
+                double tau_to200 = a_285 * no2_tr200 + a_225 * l1b_no2_strat_ptr[ip];
 
                 tg_sol_ptr[row_offset + iw] = exp(-(tau_to200 * sec0));
 
