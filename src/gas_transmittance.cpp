@@ -17,11 +17,11 @@ setup_pybind11(cfg)
 namespace py = pybind11;
 
 std::tuple<py::array_t<double>, py::array_t<double>, py::array_t<double>> ozone_transmittance(
-    py::array_t<double, py::array::c_style> k_oz, 
-    py::array_t<double, py::array::c_style> l1b_oz, 
-    py::array_t<double, py::array::c_style> l1b_csolz, 
-    py::array_t<double, py::array::c_style> l1b_csenz,
-    bool do_amf_correction) 
+    const py::array_t<double, py::array::c_style>& k_oz, 
+    const py::array_t<double, py::array::c_style>& l1b_oz, 
+    const py::array_t<double, py::array::c_style>& l1b_csolz, 
+    const py::array_t<double, py::array::c_style>& l1b_csenz,
+    const bool do_amf_correction) 
 {
     double* k_oz_ptr = static_cast<double*>(k_oz.request().ptr);
     double* l1b_oz_ptr = static_cast<double*>(l1b_oz.request().ptr);
@@ -72,13 +72,13 @@ std::tuple<py::array_t<double>, py::array_t<double>, py::array_t<double>> ozone_
 
 
 std::tuple<py::array_t<double>, py::array_t<double>, py::array_t<double>> no2_transmittance(
-    py::array_t<double, py::array::c_style> k_no2, 
-    py::array_t<double, py::array::c_style> l1b_no2_frac, 
-    py::array_t<double, py::array::c_style> l1b_no2_tropo, 
-    py::array_t<double, py::array::c_style> l1b_no2_strat,
-    py::array_t<double, py::array::c_style> l1b_csolz, 
-    py::array_t<double, py::array::c_style> l1b_csenz,
-    bool do_amf_correction) 
+    const py::array_t<double, py::array::c_style>& k_no2, 
+    const py::array_t<double, py::array::c_style>& l1b_no2_frac, 
+    const py::array_t<double, py::array::c_style>& l1b_no2_tropo, 
+    const py::array_t<double, py::array::c_style>& l1b_no2_strat,
+    const py::array_t<double, py::array::c_style>& l1b_csolz, 
+    const py::array_t<double, py::array::c_style>& l1b_csenz,
+    const bool do_amf_correction) 
 {
     double* k_no2_ptr = static_cast<double*>(k_no2.request().ptr);
     double* l1b_no2_frac_ptr = static_cast<double*>(l1b_no2_frac.request().ptr);
