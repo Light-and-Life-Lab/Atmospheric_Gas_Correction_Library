@@ -13,13 +13,14 @@ setup_pybind11(cfg)
 #include <pybind11/numpy.h>
 
 #include "gas_transmittance.hpp"
+#include "L1_record.h"
 
 namespace py = pybind11;
 
 std::tuple<py::array_t<double>, py::array_t<double>, py::array_t<double>> ozone_transmittance(
-    const py::array_t<double, py::array::c_style>& k_oz, 
-    const py::array_t<double, py::array::c_style>& l1b_oz, 
-    const py::array_t<double, py::array::c_style>& l1b_csolz, 
+    const py::array_t<double, py::array::c_style>& k_oz,
+    const py::array_t<double, py::array::c_style>& l1b_oz,
+    const py::array_t<double, py::array::c_style>& l1b_csolz,
     const py::array_t<double, py::array::c_style>& l1b_csenz,
     const bool do_amf_correction) 
 {
@@ -68,6 +69,14 @@ std::tuple<py::array_t<double>, py::array_t<double>, py::array_t<double>> ozone_
     }
 
     return std::make_tuple(tg_sol, tg_sen, tg);
+}
+
+
+std::tuple<py::array_t<double>, py::array_t<double>, py::array_t<double>> ozone_transmittance(
+    const L1_Record& l1_rec,
+    const bool do_amf_correction) 
+{
+    return ozone_transmittance(l1_rec.k_oz, l1_rec.l1b_oz, l1_rec.l1b_csolz, l1_rec.l1b_csenz, do_amf_correction);
 }
 
 
@@ -146,6 +155,19 @@ std::tuple<py::array_t<double>, py::array_t<double>, py::array_t<double>> no2_tr
 
 PYBIND11_MODULE(gas_transmittance, m) 
 {
-    m.def("ozone_transmittance", &ozone_transmittance);
+    py::class_<L1_Record>(m, "L1_Record", py::module_local())
+        .def(py::init<>())
+        .def_readwrite("k_oz", &L1_Record::k_oz)
+        .def_readwrite("l1b_oz", &L1_Record::l1b_oz)
+        .def_readwrite("l1b_csolz", &L1_Record::l1b_csolz)
+        .def_readwrite("l1b_csenz", &L1_Record::l1b_csenz);
+
+    m.def("ozone_transmittance", py::overload_cast<const L1_Record&, bool>(&ozone_transmittance));
+    m.def("ozone_transmittance", py::overload_cast<
+        const py::array_t<double, py::array::c_style>&,
+        const py::array_t<double, py::array::c_style>&,
+        const py::array_t<double, py::array::c_style>&,
+        const py::array_t<double, py::array::c_style>&, 
+        bool> (&ozone_transmittance));
     m.def("no2_transmittance", &no2_transmittance);
 }
