@@ -1,10 +1,10 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 
-struct L1_Record
+struct L1_Record_PY
 {
 public:
-    L1_Record(){};
+    L1_Record_PY(){};
     
     pybind11::array_t<double, pybind11::array::c_style> k_oz{};
     pybind11::array_t<double, pybind11::array::c_style> l1b_oz{}; 

@@ -1,7 +1,3 @@
-#include <string>
-#include <iostream>
-#include <cmath>
-#include <tuple>
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 
@@ -22,6 +18,3 @@ pybind11::array_t<T> allocate_output_array(int n_rows, int n_cols)
 
     return array;
 }
-
-// template<typename T>
-// T* allocate_output_array(int n_rows, int n_cols, )
