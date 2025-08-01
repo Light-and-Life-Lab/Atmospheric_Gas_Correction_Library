@@ -15,12 +15,12 @@ def test_ozone_transmittance_struct():
     l1_rec.l1b_csolz = l1b_csolz
     l1_rec.l1b_csenz = l1b_csenz
 
-    tg_sol, tg_sen, tg = gas_transmittance.ozone_transmittance(l1_rec, do_amf_correction)
+    t_rec = gas_transmittance.ozone_transmittance(l1_rec, do_amf_correction)
     tg_sol_benchmark = np.load('test/ozone_data/tg_sol_oz.npy')
     tg_sen_benchmark = np.load('test/ozone_data/tg_sen_oz.npy')
 
-    np.testing.assert_allclose(tg_sol, tg_sol_benchmark)
-    np.testing.assert_allclose(tg_sen, tg_sen_benchmark)
+    np.testing.assert_allclose(t_rec.tg_sol, tg_sol_benchmark)
+    np.testing.assert_allclose(t_rec.tg_sen, tg_sen_benchmark)
 
 
 def test_no2_transmittance():
@@ -40,9 +40,9 @@ def test_no2_transmittance():
     l1_rec.l1b_csolz = l1b_csolz
     l1_rec.l1b_csenz = l1b_csenz
 
-    tg_sol, tg_sen, tg = gas_transmittance.no2_transmittance(l1_rec, do_amf_correction)
+    t_rec = gas_transmittance.no2_transmittance(l1_rec, do_amf_correction)
     tg_sol_benchmark = np.load('test/no2_data/tg_sol_no2.npy')
     tg_sen_benchmark = np.load('test/no2_data/tg_sen_no2.npy')
 
-    np.testing.assert_allclose(tg_sol, tg_sol_benchmark)
-    np.testing.assert_allclose(tg_sen, tg_sen_benchmark)
+    np.testing.assert_allclose(t_rec.tg_sol, tg_sol_benchmark)
+    np.testing.assert_allclose(t_rec.tg_sen, tg_sen_benchmark)

@@ -15,3 +15,14 @@ public:
     pybind11::array_t<double, pybind11::array::c_style> l1b_csolz{}; 
     pybind11::array_t<double, pybind11::array::c_style> l1b_csenz{};
 };
+
+
+struct Transmittance_Record_PY
+{
+public:
+    Transmittance_Record_PY(){};
+    
+    pybind11::array_t<double, pybind11::array::c_style> tg_sol{};
+    pybind11::array_t<double, pybind11::array::c_style> tg_sen{};
+    pybind11::array_t<double, pybind11::array::c_style> tg{};
+};

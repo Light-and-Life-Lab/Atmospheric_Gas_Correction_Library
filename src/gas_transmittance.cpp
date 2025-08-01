@@ -10,12 +10,12 @@ setup_pybind11(cfg)
 #include <pybind11/numpy.h>
 
 #include "allocate_output_array.hpp"
-#include "L1_record_py.hpp"
+#include "pybind_interface_types.hpp"
 #include "gas_transmittance.h"
 
 namespace py = pybind11;
 
-std::tuple<py::array_t<double>, py::array_t<double>, py::array_t<double>> ozone_transmittance(
+Transmittance_Record_PY ozone_transmittance(
     const L1_Record_PY& l1_rec,
     const bool do_amf_correction) 
 {
@@ -31,23 +31,25 @@ std::tuple<py::array_t<double>, py::array_t<double>, py::array_t<double>> ozone_
     int n_cols = l1_rec.k_oz.request().shape[0];
     l1_rec_c.num_wavelengths = n_cols;
 
-    py::array_t<double> tg_sol = allocate_output_array<double>(n_rows, n_cols);
-    py::array_t<double> tg_sen = allocate_output_array<double>(n_rows, n_cols);
-    py::array_t<double> tg = allocate_output_array<double>(n_rows, n_cols);
+    Transmittance_Record_PY t_rec{};
 
-    Transmittance_Record transmittance_rec{};
+    t_rec.tg_sol = allocate_output_array<double>(n_rows, n_cols);
+    t_rec.tg_sen = allocate_output_array<double>(n_rows, n_cols);
+    t_rec.tg = allocate_output_array<double>(n_rows, n_cols);
 
-    transmittance_rec.tg_sol = static_cast<double*>(tg_sol.request().ptr);
-    transmittance_rec.tg_sen = static_cast<double*>(tg_sen.request().ptr);
-    transmittance_rec.tg = static_cast<double*>(tg.request().ptr);
+    Transmittance_Record t_rec_c{};
 
-    ozone_transmittance(&l1_rec_c, &transmittance_rec, do_amf_correction);
+    t_rec_c.tg_sol = static_cast<double*>(t_rec.tg_sol.request().ptr);
+    t_rec_c.tg_sen = static_cast<double*>(t_rec.tg_sen.request().ptr);
+    t_rec_c.tg = static_cast<double*>(t_rec.tg.request().ptr);
 
-    return std::make_tuple(tg_sol, tg_sen, tg);
+    ozone_transmittance(&l1_rec_c, &t_rec_c, do_amf_correction);
+
+    return t_rec;
 }
 
 
-std::tuple<py::array_t<double>, py::array_t<double>, py::array_t<double>> no2_transmittance(
+Transmittance_Record_PY no2_transmittance(
     const L1_Record_PY& l1_rec,
     const bool do_amf_correction) 
 {
@@ -65,19 +67,21 @@ std::tuple<py::array_t<double>, py::array_t<double>, py::array_t<double>> no2_tr
     int n_cols = l1_rec.k_no2.request().shape[0];
     l1_rec_c.num_wavelengths = n_cols;
 
-    Transmittance_Record t_rec{};
+    Transmittance_Record_PY t_rec{};
 
-    py::array_t<double> tg_sol = allocate_output_array<double>(n_rows, n_cols);
-    py::array_t<double> tg_sen = allocate_output_array<double>(n_rows, n_cols);
-    py::array_t<double> tg = allocate_output_array<double>(n_rows, n_cols);
+    t_rec.tg_sol = allocate_output_array<double>(n_rows, n_cols);
+    t_rec.tg_sen = allocate_output_array<double>(n_rows, n_cols);
+    t_rec.tg = allocate_output_array<double>(n_rows, n_cols);
 
-    t_rec.tg_sol = static_cast<double*>(tg_sol.request().ptr);
-    t_rec.tg_sen = static_cast<double*>(tg_sen.request().ptr);
-    t_rec.tg = static_cast<double*>(tg.request().ptr);
+    Transmittance_Record t_rec_c{};
 
-    no2_transmittance(&l1_rec_c, &t_rec, do_amf_correction);
+    t_rec_c.tg_sol = static_cast<double*>(t_rec.tg_sol.request().ptr);
+    t_rec_c.tg_sen = static_cast<double*>(t_rec.tg_sen.request().ptr);
+    t_rec_c.tg = static_cast<double*>(t_rec.tg.request().ptr);
 
-    return std::make_tuple(tg_sol, tg_sen, tg);
+    no2_transmittance(&l1_rec_c, &t_rec_c, do_amf_correction);
+
+    return t_rec;
 }
 
 
@@ -93,6 +97,12 @@ PYBIND11_MODULE(gas_transmittance, m)
         .def_readwrite("l1b_no2_strat", &L1_Record_PY::l1b_no2_strat)
         .def_readwrite("l1b_csolz", &L1_Record_PY::l1b_csolz)
         .def_readwrite("l1b_csenz", &L1_Record_PY::l1b_csenz);
+
+    py::class_<Transmittance_Record_PY>(m, "Transmittance_Record", py::module_local())
+        .def(py::init<>())
+        .def_readwrite("tg_sol", &Transmittance_Record_PY::tg_sol)
+        .def_readwrite("tg_sen", &Transmittance_Record_PY::tg_sen)
+        .def_readwrite("tg", &Transmittance_Record_PY::tg);
 
     m.def("ozone_transmittance", py::overload_cast<const L1_Record_PY&, bool>(&ozone_transmittance));
     m.def("no2_transmittance", py::overload_cast<const L1_Record_PY&, bool>(&no2_transmittance));
