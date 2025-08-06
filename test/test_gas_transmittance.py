@@ -8,6 +8,8 @@ def test_ozone_transmittance():
     l1_rec.ozone_concentration = np.load('test/ozone_data/oz_concentration.npy')
     l1_rec.cos_solar_zenith = np.load('test/ozone_data/oz_csolz.npy')
     l1_rec.cos_sensor_zenith = np.load('test/ozone_data/oz_csenz.npy')
+    l1_rec.num_pixels = len(l1_rec.cos_solar_zenith)
+    l1_rec.num_wavelengths = len(l1_rec.ozone_absorption_cross_section)
     do_amf_correction = False
 
     t_rec = gas_transmittance.ozone_transmittance(l1_rec, do_amf_correction)
@@ -25,6 +27,8 @@ def test_co_transmittance():
     l1_rec.num_amf_grid_points = np.load('test/co_data/num_airmass.npy')
     l1_rec.cos_solar_zenith = np.load('test/co_data/csolz.npy')
     l1_rec.cos_sensor_zenith = np.load('test/co_data/csenz.npy')
+    l1_rec.num_pixels = len(l1_rec.cos_solar_zenith)
+    l1_rec.num_wavelengths = len(l1_rec.co_transmittance[:, 0])
     do_amf_correction = True
 
     t_rec = gas_transmittance.co_transmittance(l1_rec, do_amf_correction)
@@ -43,6 +47,8 @@ def test_no2_transmittance():
     l1_rec.stratospheric_no2_concentration = np.load('test/no2_data/no2_strat.npy')
     l1_rec.cos_solar_zenith = np.load('test/no2_data/no2_csolz.npy')
     l1_rec.cos_sensor_zenith = np.load('test/no2_data/no2_csenz.npy')
+    l1_rec.num_pixels = len(l1_rec.cos_solar_zenith)
+    l1_rec.num_wavelengths = len(l1_rec.no2_absorption_cross_section)
     do_amf_correction = False
 
     t_rec = gas_transmittance.no2_transmittance(l1_rec, do_amf_correction)
