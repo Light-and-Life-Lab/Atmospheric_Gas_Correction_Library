@@ -15,9 +15,7 @@ setup_pybind11(cfg)
 
 namespace py = pybind11;
 
-Transmittance_Record_PY ozone_transmittance(
-    const L1_Record_PY& l1_rec,
-    const bool do_amf_correction) 
+Transmittance_Record_PY ozone_transmittance(const L1_Record_PY& l1_rec, const bool do_amf_correction) 
 {
     L1_Record l1_rec_c{};
     
@@ -49,9 +47,7 @@ Transmittance_Record_PY ozone_transmittance(
 }
 
 
-Transmittance_Record_PY co_transmittance(
-    const L1_Record_PY& l1_rec,
-    const bool do_amf_correction) 
+Transmittance_Record_PY co_transmittance(const L1_Record_PY& l1_rec, const bool do_amf_correction) 
 {
     L1_Record l1_rec_c{};
     
@@ -84,9 +80,7 @@ Transmittance_Record_PY co_transmittance(
 }
 
 
-Transmittance_Record_PY no2_transmittance(
-    const L1_Record_PY& l1_rec,
-    const bool do_amf_correction) 
+Transmittance_Record_PY no2_transmittance(const L1_Record_PY& l1_rec, const bool do_amf_correction) 
 {
     L1_Record l1_rec_c{};
 
