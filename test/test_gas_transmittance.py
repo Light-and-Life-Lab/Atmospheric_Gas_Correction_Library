@@ -18,6 +18,23 @@ def test_ozone_transmittance():
     np.testing.assert_allclose(t_rec.tg_sen, tg_sen_benchmark)
 
 
+def test_co_transmittance():
+    l1_rec = gas_transmittance.L1_Record()
+    l1_rec.t_co = np.load('test/co_data/t_co.npy')
+    l1_rec.amf_mixed = np.load('test/co_data/amf_mixed.npy')
+    l1_rec.num_airmass = np.load('test/co_data/num_airmass.npy')
+    l1_rec.l1b_csolz = np.load('test/co_data/csolz.npy')
+    l1_rec.l1b_csenz = np.load('test/co_data/csenz.npy')
+    do_amf_correction = True
+
+    t_rec = gas_transmittance.co_transmittance(l1_rec, do_amf_correction)
+    tg_sol_benchmark = np.load('test/co_data/tg_sol_co.npy')
+    tg_benchmark = np.load('test/co_data/tg_co.npy')
+
+    np.testing.assert_allclose(t_rec.tg_sol, tg_sol_benchmark)
+    np.testing.assert_allclose(t_rec.tg, tg_benchmark)
+
+
 def test_no2_transmittance():
     l1_rec = gas_transmittance.L1_Record()
     l1_rec.k_no2 = np.load('test/no2_data/k_no2.npy')
