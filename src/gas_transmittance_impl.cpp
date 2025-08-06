@@ -17,6 +17,27 @@ int32_t get_index_lowerbound(double* table_val, int num_val, float val)
     return index;
 }
 
+
+double interpolate_transmittance_to_amf(L1_Record* l1_rec, double* transmittance_table, int32_t index, double amf_value)
+{
+    // In the case where amf correction is performed, the gas transmittance input file will 
+    // have transmittance values as a 2D matrix. The transmittance values in this matrix are
+    // a function of both wavelength and air mass factor (amf)
+
+    // This desired amf value may fall between two of the points in the amf grid, so in general
+    // it is necessary to interpolate the values in the transmittance table to obtain the 
+    // transmittance at the desired amf value
+
+    int index_amf = get_index_lowerbound(l1_rec->amf_mixed, l1_rec->num_airmass, amf_value);
+    double ratio = (amf_value - l1_rec->amf_mixed[index_amf]) /
+                        (l1_rec->amf_mixed[index_amf + 1] - l1_rec->amf_mixed[index_amf]);
+
+    double transmittance_interpolated_to_amf = transmittance_table[index+index_amf]*(1-ratio)
+                                             + transmittance_table[index+index_amf+1]*ratio;
+    return transmittance_interpolated_to_amf;
+}
+
+
 void ozone_transmittance(L1_Record* l1_rec, Transmittance_Record* t_rec, bool do_amf_correction)
 {
     #pragma omp parallel for
@@ -57,24 +78,10 @@ void co_transmittance(L1_Record* l1_rec, Transmittance_Record* t_rec, bool do_am
             if (do_amf_correction) 
             {
                 double amf_total = amf_solz + amf_senz;
-
-                int index_amf_solz = get_index_lowerbound(l1_rec->amf_mixed, l1_rec->num_airmass, amf_solz);
-                int index_amf_total = get_index_lowerbound(l1_rec->amf_mixed, l1_rec->num_airmass, amf_total);
-
-                double ratio_solz = (amf_solz - l1_rec->amf_mixed[index_amf_solz]) /
-                                    (l1_rec->amf_mixed[index_amf_solz + 1] - l1_rec->amf_mixed[index_amf_solz]);
-                double ratio_total = (amf_total - l1_rec->amf_mixed[index_amf_total]) /
-                                    (l1_rec->amf_mixed[index_amf_total + 1] - l1_rec->amf_mixed[index_amf_total]);
-
                 int32_t index = iw*l1_rec->num_airmass;
-                
-                double t_co_interp_sol = l1_rec->t_co[index+index_amf_solz]*(1-ratio_solz)
-                                    + l1_rec->t_co[index+index_amf_solz+1]*ratio_solz;
-                t_rec->tg_sol[row_offset + iw] = t_co_interp_sol;
-                
-                double t_co_interp_total = l1_rec->t_co[index+index_amf_total]*(1-ratio_total) 
-                                + l1_rec->t_co[index+index_amf_total+1]*ratio_total;
-                t_rec->tg[row_offset + iw] = t_co_interp_total;
+
+                t_rec->tg_sol[row_offset + iw] = interpolate_transmittance_to_amf(l1_rec, l1_rec->t_co, index, amf_solz);
+                t_rec->tg[row_offset + iw] = interpolate_transmittance_to_amf(l1_rec, l1_rec->t_co, index, amf_total);
             }
             else 
             {
