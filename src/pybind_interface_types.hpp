@@ -6,17 +6,17 @@ struct L1_Record_PY
 public:
     L1_Record_PY(){};
     
-    pybind11::array_t<double, pybind11::array::c_style> k_oz{};
-    pybind11::array_t<double, pybind11::array::c_style> l1b_oz{}; 
-    pybind11::array_t<double, pybind11::array::c_style> k_no2{};
-    pybind11::array_t<double, pybind11::array::c_style> l1b_no2_frac{};
-    pybind11::array_t<double, pybind11::array::c_style> l1b_no2_tropo{};
-    pybind11::array_t<double, pybind11::array::c_style> l1b_no2_strat{};
-    pybind11::array_t<double, pybind11::array::c_style> t_co{};
-    pybind11::array_t<double, pybind11::array::c_style> amf_mixed{};
-    int num_airmass{};
-    pybind11::array_t<double, pybind11::array::c_style> l1b_csolz{}; 
-    pybind11::array_t<double, pybind11::array::c_style> l1b_csenz{};
+    pybind11::array_t<double, pybind11::array::c_style> ozone_absorption_cross_section{};
+    pybind11::array_t<double, pybind11::array::c_style> ozone_concentration{}; 
+    pybind11::array_t<double, pybind11::array::c_style> no2_absorption_cross_section{};
+    pybind11::array_t<double, pybind11::array::c_style> fraction_tropospheric_no2_above_200m{};
+    pybind11::array_t<double, pybind11::array::c_style> tropospheric_no2_concentration{};
+    pybind11::array_t<double, pybind11::array::c_style> stratospheric_no2_concentration{};
+    pybind11::array_t<double, pybind11::array::c_style> co_transmittance{};
+    pybind11::array_t<double, pybind11::array::c_style> air_mass_factor_mixed_gases{};
+    int num_amf_grid_points{};
+    pybind11::array_t<double, pybind11::array::c_style> cos_solar_zenith{}; 
+    pybind11::array_t<double, pybind11::array::c_style> cos_sensor_zenith{};
 };
 
 
@@ -25,7 +25,7 @@ struct Transmittance_Record_PY
 public:
     Transmittance_Record_PY(){};
     
-    pybind11::array_t<double, pybind11::array::c_style> tg_sol{};
-    pybind11::array_t<double, pybind11::array::c_style> tg_sen{};
-    pybind11::array_t<double, pybind11::array::c_style> tg{};
+    pybind11::array_t<double, pybind11::array::c_style> gas_transmittance_solar_zenith{};
+    pybind11::array_t<double, pybind11::array::c_style> gas_transmittance_sensor_zenith{};
+    pybind11::array_t<double, pybind11::array::c_style> gas_transmittance_total{};
 };

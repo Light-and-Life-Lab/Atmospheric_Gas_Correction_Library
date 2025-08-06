@@ -28,9 +28,9 @@ double interpolate_transmittance_to_amf(L1_Record* l1_rec, double* transmittance
     // it is necessary to interpolate the values in the transmittance table to obtain the 
     // transmittance at the desired amf value
 
-    int index_amf = get_index_lowerbound(l1_rec->amf_mixed, l1_rec->num_airmass, amf_value);
-    double ratio = (amf_value - l1_rec->amf_mixed[index_amf]) /
-                        (l1_rec->amf_mixed[index_amf + 1] - l1_rec->amf_mixed[index_amf]);
+    int index_amf = get_index_lowerbound(l1_rec->air_mass_factor_mixed_gases, l1_rec->num_amf_grid_points, amf_value);
+    double ratio = (amf_value - l1_rec->air_mass_factor_mixed_gases[index_amf]) /
+                        (l1_rec->air_mass_factor_mixed_gases[index_amf + 1] - l1_rec->air_mass_factor_mixed_gases[index_amf]);
 
     double transmittance_interpolated_to_amf = transmittance_table[index+index_amf]*(1-ratio)
                                              + transmittance_table[index+index_amf+1]*ratio;
@@ -47,16 +47,16 @@ void ozone_transmittance(L1_Record* l1_rec, Transmittance_Record* t_rec, bool do
 
         for (int iw = 0; iw < l1_rec->num_wavelengths; iw++) 
         {
-            double tau_oz = l1_rec->l1b_oz[ip] * l1_rec->k_oz[iw];
-            t_rec->tg_sol[row_offset + iw] = exp(-(tau_oz / l1_rec->l1b_csolz[ip]));
+            double tau_oz = l1_rec->ozone_concentration[ip] * l1_rec->ozone_absorption_cross_section[iw];
+            t_rec->gas_transmittance_solar_zenith[row_offset + iw] = exp(-(tau_oz / l1_rec->cos_solar_zenith[ip]));
 
             if (do_amf_correction) 
             {
-                t_rec->tg[row_offset + iw] = exp(-tau_oz * (1.0/l1_rec->l1b_csolz[ip] + 1.0/l1_rec->l1b_csenz[ip]));
+                t_rec->gas_transmittance_total[row_offset + iw] = exp(-tau_oz * (1.0/l1_rec->cos_solar_zenith[ip] + 1.0/l1_rec->cos_sensor_zenith[ip]));
             } 
             else 
             {
-                t_rec->tg_sen[row_offset + iw] = exp(-(tau_oz / l1_rec->l1b_csenz[ip]));
+                t_rec->gas_transmittance_sensor_zenith[row_offset + iw] = exp(-(tau_oz / l1_rec->cos_sensor_zenith[ip]));
             }
         }
     }
@@ -70,23 +70,23 @@ void co_transmittance(L1_Record* l1_rec, Transmittance_Record* t_rec, bool do_am
     {
         int row_offset = ip*l1_rec->num_wavelengths; // Each row represents a single pixel and has num_wavelengths elements
 
-        double amf_solz = 1.0/l1_rec->l1b_csolz[ip];
-        double amf_senz = 1.0/l1_rec->l1b_csenz[ip];
+        double amf_solz = 1.0/l1_rec->cos_solar_zenith[ip];
+        double amf_senz = 1.0/l1_rec->cos_sensor_zenith[ip];
         
         for (int iw = 0; iw < l1_rec->num_wavelengths; iw++) 
         {
             if (do_amf_correction) 
             {
                 double amf_total = amf_solz + amf_senz;
-                int32_t index = iw*l1_rec->num_airmass;
+                int32_t index = iw*l1_rec->num_amf_grid_points;
 
-                t_rec->tg_sol[row_offset + iw] = interpolate_transmittance_to_amf(l1_rec, l1_rec->t_co, index, amf_solz);
-                t_rec->tg[row_offset + iw] = interpolate_transmittance_to_amf(l1_rec, l1_rec->t_co, index, amf_total);
+                t_rec->gas_transmittance_solar_zenith[row_offset + iw] = interpolate_transmittance_to_amf(l1_rec, l1_rec->co_transmittance, index, amf_solz);
+                t_rec->gas_transmittance_total[row_offset + iw] = interpolate_transmittance_to_amf(l1_rec, l1_rec->co_transmittance, index, amf_total);
             }
             else 
             {
-                t_rec->tg_sol[row_offset + iw] = pow(l1_rec->t_co[iw], amf_solz);
-                t_rec->tg_sen[row_offset + iw] = pow(l1_rec->t_co[iw], amf_senz);
+                t_rec->gas_transmittance_solar_zenith[row_offset + iw] = pow(l1_rec->co_transmittance[iw], amf_solz);
+                t_rec->gas_transmittance_sensor_zenith[row_offset + iw] = pow(l1_rec->co_transmittance[iw], amf_senz);
             }
         }
     }
@@ -98,38 +98,38 @@ void no2_transmittance(L1_Record* l1_rec, Transmittance_Record* t_rec, bool do_a
     #pragma omp parallel for
     for (int ip = 0; ip < l1_rec->num_pixels; ip++)
     {
-        double sec0 = 1.0 / l1_rec->l1b_csolz[ip];
-        double sec = 1.0 / l1_rec->l1b_csenz[ip];
+        double sec0 = 1.0 / l1_rec->cos_solar_zenith[ip];
+        double sec = 1.0 / l1_rec->cos_sensor_zenith[ip];
         double no2_tr200{0.0};
 
-        if (l1_rec->l1b_no2_tropo[ip] > 0.0)
+        if (l1_rec->tropospheric_no2_concentration[ip] > 0.0)
         {
             /* compute tropo no2 above 200m (Z.Ahmad)
             no2_tr200 = exp(12.6615 + 0.61676*log(no2_tropo));
             new, location-dependent method */
-            no2_tr200 = l1_rec->l1b_no2_frac[ip] * l1_rec->l1b_no2_tropo[ip];
+            no2_tr200 = l1_rec->fraction_tropospheric_no2_above_200m[ip] * l1_rec->tropospheric_no2_concentration[ip];
         }
 
         int row_offset = ip*l1_rec->num_wavelengths; // Each row represents a single pixel and has num_wavelengths elements
 
         for (int iw = 0; iw < l1_rec->num_wavelengths; iw++) 
         {
-            if (l1_rec->k_no2[iw] > 0.0) 
+            if (l1_rec->no2_absorption_cross_section[iw] > 0.0) 
             {
-                double a_285 = l1_rec->k_no2[iw] * (1.0 - 0.003 * (285.0 - 294.0));
-                double a_225 = l1_rec->k_no2[iw] * (1.0 - 0.003 * (225.0 - 294.0));
+                double a_285 = l1_rec->no2_absorption_cross_section[iw] * (1.0 - 0.003 * (285.0 - 294.0));
+                double a_225 = l1_rec->no2_absorption_cross_section[iw] * (1.0 - 0.003 * (225.0 - 294.0));
 
-                double tau_to200 = a_285 * no2_tr200 + a_225 * l1_rec->l1b_no2_strat[ip];
+                double tau_to200 = a_285 * no2_tr200 + a_225 * l1_rec->stratospheric_no2_concentration[ip];
 
-                t_rec->tg_sol[row_offset + iw] = exp(-(tau_to200 * sec0));
+                t_rec->gas_transmittance_solar_zenith[row_offset + iw] = exp(-(tau_to200 * sec0));
 
                 if (do_amf_correction) 
                 {
-                    t_rec->tg[row_offset + iw] = exp(-(tau_to200 * (sec + sec0)));
+                    t_rec->gas_transmittance_total[row_offset + iw] = exp(-(tau_to200 * (sec + sec0)));
                 }
                 else
                 {
-                    t_rec->tg_sen[row_offset + iw] = exp(-(tau_to200 * sec));
+                    t_rec->gas_transmittance_sensor_zenith[row_offset + iw] = exp(-(tau_to200 * sec));
                 }
             }
         }

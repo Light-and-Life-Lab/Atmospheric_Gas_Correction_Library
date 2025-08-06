@@ -1,29 +1,29 @@
 struct L1_Record
 {
-    double* k_oz{};
-    double* l1b_oz{};
+    double* ozone_absorption_cross_section{};
+    double* ozone_concentration{};
 
-    double* k_no2{};
-    double* l1b_no2_frac{};
-    double* l1b_no2_tropo{};
-    double* l1b_no2_strat{};
+    double* no2_absorption_cross_section{};
+    double* fraction_tropospheric_no2_above_200m{};
+    double* tropospheric_no2_concentration{};
+    double* stratospheric_no2_concentration{};
 
-    double* t_co{};
+    double* co_transmittance{};
 
-    double* amf_mixed{};
-    int num_airmass{};
+    double* air_mass_factor_mixed_gases{};
+    int num_amf_grid_points{};
 
-    double* l1b_csolz{}; 
-    double* l1b_csenz{};
+    double* cos_solar_zenith{}; 
+    double* cos_sensor_zenith{};
     int num_pixels{};
     int num_wavelengths{};
 };
 
 struct Transmittance_Record
 {
-    double* tg_sol{};
-    double* tg_sen{};
-    double* tg{};
+    double* gas_transmittance_solar_zenith{};
+    double* gas_transmittance_sensor_zenith{};
+    double* gas_transmittance_total{};
 };
 
 void ozone_transmittance(L1_Record* l1_rec, Transmittance_Record* t_rec, bool do_amf_correction);

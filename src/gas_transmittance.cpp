@@ -21,27 +21,27 @@ Transmittance_Record_PY ozone_transmittance(
 {
     L1_Record l1_rec_c{};
     
-    l1_rec_c.k_oz = static_cast<double*>(l1_rec.k_oz.request().ptr);
-    l1_rec_c.l1b_oz = static_cast<double*>(l1_rec.l1b_oz.request().ptr);
-    l1_rec_c.l1b_csolz = static_cast<double*>(l1_rec.l1b_csolz.request().ptr);
-    l1_rec_c.l1b_csenz = static_cast<double*>(l1_rec.l1b_csenz.request().ptr);
+    l1_rec_c.ozone_absorption_cross_section = static_cast<double*>(l1_rec.ozone_absorption_cross_section.request().ptr);
+    l1_rec_c.ozone_concentration = static_cast<double*>(l1_rec.ozone_concentration.request().ptr);
+    l1_rec_c.cos_solar_zenith = static_cast<double*>(l1_rec.cos_solar_zenith.request().ptr);
+    l1_rec_c.cos_sensor_zenith = static_cast<double*>(l1_rec.cos_sensor_zenith.request().ptr);
 
-    int n_rows = l1_rec.l1b_oz.request().shape[0];
+    int n_rows = l1_rec.ozone_concentration.request().shape[0];
     l1_rec_c.num_pixels = n_rows;
-    int n_cols = l1_rec.k_oz.request().shape[0];
+    int n_cols = l1_rec.ozone_absorption_cross_section.request().shape[0];
     l1_rec_c.num_wavelengths = n_cols;
 
     Transmittance_Record_PY t_rec{};
 
-    t_rec.tg_sol = allocate_output_array<double>(n_rows, n_cols);
-    t_rec.tg_sen = allocate_output_array<double>(n_rows, n_cols);
-    t_rec.tg = allocate_output_array<double>(n_rows, n_cols);
+    t_rec.gas_transmittance_solar_zenith = allocate_output_array<double>(n_rows, n_cols);
+    t_rec.gas_transmittance_sensor_zenith = allocate_output_array<double>(n_rows, n_cols);
+    t_rec.gas_transmittance_total = allocate_output_array<double>(n_rows, n_cols);
 
     Transmittance_Record t_rec_c{};
 
-    t_rec_c.tg_sol = static_cast<double*>(t_rec.tg_sol.request().ptr);
-    t_rec_c.tg_sen = static_cast<double*>(t_rec.tg_sen.request().ptr);
-    t_rec_c.tg = static_cast<double*>(t_rec.tg.request().ptr);
+    t_rec_c.gas_transmittance_solar_zenith = static_cast<double*>(t_rec.gas_transmittance_solar_zenith.request().ptr);
+    t_rec_c.gas_transmittance_sensor_zenith = static_cast<double*>(t_rec.gas_transmittance_sensor_zenith.request().ptr);
+    t_rec_c.gas_transmittance_total = static_cast<double*>(t_rec.gas_transmittance_total.request().ptr);
 
     ozone_transmittance(&l1_rec_c, &t_rec_c, do_amf_correction);
 
@@ -55,28 +55,28 @@ Transmittance_Record_PY co_transmittance(
 {
     L1_Record l1_rec_c{};
     
-    l1_rec_c.t_co = static_cast<double*>(l1_rec.t_co.request().ptr);
-    l1_rec_c.amf_mixed = static_cast<double*>(l1_rec.amf_mixed.request().ptr);
-    l1_rec_c.num_airmass = l1_rec.num_airmass;
-    l1_rec_c.l1b_csolz = static_cast<double*>(l1_rec.l1b_csolz.request().ptr);
-    l1_rec_c.l1b_csenz = static_cast<double*>(l1_rec.l1b_csenz.request().ptr);
+    l1_rec_c.co_transmittance = static_cast<double*>(l1_rec.co_transmittance.request().ptr);
+    l1_rec_c.air_mass_factor_mixed_gases = static_cast<double*>(l1_rec.air_mass_factor_mixed_gases.request().ptr);
+    l1_rec_c.num_amf_grid_points = l1_rec.num_amf_grid_points;
+    l1_rec_c.cos_solar_zenith = static_cast<double*>(l1_rec.cos_solar_zenith.request().ptr);
+    l1_rec_c.cos_sensor_zenith = static_cast<double*>(l1_rec.cos_sensor_zenith.request().ptr);
 
-    int n_rows = l1_rec.l1b_csolz.request().shape[0];
+    int n_rows = l1_rec.cos_solar_zenith.request().shape[0];
     l1_rec_c.num_pixels = n_rows;
-    int n_cols = l1_rec.t_co.request().shape[0];
+    int n_cols = l1_rec.co_transmittance.request().shape[0];
     l1_rec_c.num_wavelengths = n_cols;
 
     Transmittance_Record_PY t_rec{};
 
-    t_rec.tg_sol = allocate_output_array<double>(n_rows, n_cols);
-    t_rec.tg_sen = allocate_output_array<double>(n_rows, n_cols);
-    t_rec.tg = allocate_output_array<double>(n_rows, n_cols);
+    t_rec.gas_transmittance_solar_zenith = allocate_output_array<double>(n_rows, n_cols);
+    t_rec.gas_transmittance_sensor_zenith = allocate_output_array<double>(n_rows, n_cols);
+    t_rec.gas_transmittance_total = allocate_output_array<double>(n_rows, n_cols);
 
     Transmittance_Record t_rec_c{};
 
-    t_rec_c.tg_sol = static_cast<double*>(t_rec.tg_sol.request().ptr);
-    t_rec_c.tg_sen = static_cast<double*>(t_rec.tg_sen.request().ptr);
-    t_rec_c.tg = static_cast<double*>(t_rec.tg.request().ptr);
+    t_rec_c.gas_transmittance_solar_zenith = static_cast<double*>(t_rec.gas_transmittance_solar_zenith.request().ptr);
+    t_rec_c.gas_transmittance_sensor_zenith = static_cast<double*>(t_rec.gas_transmittance_sensor_zenith.request().ptr);
+    t_rec_c.gas_transmittance_total = static_cast<double*>(t_rec.gas_transmittance_total.request().ptr);
 
     co_transmittance(&l1_rec_c, &t_rec_c, do_amf_correction);
 
@@ -90,29 +90,29 @@ Transmittance_Record_PY no2_transmittance(
 {
     L1_Record l1_rec_c{};
 
-    l1_rec_c.k_no2 = static_cast<double*>(l1_rec.k_no2.request().ptr);
-    l1_rec_c.l1b_no2_frac = static_cast<double*>(l1_rec.l1b_no2_frac.request().ptr);
-    l1_rec_c.l1b_no2_tropo = static_cast<double*>(l1_rec.l1b_no2_tropo.request().ptr);
-    l1_rec_c.l1b_no2_strat = static_cast<double*>(l1_rec.l1b_no2_strat.request().ptr);
-    l1_rec_c.l1b_csolz = static_cast<double*>(l1_rec.l1b_csolz.request().ptr);
-    l1_rec_c.l1b_csenz = static_cast<double*>(l1_rec.l1b_csenz.request().ptr);
+    l1_rec_c.no2_absorption_cross_section = static_cast<double*>(l1_rec.no2_absorption_cross_section.request().ptr);
+    l1_rec_c.fraction_tropospheric_no2_above_200m = static_cast<double*>(l1_rec.fraction_tropospheric_no2_above_200m.request().ptr);
+    l1_rec_c.tropospheric_no2_concentration = static_cast<double*>(l1_rec.tropospheric_no2_concentration.request().ptr);
+    l1_rec_c.stratospheric_no2_concentration = static_cast<double*>(l1_rec.stratospheric_no2_concentration.request().ptr);
+    l1_rec_c.cos_solar_zenith = static_cast<double*>(l1_rec.cos_solar_zenith.request().ptr);
+    l1_rec_c.cos_sensor_zenith = static_cast<double*>(l1_rec.cos_sensor_zenith.request().ptr);
 
-    int n_rows = l1_rec.l1b_no2_tropo.request().shape[0];
+    int n_rows = l1_rec.tropospheric_no2_concentration.request().shape[0];
     l1_rec_c.num_pixels = n_rows;
-    int n_cols = l1_rec.k_no2.request().shape[0];
+    int n_cols = l1_rec.no2_absorption_cross_section.request().shape[0];
     l1_rec_c.num_wavelengths = n_cols;
 
     Transmittance_Record_PY t_rec{};
 
-    t_rec.tg_sol = allocate_output_array<double>(n_rows, n_cols);
-    t_rec.tg_sen = allocate_output_array<double>(n_rows, n_cols);
-    t_rec.tg = allocate_output_array<double>(n_rows, n_cols);
+    t_rec.gas_transmittance_solar_zenith = allocate_output_array<double>(n_rows, n_cols);
+    t_rec.gas_transmittance_sensor_zenith = allocate_output_array<double>(n_rows, n_cols);
+    t_rec.gas_transmittance_total = allocate_output_array<double>(n_rows, n_cols);
 
     Transmittance_Record t_rec_c{};
 
-    t_rec_c.tg_sol = static_cast<double*>(t_rec.tg_sol.request().ptr);
-    t_rec_c.tg_sen = static_cast<double*>(t_rec.tg_sen.request().ptr);
-    t_rec_c.tg = static_cast<double*>(t_rec.tg.request().ptr);
+    t_rec_c.gas_transmittance_solar_zenith = static_cast<double*>(t_rec.gas_transmittance_solar_zenith.request().ptr);
+    t_rec_c.gas_transmittance_sensor_zenith = static_cast<double*>(t_rec.gas_transmittance_sensor_zenith.request().ptr);
+    t_rec_c.gas_transmittance_total = static_cast<double*>(t_rec.gas_transmittance_total.request().ptr);
 
     no2_transmittance(&l1_rec_c, &t_rec_c, do_amf_correction);
 
@@ -124,23 +124,23 @@ PYBIND11_MODULE(gas_transmittance, m)
 {
     py::class_<L1_Record_PY>(m, "L1_Record", py::module_local())
         .def(py::init<>())
-        .def_readwrite("k_oz", &L1_Record_PY::k_oz)
-        .def_readwrite("l1b_oz", &L1_Record_PY::l1b_oz)
-        .def_readwrite("k_no2", &L1_Record_PY::k_no2)
-        .def_readwrite("l1b_no2_frac", &L1_Record_PY::l1b_no2_frac)
-        .def_readwrite("l1b_no2_tropo", &L1_Record_PY::l1b_no2_tropo)
-        .def_readwrite("l1b_no2_strat", &L1_Record_PY::l1b_no2_strat)
-        .def_readwrite("t_co", &L1_Record_PY::t_co)
-        .def_readwrite("amf_mixed", &L1_Record_PY::amf_mixed)
-        .def_readwrite("num_airmass", &L1_Record_PY::num_airmass)
-        .def_readwrite("l1b_csolz", &L1_Record_PY::l1b_csolz)
-        .def_readwrite("l1b_csenz", &L1_Record_PY::l1b_csenz);
+        .def_readwrite("ozone_absorption_cross_section", &L1_Record_PY::ozone_absorption_cross_section)
+        .def_readwrite("ozone_concentration", &L1_Record_PY::ozone_concentration)
+        .def_readwrite("no2_absorption_cross_section", &L1_Record_PY::no2_absorption_cross_section)
+        .def_readwrite("fraction_tropospheric_no2_above_200m", &L1_Record_PY::fraction_tropospheric_no2_above_200m)
+        .def_readwrite("tropospheric_no2_concentration", &L1_Record_PY::tropospheric_no2_concentration)
+        .def_readwrite("stratospheric_no2_concentration", &L1_Record_PY::stratospheric_no2_concentration)
+        .def_readwrite("co_transmittance", &L1_Record_PY::co_transmittance)
+        .def_readwrite("air_mass_factor_mixed_gases", &L1_Record_PY::air_mass_factor_mixed_gases)
+        .def_readwrite("num_amf_grid_points", &L1_Record_PY::num_amf_grid_points)
+        .def_readwrite("cos_solar_zenith", &L1_Record_PY::cos_solar_zenith)
+        .def_readwrite("cos_sensor_zenith", &L1_Record_PY::cos_sensor_zenith);
 
     py::class_<Transmittance_Record_PY>(m, "Transmittance_Record", py::module_local())
         .def(py::init<>())
-        .def_readwrite("tg_sol", &Transmittance_Record_PY::tg_sol)
-        .def_readwrite("tg_sen", &Transmittance_Record_PY::tg_sen)
-        .def_readwrite("tg", &Transmittance_Record_PY::tg);
+        .def_readwrite("gas_transmittance_solar_zenith", &Transmittance_Record_PY::gas_transmittance_solar_zenith)
+        .def_readwrite("gas_transmittance_sensor_zenith", &Transmittance_Record_PY::gas_transmittance_sensor_zenith)
+        .def_readwrite("gas_transmittance_total", &Transmittance_Record_PY::gas_transmittance_total);
 
     m.def("ozone_transmittance", py::overload_cast<const L1_Record_PY&, bool>(&ozone_transmittance));
     m.def("co_transmittance", py::overload_cast<const L1_Record_PY&, bool>(&co_transmittance));
