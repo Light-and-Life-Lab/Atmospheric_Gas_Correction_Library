@@ -49,6 +49,41 @@ Transmittance_Record_PY ozone_transmittance(
 }
 
 
+Transmittance_Record_PY co_transmittance(
+    const L1_Record_PY& l1_rec,
+    const bool do_amf_correction) 
+{
+    L1_Record l1_rec_c{};
+    
+    l1_rec_c.t_co = static_cast<double*>(l1_rec.t_co.request().ptr);
+    l1_rec_c.amf_mixed = static_cast<double*>(l1_rec.amf_mixed.request().ptr);
+    l1_rec_c.num_airmass = l1_rec.num_airmass;
+    l1_rec_c.l1b_csolz = static_cast<double*>(l1_rec.l1b_csolz.request().ptr);
+    l1_rec_c.l1b_csenz = static_cast<double*>(l1_rec.l1b_csenz.request().ptr);
+
+    int n_rows = l1_rec.l1b_csolz.request().shape[0];
+    l1_rec_c.num_pixels = n_rows;
+    int n_cols = l1_rec.t_co.request().shape[0];
+    l1_rec_c.num_wavelengths = n_cols;
+
+    Transmittance_Record_PY t_rec{};
+
+    t_rec.tg_sol = allocate_output_array<double>(n_rows, n_cols);
+    t_rec.tg_sen = allocate_output_array<double>(n_rows, n_cols);
+    t_rec.tg = allocate_output_array<double>(n_rows, n_cols);
+
+    Transmittance_Record t_rec_c{};
+
+    t_rec_c.tg_sol = static_cast<double*>(t_rec.tg_sol.request().ptr);
+    t_rec_c.tg_sen = static_cast<double*>(t_rec.tg_sen.request().ptr);
+    t_rec_c.tg = static_cast<double*>(t_rec.tg.request().ptr);
+
+    co_transmittance(&l1_rec_c, &t_rec_c, do_amf_correction);
+
+    return t_rec;
+}
+
+
 Transmittance_Record_PY no2_transmittance(
     const L1_Record_PY& l1_rec,
     const bool do_amf_correction) 
@@ -95,6 +130,9 @@ PYBIND11_MODULE(gas_transmittance, m)
         .def_readwrite("l1b_no2_frac", &L1_Record_PY::l1b_no2_frac)
         .def_readwrite("l1b_no2_tropo", &L1_Record_PY::l1b_no2_tropo)
         .def_readwrite("l1b_no2_strat", &L1_Record_PY::l1b_no2_strat)
+        .def_readwrite("t_co", &L1_Record_PY::t_co)
+        .def_readwrite("amf_mixed", &L1_Record_PY::amf_mixed)
+        .def_readwrite("num_airmass", &L1_Record_PY::num_airmass)
         .def_readwrite("l1b_csolz", &L1_Record_PY::l1b_csolz)
         .def_readwrite("l1b_csenz", &L1_Record_PY::l1b_csenz);
 
@@ -105,5 +143,6 @@ PYBIND11_MODULE(gas_transmittance, m)
         .def_readwrite("tg", &Transmittance_Record_PY::tg);
 
     m.def("ozone_transmittance", py::overload_cast<const L1_Record_PY&, bool>(&ozone_transmittance));
+    m.def("co_transmittance", py::overload_cast<const L1_Record_PY&, bool>(&co_transmittance));
     m.def("no2_transmittance", py::overload_cast<const L1_Record_PY&, bool>(&no2_transmittance));
 }
