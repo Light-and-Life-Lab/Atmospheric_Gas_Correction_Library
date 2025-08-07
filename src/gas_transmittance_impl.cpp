@@ -153,6 +153,62 @@ void ch4_transmittance(L1_Record* l1_rec, Transmittance_Record* t_rec, bool do_a
 }
 
 
+// void o2_transmittance(L1_Record* l1_rec, Transmittance_Record* t_rec, bool do_amf_correction)
+// {
+//     #pragma omp parallel for
+//     for (int ip = 0; ip < l1_rec->num_pixels; ip++)
+//     {
+//         int index_amf_solz_o2;
+//         float ratio_solz_o2;
+//         float ratio_total_o2;
+//         int index_amf_total_o2;
+
+//         if (do_amf_correction && input->oxaband_opt == 3) {
+//             float amf_total_o2 = get_airmass_oxygen(l1rec, ip, 753.0221, 761.7891, 776.81335);
+//             float scaling_factor = amf_total_o2 / amf_total;
+
+//             index_amf_solz_o2 = get_index_lowerbound(amf_mixed, num_airmass, amf_solz * scaling_factor);
+//             index_amf_total_o2 = get_index_lowerbound(amf_mixed, num_airmass, amf_total * scaling_factor);
+
+//             ratio_solz_o2 = (amf_solz * scaling_factor - amf_mixed[index_amf_solz_o2]) /
+//                             (amf_mixed[index_amf_solz_o2 + 1] - amf_mixed[index_amf_solz_o2]);
+//             ratio_total_o2 = (amf_total * scaling_factor - amf_mixed[index_amf_total_o2]) /
+//                              (amf_mixed[index_amf_total_o2 + 1] - amf_mixed[index_amf_total_o2]);
+//         }
+
+//         for (int iw = 0; iw < l1_rec->num_wavelengths; iw++) 
+//         {
+//             if (do_amf_correction) 
+//             {
+//                 int32_t row_index = iw*l1_rec->num_amf_grid_points;
+//                 float t_o2_interp;
+
+//                 if (input->oxaband_opt == 3) 
+//                 {
+//                     t_o2_interp = t_o2[index + index_amf_solz_o2] * (1 - ratio_solz_o2) +
+//                                   t_o2[index + index_amf_solz_o2 + 1] * ratio_solz_o2;
+//                     l1rec->tg_sol[ipb + iw] *= t_o2_interp;
+
+//                     t_o2_interp = t_o2[index + index_amf_total_o2] * (1 - ratio_total_o2) +
+//                                   t_o2[index + index_amf_total_o2 + 1] * ratio_total_o2;
+//                     l1rec->tg[ipb + iw] *= t_o2_interp;
+//                 }
+//                 else
+//                 {
+//                     t_o2_interp = t_o2[index + index_amf_solz] * (1 - ratio_solz) +
+//                                   t_o2[index + index_amf_solz + 1] * ratio_solz;
+//                     l1rec->tg_sol[ipb + iw] *= t_o2_interp;
+
+//                     t_o2_interp = t_o2[index + index_amf_total] * (1 - ratio_total) +
+//                                   t_o2[index + index_amf_total + 1] * ratio_total;
+//                     l1rec->tg[ipb + iw] *= t_o2_interp;
+//                 }
+//             }
+//         }
+//     }
+// }
+
+
 void n2o_transmittance(L1_Record* l1_rec, Transmittance_Record* t_rec, bool do_amf_correction)
 {
     #pragma omp parallel for
