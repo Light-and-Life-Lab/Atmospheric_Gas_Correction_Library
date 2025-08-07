@@ -113,6 +113,39 @@ Transmittance_Record_PY co_transmittance(const L1_Record_PY& l1_rec, const bool 
 }
 
 
+Transmittance_Record_PY ch4_transmittance(const L1_Record_PY& l1_rec, const bool do_amf_correction) 
+{
+    L1_Record l1_rec_c{};
+    
+    l1_rec_c.ch4_transmittance = static_cast<double*>(l1_rec.ch4_transmittance.request().ptr);
+    l1_rec_c.air_mass_factor_mixed_gases = static_cast<double*>(l1_rec.air_mass_factor_mixed_gases.request().ptr);
+    l1_rec_c.num_amf_grid_points = l1_rec.num_amf_grid_points;
+    l1_rec_c.cos_solar_zenith = static_cast<double*>(l1_rec.cos_solar_zenith.request().ptr);
+    l1_rec_c.cos_sensor_zenith = static_cast<double*>(l1_rec.cos_sensor_zenith.request().ptr);
+    l1_rec_c.num_pixels = l1_rec.num_pixels;
+    l1_rec_c.num_wavelengths = l1_rec.num_wavelengths;
+
+    int n_rows = l1_rec_c.num_pixels;
+    int n_cols = l1_rec_c.num_wavelengths;
+
+    Transmittance_Record_PY t_rec{};
+
+    t_rec.gas_transmittance_solar_zenith = allocate_output_array<double>(n_rows, n_cols);
+    t_rec.gas_transmittance_sensor_zenith = allocate_output_array<double>(n_rows, n_cols);
+    t_rec.gas_transmittance_total = allocate_output_array<double>(n_rows, n_cols);
+
+    Transmittance_Record t_rec_c{};
+
+    t_rec_c.gas_transmittance_solar_zenith = static_cast<double*>(t_rec.gas_transmittance_solar_zenith.request().ptr);
+    t_rec_c.gas_transmittance_sensor_zenith = static_cast<double*>(t_rec.gas_transmittance_sensor_zenith.request().ptr);
+    t_rec_c.gas_transmittance_total = static_cast<double*>(t_rec.gas_transmittance_total.request().ptr);
+
+    ch4_transmittance(&l1_rec_c, &t_rec_c, do_amf_correction);
+
+    return t_rec;
+}
+
+
 Transmittance_Record_PY no2_transmittance(const L1_Record_PY& l1_rec, const bool do_amf_correction) 
 {
     L1_Record l1_rec_c{};
@@ -159,6 +192,7 @@ PYBIND11_MODULE(gas_transmittance, m)
         .def_readwrite("stratospheric_no2_concentration", &L1_Record_PY::stratospheric_no2_concentration)
         .def_readwrite("co2_transmittance", &L1_Record_PY::co2_transmittance)
         .def_readwrite("co_transmittance", &L1_Record_PY::co_transmittance)
+        .def_readwrite("ch4_transmittance", &L1_Record_PY::ch4_transmittance)
         .def_readwrite("air_mass_factor_mixed_gases", &L1_Record_PY::air_mass_factor_mixed_gases)
         .def_readwrite("num_amf_grid_points", &L1_Record_PY::num_amf_grid_points)
         .def_readwrite("cos_solar_zenith", &L1_Record_PY::cos_solar_zenith)
@@ -175,5 +209,6 @@ PYBIND11_MODULE(gas_transmittance, m)
     m.def("ozone_transmittance", py::overload_cast<const L1_Record_PY&, bool>(&ozone_transmittance));
     m.def("co2_transmittance", py::overload_cast<const L1_Record_PY&, bool>(&co2_transmittance));
     m.def("co_transmittance", py::overload_cast<const L1_Record_PY&, bool>(&co_transmittance));
+    m.def("ch4_transmittance", py::overload_cast<const L1_Record_PY&, bool>(&ch4_transmittance));
     m.def("no2_transmittance", py::overload_cast<const L1_Record_PY&, bool>(&no2_transmittance));
 }

@@ -10,6 +10,7 @@ struct L1_Record
 
     double* co2_transmittance{};
     double* co_transmittance{};
+    double* ch4_transmittance{};
 
     double* air_mass_factor_mixed_gases{};
     int num_amf_grid_points{};
@@ -30,4 +31,5 @@ struct Transmittance_Record
 void ozone_transmittance(L1_Record* l1_rec, Transmittance_Record* t_rec, bool do_amf_correction);
 void co2_transmittance(L1_Record* l1_rec, Transmittance_Record* t_rec, bool do_amf_correction);
 void co_transmittance(L1_Record* l1_rec, Transmittance_Record* t_rec, bool do_amf_correction);
+void ch4_transmittance(L1_Record* l1_rec, Transmittance_Record* t_rec, bool do_amf_correction);
 void no2_transmittance(L1_Record* l1_rec, Transmittance_Record* t_rec, bool do_amf_correction);
