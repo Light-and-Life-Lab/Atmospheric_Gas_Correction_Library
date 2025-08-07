@@ -153,6 +153,36 @@ void ch4_transmittance(L1_Record* l1_rec, Transmittance_Record* t_rec, bool do_a
 }
 
 
+void n2o_transmittance(L1_Record* l1_rec, Transmittance_Record* t_rec, bool do_amf_correction)
+{
+    #pragma omp parallel for
+    for (int ip = 0; ip < l1_rec->num_pixels; ip++)
+    {
+        int row_offset = ip*l1_rec->num_wavelengths; // Each row represents a single pixel and has num_wavelengths elements
+
+        double amf_solar_zenith = 1.0/l1_rec->cos_solar_zenith[ip];
+        double amf_sensor_zenith = 1.0/l1_rec->cos_sensor_zenith[ip];
+
+        for (int iw = 0; iw < l1_rec->num_wavelengths; iw++) 
+        {
+            if (do_amf_correction)
+            {
+                double amf_total = amf_solar_zenith + amf_sensor_zenith;
+                int32_t row_index = iw*l1_rec->num_amf_grid_points;
+
+                t_rec->gas_transmittance_solar_zenith[row_offset + iw] = interpolate_transmittance_to_amf(l1_rec, l1_rec->n2o_transmittance, row_index, amf_solar_zenith);
+                t_rec->gas_transmittance_total[row_offset + iw] = interpolate_transmittance_to_amf(l1_rec, l1_rec->n2o_transmittance, row_index, amf_total);
+            }
+            else
+            {
+                t_rec->gas_transmittance_solar_zenith[row_offset + iw] = pow(l1_rec->n2o_transmittance[iw], amf_solar_zenith);
+                t_rec->gas_transmittance_sensor_zenith[row_offset + iw] = pow(l1_rec->n2o_transmittance[iw], amf_sensor_zenith);
+            }
+        }
+    }
+}
+
+
 void no2_transmittance(L1_Record* l1_rec, Transmittance_Record* t_rec, bool do_amf_correction)
 {
     #pragma omp parallel for
