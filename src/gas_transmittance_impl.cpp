@@ -1,5 +1,6 @@
 #include <cmath>
 #include <algorithm>
+#include <utility>
 #include <omp.h>
 
 #include "gas_transmittance.h"
@@ -17,8 +18,17 @@ int32_t get_index_lowerbound(double* table_val, int num_val, float val)
     return index;
 }
 
+std::pair<int, double> get_amf_index_and_ratio(L1_Record* l1_rec, double amf_value)
+{
+    int index_amf = get_index_lowerbound(l1_rec->air_mass_factor_mixed_gases, l1_rec->num_amf_grid_points, amf_value);
+    double ratio = (amf_value - l1_rec->air_mass_factor_mixed_gases[index_amf]) /
+                    (l1_rec->air_mass_factor_mixed_gases[index_amf + 1] - l1_rec->air_mass_factor_mixed_gases[index_amf]);
 
-double interpolate_transmittance_to_amf(L1_Record* l1_rec, double* transmittance_table, int32_t index, double amf_value)
+    return std::make_pair(index_amf, ratio);
+}
+
+
+double interpolate_transmittance_to_amf(L1_Record* l1_rec, double* transmittance_table, int32_t index, double ratio)
 {
     // In the case where amf correction is performed, the gas transmittance input file will 
     // have transmittance values as a 2D matrix. The transmittance values in this matrix are
@@ -28,12 +38,8 @@ double interpolate_transmittance_to_amf(L1_Record* l1_rec, double* transmittance
     // it is necessary to interpolate the values in the transmittance table to obtain the 
     // transmittance at the desired amf value
 
-    int index_amf = get_index_lowerbound(l1_rec->air_mass_factor_mixed_gases, l1_rec->num_amf_grid_points, amf_value);
-    double ratio = (amf_value - l1_rec->air_mass_factor_mixed_gases[index_amf]) /
-                        (l1_rec->air_mass_factor_mixed_gases[index_amf + 1] - l1_rec->air_mass_factor_mixed_gases[index_amf]);
-
-    double transmittance_interpolated_to_amf = transmittance_table[index+index_amf]*(1-ratio)
-                                             + transmittance_table[index+index_amf+1]*ratio;
+    double transmittance_interpolated_to_amf = transmittance_table[index]*(1-ratio)
+                                             + transmittance_table[index+1]*ratio;
     return transmittance_interpolated_to_amf;
 }
 
@@ -72,16 +78,21 @@ void co2_transmittance(L1_Record* l1_rec, Transmittance_Record* t_rec, bool do_a
 
         double amf_solar_zenith = 1.0/l1_rec->cos_solar_zenith[ip];
         double amf_sensor_zenith = 1.0/l1_rec->cos_sensor_zenith[ip];
+        double amf_total = amf_solar_zenith + amf_sensor_zenith;
+
+        auto [index_amf_solz, ratio_solz] = get_amf_index_and_ratio(l1_rec, amf_solar_zenith);
+        auto [index_amf_total, ratio_total] = get_amf_index_and_ratio(l1_rec, amf_total);
 
         for (int iw = 0; iw < l1_rec->num_wavelengths; iw++) 
         {
             if (do_amf_correction)
             {
                 int32_t row_index = iw*l1_rec->num_amf_grid_points;
-                double amf_total = amf_solar_zenith + amf_sensor_zenith;
+                int32_t table_index_solz = row_index + index_amf_solz;
+                int32_t table_index_total = row_index + index_amf_total;
 
-                t_rec->gas_transmittance_solar_zenith[row_offset + iw] = interpolate_transmittance_to_amf(l1_rec, l1_rec->co2_transmittance, row_index, amf_solar_zenith);
-                t_rec->gas_transmittance_total[row_offset + iw] = interpolate_transmittance_to_amf(l1_rec, l1_rec->co2_transmittance, row_index, amf_total);
+                t_rec->gas_transmittance_solar_zenith[row_offset + iw] = interpolate_transmittance_to_amf(l1_rec, l1_rec->co2_transmittance, table_index_solz, ratio_solz);
+                t_rec->gas_transmittance_total[row_offset + iw] = interpolate_transmittance_to_amf(l1_rec, l1_rec->co2_transmittance, table_index_total, ratio_total);
             }
             else
             {
@@ -102,18 +113,23 @@ void co_transmittance(L1_Record* l1_rec, Transmittance_Record* t_rec, bool do_am
 
         double amf_solar_zenith = 1.0/l1_rec->cos_solar_zenith[ip];
         double amf_sensor_zenith = 1.0/l1_rec->cos_sensor_zenith[ip];
-        
+        double amf_total = amf_solar_zenith + amf_sensor_zenith;
+
+        auto [index_amf_solz, ratio_solz] = get_amf_index_and_ratio(l1_rec, amf_solar_zenith);
+        auto [index_amf_total, ratio_total] = get_amf_index_and_ratio(l1_rec, amf_total);
+
         for (int iw = 0; iw < l1_rec->num_wavelengths; iw++) 
         {
-            if (do_amf_correction) 
+            if (do_amf_correction)
             {
-                double amf_total = amf_solar_zenith + amf_sensor_zenith;
                 int32_t row_index = iw*l1_rec->num_amf_grid_points;
+                int32_t table_index_solz = row_index + index_amf_solz;
+                int32_t table_index_total = row_index + index_amf_total;
 
-                t_rec->gas_transmittance_solar_zenith[row_offset + iw] = interpolate_transmittance_to_amf(l1_rec, l1_rec->co_transmittance, row_index, amf_solar_zenith);
-                t_rec->gas_transmittance_total[row_offset + iw] = interpolate_transmittance_to_amf(l1_rec, l1_rec->co_transmittance, row_index, amf_total);
+                t_rec->gas_transmittance_solar_zenith[row_offset + iw] = interpolate_transmittance_to_amf(l1_rec, l1_rec->co_transmittance, table_index_solz, ratio_solz);
+                t_rec->gas_transmittance_total[row_offset + iw] = interpolate_transmittance_to_amf(l1_rec, l1_rec->co_transmittance, table_index_total, ratio_total);
             }
-            else 
+            else
             {
                 t_rec->gas_transmittance_solar_zenith[row_offset + iw] = pow(l1_rec->co_transmittance[iw], amf_solar_zenith);
                 t_rec->gas_transmittance_sensor_zenith[row_offset + iw] = pow(l1_rec->co_transmittance[iw], amf_sensor_zenith);
@@ -121,7 +137,6 @@ void co_transmittance(L1_Record* l1_rec, Transmittance_Record* t_rec, bool do_am
         }
     }
 }
-
 
 void ch4_transmittance(L1_Record* l1_rec, Transmittance_Record* t_rec, bool do_amf_correction)
 {
@@ -132,16 +147,21 @@ void ch4_transmittance(L1_Record* l1_rec, Transmittance_Record* t_rec, bool do_a
 
         double amf_solar_zenith = 1.0/l1_rec->cos_solar_zenith[ip];
         double amf_sensor_zenith = 1.0/l1_rec->cos_sensor_zenith[ip];
+        double amf_total = amf_solar_zenith + amf_sensor_zenith;
+
+        auto [index_amf_solz, ratio_solz] = get_amf_index_and_ratio(l1_rec, amf_solar_zenith);
+        auto [index_amf_total, ratio_total] = get_amf_index_and_ratio(l1_rec, amf_total);
 
         for (int iw = 0; iw < l1_rec->num_wavelengths; iw++) 
         {
-            if (do_amf_correction) 
+            if (do_amf_correction)
             {
-                double amf_total = amf_solar_zenith + amf_sensor_zenith;
                 int32_t row_index = iw*l1_rec->num_amf_grid_points;
+                int32_t table_index_solz = row_index + index_amf_solz;
+                int32_t table_index_total = row_index + index_amf_total;
 
-                t_rec->gas_transmittance_solar_zenith[row_offset + iw] = interpolate_transmittance_to_amf(l1_rec, l1_rec->ch4_transmittance, row_index, amf_solar_zenith);
-                t_rec->gas_transmittance_total[row_offset + iw] = interpolate_transmittance_to_amf(l1_rec, l1_rec->ch4_transmittance, row_index, amf_total);
+                t_rec->gas_transmittance_solar_zenith[row_offset + iw] = interpolate_transmittance_to_amf(l1_rec, l1_rec->ch4_transmittance, table_index_solz, ratio_solz);
+                t_rec->gas_transmittance_total[row_offset + iw] = interpolate_transmittance_to_amf(l1_rec, l1_rec->ch4_transmittance, table_index_total, ratio_total);
             }
             else
             {
@@ -151,7 +171,6 @@ void ch4_transmittance(L1_Record* l1_rec, Transmittance_Record* t_rec, bool do_a
         }
     }
 }
-
 
 // void o2_transmittance(L1_Record* l1_rec, Transmittance_Record* t_rec, bool do_amf_correction)
 // {
@@ -218,16 +237,21 @@ void n2o_transmittance(L1_Record* l1_rec, Transmittance_Record* t_rec, bool do_a
 
         double amf_solar_zenith = 1.0/l1_rec->cos_solar_zenith[ip];
         double amf_sensor_zenith = 1.0/l1_rec->cos_sensor_zenith[ip];
+        double amf_total = amf_solar_zenith + amf_sensor_zenith;
+
+        auto [index_amf_solz, ratio_solz] = get_amf_index_and_ratio(l1_rec, amf_solar_zenith);
+        auto [index_amf_total, ratio_total] = get_amf_index_and_ratio(l1_rec, amf_total);
 
         for (int iw = 0; iw < l1_rec->num_wavelengths; iw++) 
         {
             if (do_amf_correction)
             {
-                double amf_total = amf_solar_zenith + amf_sensor_zenith;
                 int32_t row_index = iw*l1_rec->num_amf_grid_points;
+                int32_t table_index_solz = row_index + index_amf_solz;
+                int32_t table_index_total = row_index + index_amf_total;
 
-                t_rec->gas_transmittance_solar_zenith[row_offset + iw] = interpolate_transmittance_to_amf(l1_rec, l1_rec->n2o_transmittance, row_index, amf_solar_zenith);
-                t_rec->gas_transmittance_total[row_offset + iw] = interpolate_transmittance_to_amf(l1_rec, l1_rec->n2o_transmittance, row_index, amf_total);
+                t_rec->gas_transmittance_solar_zenith[row_offset + iw] = interpolate_transmittance_to_amf(l1_rec, l1_rec->n2o_transmittance, table_index_solz, ratio_solz);
+                t_rec->gas_transmittance_total[row_offset + iw] = interpolate_transmittance_to_amf(l1_rec, l1_rec->n2o_transmittance, table_index_total, ratio_total);
             }
             else
             {
@@ -237,7 +261,6 @@ void n2o_transmittance(L1_Record* l1_rec, Transmittance_Record* t_rec, bool do_a
         }
     }
 }
-
 
 void no2_transmittance(L1_Record* l1_rec, Transmittance_Record* t_rec, bool do_amf_correction)
 {
