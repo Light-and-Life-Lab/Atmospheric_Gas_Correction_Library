@@ -17,16 +17,22 @@ public:
     pybind11::array_t<double, pybind11::array::c_style> co2_transmittance{};
     pybind11::array_t<double, pybind11::array::c_style> co_transmittance{};
     pybind11::array_t<double, pybind11::array::c_style> ch4_transmittance{};
+    pybind11::array_t<double, pybind11::array::c_style> o2_transmittance{};
     pybind11::array_t<double, pybind11::array::c_style> n2o_transmittance{};
 
     pybind11::array_t<double, pybind11::array::c_style> air_mass_factor_mixed_gases{};
     int num_amf_grid_points{};
+
+    pybind11::array_t<double, pybind11::array::c_style> Lt{};
+    pybind11::array_t<double, pybind11::array::c_style> F0{};
 
     pybind11::array_t<double, pybind11::array::c_style> cos_solar_zenith{}; 
     pybind11::array_t<double, pybind11::array::c_style> cos_sensor_zenith{};
 
     int num_pixels{};
     int num_wavelengths{};
+
+    pybind11::array_t<double, pybind11::array::c_style> wavelengths{};
 };
 
 
