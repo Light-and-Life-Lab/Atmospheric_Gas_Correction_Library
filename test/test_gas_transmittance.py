@@ -6,16 +6,18 @@ import time
 import bin.gas_transmittance as gas_transmittance
 
 def test_ozone_transmittance():
+    ancillary_data = gas_transmittance.Ancillary_Data()
+    ancillary_data.ozone_absorption_cross_section = np.load('test/npy/ozone/koz.npy')
+    ancillary_data.ozone_concentration = np.load('test/npy/ozone/oz_concentration.npy')
+
     l1_rec = gas_transmittance.L1_Record()
-    l1_rec.ozone_absorption_cross_section = np.load('test/npy/ozone/koz.npy')
-    l1_rec.ozone_concentration = np.load('test/npy/ozone/oz_concentration.npy')
     l1_rec.cos_solar_zenith = np.load('test/npy/csolz.npy')
     l1_rec.cos_sensor_zenith = np.load('test/npy/csenz.npy')
     l1_rec.num_pixels = len(l1_rec.cos_solar_zenith)
-    l1_rec.num_wavelengths = len(l1_rec.ozone_absorption_cross_section)
+    l1_rec.num_wavelengths = len(ancillary_data.ozone_absorption_cross_section)
     do_amf_correction = False
 
-    t_rec = gas_transmittance.ozone_transmittance(l1_rec, do_amf_correction)
+    t_rec = gas_transmittance.ozone_transmittance(l1_rec, ancillary_data, do_amf_correction)
     gas_transmittance_solar_zenith_benchmark = np.load('test/npy/ozone/tg_sol_oz.npy')
     gas_transmittance_sensor_zenith_benchmark = np.load('test/npy/ozone/tg_sen_oz.npy')
 
@@ -24,17 +26,19 @@ def test_ozone_transmittance():
 
 
 def test_co2_transmittance():
+    amf_table = gas_transmittance.Air_Mass_Factor_Lookup_Table()
+    amf_table.co2_transmittance = np.load('test/npy/co2/t_co2.npy')
+    amf_table.air_mass_factor_mixed_gases = np.load('test/npy/amf_mixed.npy')
+    amf_table.num_amf_grid_points = np.load('test/npy/num_airmass.npy')
+
     l1_rec = gas_transmittance.L1_Record()
-    l1_rec.co2_transmittance = np.load('test/npy/co2/t_co2.npy')
-    l1_rec.air_mass_factor_mixed_gases = np.load('test/npy/amf_mixed.npy')
-    l1_rec.num_amf_grid_points = np.load('test/npy/num_airmass.npy')
     l1_rec.cos_solar_zenith = np.load('test/npy/csolz.npy')
     l1_rec.cos_sensor_zenith = np.load('test/npy/csenz.npy')
     l1_rec.num_pixels = len(l1_rec.cos_solar_zenith)
-    l1_rec.num_wavelengths = len(l1_rec.co2_transmittance[:, 0])
+    l1_rec.num_wavelengths = len(amf_table.co2_transmittance[:, 0])
     do_amf_correction = True
 
-    t_rec = gas_transmittance.co2_transmittance(l1_rec, do_amf_correction)
+    t_rec = gas_transmittance.co2_transmittance(l1_rec, amf_table, do_amf_correction)
     gas_transmittance_solar_zenith_benchmark = np.load('test/npy/co2/tg_sol_co2.npy')
     gas_transmittance_total_benchmark = np.load('test/npy/co2/tg_co2.npy')
 
@@ -43,17 +47,19 @@ def test_co2_transmittance():
 
 
 def test_co_transmittance():
+    amf_table = gas_transmittance.Air_Mass_Factor_Lookup_Table()
+    amf_table.co_transmittance = np.load('test/npy/co/t_co.npy')
+    amf_table.air_mass_factor_mixed_gases = np.load('test/npy/amf_mixed.npy')
+    amf_table.num_amf_grid_points = np.load('test/npy/num_airmass.npy')
+
     l1_rec = gas_transmittance.L1_Record()
-    l1_rec.co_transmittance = np.load('test/npy/co/t_co.npy')
-    l1_rec.air_mass_factor_mixed_gases = np.load('test/npy/amf_mixed.npy')
-    l1_rec.num_amf_grid_points = np.load('test/npy/num_airmass.npy')
     l1_rec.cos_solar_zenith = np.load('test/npy/csolz.npy')
     l1_rec.cos_sensor_zenith = np.load('test/npy/csenz.npy')
     l1_rec.num_pixels = len(l1_rec.cos_solar_zenith)
-    l1_rec.num_wavelengths = len(l1_rec.co_transmittance[:, 0])
+    l1_rec.num_wavelengths = len(amf_table.co_transmittance[:, 0])
     do_amf_correction = True
 
-    t_rec = gas_transmittance.co_transmittance(l1_rec, do_amf_correction)
+    t_rec = gas_transmittance.co_transmittance(l1_rec, amf_table, do_amf_correction)
     gas_transmittance_solar_zenith_benchmark = np.load('test/npy/co/tg_sol_co.npy')
     gas_transmittance_total_benchmark = np.load('test/npy/co/tg_co.npy')
 
@@ -62,17 +68,19 @@ def test_co_transmittance():
 
 
 def test_ch4_transmittance():
+    amf_table = gas_transmittance.Air_Mass_Factor_Lookup_Table()
+    amf_table.ch4_transmittance = np.load('test/npy/ch4/t_ch4.npy')
+    amf_table.air_mass_factor_mixed_gases = np.load('test/npy/amf_mixed.npy')
+    amf_table.num_amf_grid_points = np.load('test/npy/num_airmass.npy')
+    
     l1_rec = gas_transmittance.L1_Record()
-    l1_rec.ch4_transmittance = np.load('test/npy/ch4/t_ch4.npy')
-    l1_rec.air_mass_factor_mixed_gases = np.load('test/npy/amf_mixed.npy')
-    l1_rec.num_amf_grid_points = np.load('test/npy/num_airmass.npy')
     l1_rec.cos_solar_zenith = np.load('test/npy/csolz.npy')
     l1_rec.cos_sensor_zenith = np.load('test/npy/csenz.npy')
     l1_rec.num_pixels = len(l1_rec.cos_solar_zenith)
-    l1_rec.num_wavelengths = len(l1_rec.ch4_transmittance[:, 0])
+    l1_rec.num_wavelengths = len(amf_table.ch4_transmittance[:, 0])
     do_amf_correction = True
 
-    t_rec = gas_transmittance.ch4_transmittance(l1_rec, do_amf_correction)
+    t_rec = gas_transmittance.ch4_transmittance(l1_rec, amf_table, do_amf_correction)
     gas_transmittance_solar_zenith_benchmark = np.load('test/npy/ch4/tg_sol_ch4.npy')
     gas_transmittance_total_benchmark = np.load('test/npy/ch4/tg_ch4.npy')
 
@@ -81,17 +89,19 @@ def test_ch4_transmittance():
 
 
 def test_n2o_transmittance():
+    amf_table = gas_transmittance.Air_Mass_Factor_Lookup_Table()
+    amf_table.n2o_transmittance = np.load('test/npy/n2o/t_n2o.npy')
+    amf_table.air_mass_factor_mixed_gases = np.load('test/npy/amf_mixed.npy')
+    amf_table.num_amf_grid_points = np.load('test/npy/num_airmass.npy')
+    
     l1_rec = gas_transmittance.L1_Record()
-    l1_rec.n2o_transmittance = np.load('test/npy/n2o/t_n2o.npy')
-    l1_rec.air_mass_factor_mixed_gases = np.load('test/npy/amf_mixed.npy')
-    l1_rec.num_amf_grid_points = np.load('test/npy/num_airmass.npy')
     l1_rec.cos_solar_zenith = np.load('test/npy/csolz.npy')
     l1_rec.cos_sensor_zenith = np.load('test/npy/csenz.npy')
     l1_rec.num_pixels = len(l1_rec.cos_solar_zenith)
-    l1_rec.num_wavelengths = len(l1_rec.n2o_transmittance[:, 0])
+    l1_rec.num_wavelengths = len(amf_table.n2o_transmittance[:, 0])
     do_amf_correction = True
 
-    t_rec = gas_transmittance.n2o_transmittance(l1_rec, do_amf_correction)
+    t_rec = gas_transmittance.n2o_transmittance(l1_rec, amf_table, do_amf_correction)
     gas_transmittance_solar_zenith_benchmark = np.load('test/npy/n2o/tg_sol_n2o.npy')
     gas_transmittance_total_benchmark = np.load('test/npy/n2o/tg_n2o.npy')
 
@@ -99,34 +109,38 @@ def test_n2o_transmittance():
     np.testing.assert_allclose(t_rec.gas_transmittance_total, gas_transmittance_total_benchmark)
 
 
-def test_n2o_transmittance():
-    l1_rec = gas_transmittance.L1_Record()
-    l1_rec.n2o_transmittance = np.load('test/npy/n2o/t_n2o.npy')
-    l1_rec.air_mass_factor_mixed_gases = np.load('test/npy/amf_mixed.npy')
-    l1_rec.num_amf_grid_points = np.load('test/npy/num_airmass.npy')
+def test_no2_transmittance():
+    ancillary_data = gas_transmittance.Ancillary_Data()
+    ancillary_data.no2_absorption_cross_section = np.load('test/npy/no2/no2_absorption_cross_section.npy')
+    ancillary_data.fraction_tropospheric_no2_above_200m = np.load('test/npy/no2/no2_frac.npy')
+    ancillary_data.tropospheric_no2_concentration = np.load('test/npy/no2/no2_tropo.npy')
+    ancillary_data.stratospheric_no2_concentration = np.load('test/npy/no2/no2_strat.npy')
+    
+    l1_rec = gas_transmittance.L1_Record() 
     l1_rec.cos_solar_zenith = np.load('test/npy/csolz.npy')
     l1_rec.cos_sensor_zenith = np.load('test/npy/csenz.npy')
     l1_rec.num_pixels = len(l1_rec.cos_solar_zenith)
-    l1_rec.num_wavelengths = len(l1_rec.n2o_transmittance[:, 0])
-    do_amf_correction = True
+    l1_rec.num_wavelengths = len(ancillary_data.no2_absorption_cross_section)
+    do_amf_correction = False
 
-    t_rec = gas_transmittance.n2o_transmittance(l1_rec, do_amf_correction)
-    gas_transmittance_solar_zenith_benchmark = np.load('test/npy/n2o/tg_sol_n2o.npy')
-    gas_transmittance_total_benchmark = np.load('test/npy/n2o/tg_n2o.npy')
+    t_rec = gas_transmittance.no2_transmittance(l1_rec, ancillary_data, do_amf_correction)
+    gas_transmittance_solar_zenith_benchmark = np.load('test/npy/no2/tg_sol_no2.npy')
+    gas_transmittance_sensor_zenith_benchmark = np.load('test/npy/no2/tg_sen_no2.npy')
 
     np.testing.assert_allclose(t_rec.gas_transmittance_solar_zenith, gas_transmittance_solar_zenith_benchmark)
-    np.testing.assert_allclose(t_rec.gas_transmittance_total, gas_transmittance_total_benchmark)
+    np.testing.assert_allclose(t_rec.gas_transmittance_sensor_zenith, gas_transmittance_sensor_zenith_benchmark)
 
 
 def test_o2_transmittance():
-    l1_rec = gas_transmittance.L1_Record()
+    amf_table = gas_transmittance.Air_Mass_Factor_Lookup_Table()
 
     with h5py.File("test/PACE/oci_gas_transmittance_cia_amf_v3.2.nc", 'r') as f:
         o2_transmittance = np.array(f['oxygen_transmittance'])
-        l1_rec.air_mass_factor_mixed_gases = np.array(f['air_mass_factor_mixed'])
-        l1_rec.num_amf_grid_points = np.array(f['n_air_mass_factor']).size
+        amf_table.air_mass_factor_mixed_gases = np.array(f['air_mass_factor_mixed'])
+        amf_table.num_amf_grid_points = np.array(f['n_air_mass_factor']).size
         gas_transmittance_wavelengths = np.array(f['wavelength'])
 
+    l1_rec = gas_transmittance.L1_Record()
     start_line = 0
     start_pixel = 0
     end_line = 200
@@ -169,12 +183,12 @@ def test_o2_transmittance():
 
     l1_rec.Lt = reflectance
     l1_rec.F0 = F0_sensor_wavelengths
-    l1_rec.o2_transmittance = o2_transmittance_sensor_wavelengths
+    amf_table.o2_transmittance = o2_transmittance_sensor_wavelengths
 
     oxygen_A_band_option = gas_transmittance.Oxygen_A_Band_Option.NO_AMF_CORRECTION
 
     start_time = time.perf_counter()
-    t_rec = gas_transmittance.o2_transmittance(l1_rec, do_amf_correction, oxygen_A_band_option)
+    t_rec = gas_transmittance.o2_transmittance(l1_rec, amf_table, do_amf_correction, oxygen_A_band_option)
     end_time = time.perf_counter()
     cpp_time_elapsed = end_time - start_time
     print("C++ O2 time: ", cpp_time_elapsed)
