@@ -269,6 +269,53 @@ Transmittance_Record_PY no2_transmittance(const L1_Record_PY& l1_rec, const Anci
 }
 
 
+Transmittance_Record_PY h2o_transmittance(const L1_Record_PY& l1_rec, const Ancillary_Data_PY& ancillary_data, const Air_Mass_Factor_Lookup_Table_PY& amf_table, const bool do_amf_correction, const bool use_gas_transmittance_table) 
+{
+    Ancillary_Data ancillary_data_c{};
+
+    ancillary_data_c.no2_absorption_cross_section = static_cast<double*>(ancillary_data.no2_absorption_cross_section.request().ptr);
+    ancillary_data_c.fraction_tropospheric_no2_above_200m = static_cast<double*>(ancillary_data.fraction_tropospheric_no2_above_200m.request().ptr);
+    ancillary_data_c.tropospheric_no2_concentration = static_cast<double*>(ancillary_data.tropospheric_no2_concentration.request().ptr);
+    ancillary_data_c.stratospheric_no2_concentration = static_cast<double*>(ancillary_data.stratospheric_no2_concentration.request().ptr);
+
+    Air_Mass_Factor_Lookup_Table amf_table_c{};
+
+    amf_table_c.h2o_transmittance = static_cast<double*>(amf_table.h2o_transmittance.request().ptr);
+    amf_table_c.air_mass_factor_mixed_gases = static_cast<double*>(amf_table.air_mass_factor_water_vapor.request().ptr);
+    amf_table_c.gas_transmittance_table_wavelengths = static_cast<double*>(amf_table.gas_transmittance_table_wavelengths.request().ptr);
+    amf_table_c.water_vapor_concentration = static_cast<double*>(amf_table.water_vapor_concentration.request().ptr);
+    amf_table_c.num_models = amf_table.num_models;
+    amf_table_c.num_gas_transmittance_wavelengths = amf_table.num_gas_transmittance_wavelengths;
+    amf_table_c.num_amf_grid_points = amf_table.num_amf_grid_points;
+    amf_table_c.num_water_vapor_concentrations = amf_table.num_water_vapor_concentrations;
+    
+    L1_Record l1_rec_c{};
+    l1_rec_c.cos_solar_zenith = static_cast<double*>(l1_rec.cos_solar_zenith.request().ptr);
+    l1_rec_c.cos_sensor_zenith = static_cast<double*>(l1_rec.cos_sensor_zenith.request().ptr);
+    l1_rec_c.num_pixels = l1_rec.num_pixels;
+    l1_rec_c.num_wavelengths = l1_rec.num_wavelengths;
+
+    int n_rows = l1_rec_c.num_pixels;
+    int n_cols = l1_rec_c.num_wavelengths;
+
+    Transmittance_Record_PY t_rec{};
+
+    t_rec.gas_transmittance_solar_zenith = allocate_output_array<double>(n_rows, n_cols);
+    t_rec.gas_transmittance_sensor_zenith = allocate_output_array<double>(n_rows, n_cols);
+    t_rec.gas_transmittance_total = allocate_output_array<double>(n_rows, n_cols);
+
+    Transmittance_Record t_rec_c{};
+
+    t_rec_c.gas_transmittance_solar_zenith = static_cast<double*>(t_rec.gas_transmittance_solar_zenith.request().ptr);
+    t_rec_c.gas_transmittance_sensor_zenith = static_cast<double*>(t_rec.gas_transmittance_sensor_zenith.request().ptr);
+    t_rec_c.gas_transmittance_total = static_cast<double*>(t_rec.gas_transmittance_total.request().ptr);
+
+    h2o_transmittance(&l1_rec_c, &ancillary_data_c, &amf_table_c, &t_rec_c, do_amf_correction);
+
+    return t_rec;
+}
+
+
 PYBIND11_MODULE(gas_transmittance, m) 
 {
     py::class_<Ancillary_Data_PY>(m, "Ancillary_Data", py::module_local())
@@ -335,4 +382,5 @@ PYBIND11_MODULE(gas_transmittance, m)
     m.def("o2_transmittance", py::overload_cast<const L1_Record_PY&, const Air_Mass_Factor_Lookup_Table_PY& ,bool, Oxygen_A_Band_Option>(&o2_transmittance));
     m.def("n2o_transmittance", py::overload_cast<const L1_Record_PY&, const Air_Mass_Factor_Lookup_Table_PY&, bool>(&n2o_transmittance));
     m.def("no2_transmittance", py::overload_cast<const L1_Record_PY&, const Ancillary_Data_PY&, bool>(&no2_transmittance));
+    m.def("h2o_transmittance", py::overload_cast<const L1_Record_PY&, const Ancillary_Data_PY&, const Air_Mass_Factor_Lookup_Table_PY&, bool, bool>(&h2o_transmittance));
 }

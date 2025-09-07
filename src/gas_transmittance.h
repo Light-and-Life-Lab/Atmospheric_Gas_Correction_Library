@@ -104,5 +104,6 @@ void ch4_transmittance(L1_Record* l1_rec, Air_Mass_Factor_Lookup_Table* amf_tabl
 void o2_transmittance(L1_Record* l1_rec, Air_Mass_Factor_Lookup_Table* amf_table, Transmittance_Record* t_rec, bool do_amf_correction, Oxygen_A_Band_Option oxygen_A_band_option);
 void n2o_transmittance(L1_Record* l1_rec, Air_Mass_Factor_Lookup_Table* amf_table, Transmittance_Record* t_rec, bool do_amf_correction);
 void no2_transmittance(L1_Record* l1_rec, Ancillary_Data* ancillary_data, Transmittance_Record* t_rec, bool do_amf_correction);
+void h2o_transmittance(L1_Record* l1_rec, Ancillary_Data* ancillary_data, Air_Mass_Factor_Lookup_Table* amf_table, Transmittance_Record* t_rec, bool do_amf_correction, bool use_gas_transmittance_table);
 
 #endif // GAS_TRANSMITTANCE_H
