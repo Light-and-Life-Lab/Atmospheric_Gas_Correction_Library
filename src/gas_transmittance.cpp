@@ -284,7 +284,10 @@ PYBIND11_MODULE(gas_transmittance, m)
         .def_readwrite("c_h2o", &Ancillary_Data_PY::c_h2o)
         .def_readwrite("d_h2o", &Ancillary_Data_PY::d_h2o)
         .def_readwrite("e_h2o", &Ancillary_Data_PY::e_h2o)
-        .def_readwrite("f_h2o", &Ancillary_Data_PY::f_h2o);
+        .def_readwrite("f_h2o", &Ancillary_Data_PY::f_h2o)
+        .def_readwrite("g_h2o", &Ancillary_Data_PY::g_h2o)
+        .def_readwrite("water_vapor_bands", &Ancillary_Data_PY::water_vapor_bands)
+        .def_readwrite("num_water_vapor_bands", &Ancillary_Data_PY::num_water_vapor_bands);
 
     py::class_<Air_Mass_Factor_Lookup_Table_PY>(m, "Air_Mass_Factor_Lookup_Table", py::module_local())
         .def(py::init<>())

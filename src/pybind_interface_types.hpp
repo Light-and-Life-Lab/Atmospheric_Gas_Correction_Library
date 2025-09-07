@@ -25,6 +25,10 @@ public:
     pybind11::array_t<double, pybind11::array::c_style> d_h2o{};
     pybind11::array_t<double, pybind11::array::c_style> e_h2o{};
     pybind11::array_t<double, pybind11::array::c_style> f_h2o{};
+    pybind11::array_t<double, pybind11::array::c_style> g_h2o{};
+
+    pybind11::array_t<int, pybind11::array::c_style> water_vapor_bands{};
+    int num_water_vapor_bands{};
 };
 
 

@@ -40,9 +40,14 @@ struct Ancillary_Data
     double* d_h2o{};
     double* e_h2o{};
     double* f_h2o{};
+    double* g_h2o{};
+
+    int* water_vapor_bands{};
+    int num_water_vapor_bands{};
 };
 
 
+// TODO: Rename this struct to 'Gas_Transmittance_Lookup_Table' everywhere
 struct Air_Mass_Factor_Lookup_Table
 {
     // From e.g. oci_gas_transmittance_cia_amf_v3.2.nc
