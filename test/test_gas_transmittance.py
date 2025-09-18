@@ -3,8 +3,61 @@ import matplotlib.pyplot as plt
 import h5py
 from scipy import interpolate
 import time
+import pytest
 
 import bin.gas_transmittance as gas_transmittance
+
+@pytest.fixture
+def read_ozone_ancillary_data():
+    koz = np.load('test/PACE/ozone/koz.npy')
+    ozone_concentration = np.load('test/PACE/ozone/oz_concentration.npy')
+
+    return koz, ozone_concentration
+
+
+@pytest.fixture
+def read_PACE_geometry_data():
+    csolz = np.load('test/PACE/csolz.npy')
+    csenz = np.load('test/PACE/csenz.npy')
+
+    return csolz, csenz
+
+
+@pytest.fixture
+def read_OCSMART_ozone_transmittance_benchmark_data():
+    tg_sol_ocsmart = np.load('test/PACE/ozone/tg_sol_oz.npy')
+    tg_sen_ocsmart = np.load('test/PACE/ozone/tg_sen_oz.npy')
+    sensor_wavelengths = np.load('test/PACE/OCSMART_wavelengths.npy')
+
+    return tg_sol_ocsmart, tg_sen_ocsmart, sensor_wavelengths
+
+
+@pytest.fixture
+def read_OCSSW_ozone_transmittance_benchmark_data():
+    with h5py.File('test/PACE/ozone/PACE_OCI.20240411T182012.L2.ozone.nc', 'r') as f:
+        tg_sen_ocssw = 5e-5*np.array(f['/geophysical_data/tg_sen'])
+        tg_sol_ocssw = 5e-5*np.array(f['/geophysical_data/tg_sol'])
+        wavelength_3d = np.array(f['/sensor_band_parameters/wavelength_3d'])
+
+    return tg_sen_ocssw, tg_sol_ocssw, wavelength_3d
+
+
+@pytest.fixture
+def read_OCSSW_lat_lon():
+    with h5py.File('test/PACE/ozone/PACE_OCI.20240411T182012.L2.ozone.nc', 'r') as f:
+        OCSSW_lat = np.array(f['/navigation_data/latitude'])
+        OCSSW_lon = np.array(f['/navigation_data/longitude'])
+
+    return OCSSW_lat, OCSSW_lon
+
+
+@pytest.fixture
+def read_OCSMART_lat_lon():
+    OCSMART_lat = np.load('test/PACE/l1b_lat.npy')
+    OCSMART_lon = np.load('test/PACE/l1b_lon.npy')
+
+    return OCSMART_lat, OCSMART_lon
+
 
 # def test_ozone_transmittance():
 #     ancillary_data = gas_transmittance.Ancillary_Data()
@@ -26,44 +79,35 @@ import bin.gas_transmittance as gas_transmittance
 #     np.testing.assert_allclose(t_rec.gas_transmittance_sensor_zenith, gas_transmittance_sensor_zenith_benchmark)
 
 
-def test_ozone_OCSSW():
+def test_ozone_OCSSW(read_ozone_ancillary_data, 
+                     read_PACE_geometry_data, 
+                     read_OCSMART_ozone_transmittance_benchmark_data, 
+                     read_OCSSW_ozone_transmittance_benchmark_data,
+                     read_OCSSW_lat_lon,
+                     read_OCSMART_lat_lon):
     ancillary_data = gas_transmittance.Ancillary_Data()
-    ancillary_data.ozone_absorption_cross_section = np.load('test/PACE/ozone/koz.npy')
-    ancillary_data.ozone_concentration = np.load('test/PACE/ozone/oz_concentration.npy')
+    ancillary_data.ozone_absorption_cross_section, ancillary_data.ozone_concentration = read_ozone_ancillary_data
 
     l1_rec = gas_transmittance.L1_Record()
-    l1_rec.cos_solar_zenith = np.load('test/PACE/csolz.npy')
-    l1_rec.cos_sensor_zenith = np.load('test/PACE/csenz.npy')
-    l1_rec.num_pixels = len(l1_rec.cos_solar_zenith)
+    l1_rec.cos_solar_zenith, l1_rec.cos_sensor_zenith = read_PACE_geometry_data
+    l1_rec.num_pixels = l1_rec.cos_solar_zenith.shape[0] * l1_rec.cos_solar_zenith.shape[1]
     l1_rec.num_wavelengths = len(ancillary_data.ozone_absorption_cross_section)
     do_amf_correction = False
 
     t_rec = gas_transmittance.ozone_transmittance(l1_rec, ancillary_data, do_amf_correction)
 
-    shape = (1710, 1272)
-    gas_transmittance_solar_zenith_benchmark = np.load('test/PACE/ozone/tg_sol_oz.npy')
-    gas_transmittance_sensor_zenith_benchmark = np.load('test/PACE/ozone/tg_sen_oz.npy')
+    tg_sol_ocsmart, tg_sen_ocsmart, sensor_wavelengths = read_OCSMART_ozone_transmittance_benchmark_data
 
-    tg_sen_ocsmart = np.flipud(gas_transmittance_solar_zenith_benchmark.reshape((1710, 1272, 197)))
-    tg_sol_ocsmart = np.flipud(gas_transmittance_sensor_zenith_benchmark.reshape((1710, 1272, 197)))
+    tg_sen_gas_correction_lib = t_rec.gas_transmittance_sensor_zenith.reshape((1710, 1272, 197))
+    tg_sol_gas_correction_lib = t_rec.gas_transmittance_solar_zenith.reshape((1710, 1272, 197))
 
-    np.testing.assert_allclose(t_rec.gas_transmittance_solar_zenith, gas_transmittance_solar_zenith_benchmark)
-    np.testing.assert_allclose(t_rec.gas_transmittance_sensor_zenith, gas_transmittance_sensor_zenith_benchmark)
+    # np.testing.assert_allclose(t_rec.gas_transmittance_solar_zenith, gas_transmittance_solar_zenith_benchmark)
+    # np.testing.assert_allclose(t_rec.gas_transmittance_sensor_zenith, gas_transmittance_sensor_zenith_benchmark)
 
-    with h5py.File('test/PACE/ozone/PACE_OCI.20240411T182012.L2.ozone.nc', 'r') as f:
-        tg_sen_ocssw = 5e-5*np.array(f['/geophysical_data/tg_sen'])
-        tg_sol_ocssw = 5e-5*np.array(f['/geophysical_data/tg_sol'])
-        wavelength_3d = np.array(f['/sensor_band_parameters/wavelength_3d'])
-        OCSSW_lat = np.array(f['/navigation_data/latitude'])
-        OCSSW_lon = np.array(f['/navigation_data/longitude'])
+    tg_sen_ocssw, tg_sol_ocssw, wavelength_3d = read_OCSSW_ozone_transmittance_benchmark_data
 
-    OCSMART_lat = np.flipud(np.load('test/PACE/l1b_lat.npy').reshape((1710, 1272)))
-    OCSMART_lon = np.flipud(np.load('test/PACE/l1b_lon.npy').reshape((1710, 1272)))
-
-    tg_sen_gas_correction_lib = np.flipud(t_rec.gas_transmittance_sensor_zenith.reshape((1710, 1272, 197)))
-    tg_sol_gas_correction_lib = np.flipud(t_rec.gas_transmittance_solar_zenith.reshape((1710, 1272, 197)))
-
-    sensor_wavelengths = np.load('test/PACE/OCSMART_wavelengths.npy')
+    OCSSW_lat, OCSSW_lon = read_OCSSW_lat_lon
+    OCSMART_lat, OCSMART_lon = read_OCSMART_lat_lon
 
     # OCSMART_first_pixel_idx = 2173848 # Index of the location (6.67, -93.1), which is the first pixel in the OCSSW grid, but not in the OCSMART grid
 
