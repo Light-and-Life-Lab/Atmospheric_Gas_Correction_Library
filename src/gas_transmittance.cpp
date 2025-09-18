@@ -310,7 +310,7 @@ Transmittance_Record_PY h2o_transmittance(const L1_Record_PY& l1_rec, const Anci
     t_rec_c.gas_transmittance_sensor_zenith = static_cast<double*>(t_rec.gas_transmittance_sensor_zenith.request().ptr);
     t_rec_c.gas_transmittance_total = static_cast<double*>(t_rec.gas_transmittance_total.request().ptr);
 
-    h2o_transmittance(&l1_rec_c, &ancillary_data_c, &amf_table_c, &t_rec_c, do_amf_correction);
+    h2o_transmittance(&l1_rec_c, &ancillary_data_c, &amf_table_c, &t_rec_c, do_amf_correction, use_gas_transmittance_table);
 
     return t_rec;
 }
