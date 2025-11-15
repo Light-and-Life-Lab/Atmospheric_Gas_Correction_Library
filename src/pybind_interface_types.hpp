@@ -19,6 +19,8 @@ public:
     pybind11::array_t<double, pybind11::array::c_style> tropospheric_no2_concentration{};
     pybind11::array_t<double, pybind11::array::c_style> stratospheric_no2_concentration{};
 
+    pybind11::array_t<double, pybind11::array::c_style> precipitable_water{};
+
     pybind11::array_t<double, pybind11::array::c_style> a_h2o{};
     pybind11::array_t<double, pybind11::array::c_style> b_h2o{};
     pybind11::array_t<double, pybind11::array::c_style> c_h2o{};
@@ -27,7 +29,7 @@ public:
     pybind11::array_t<double, pybind11::array::c_style> f_h2o{};
     pybind11::array_t<double, pybind11::array::c_style> g_h2o{};
 
-    pybind11::array_t<int, pybind11::array::c_style> water_vapor_bands{};
+    pybind11::array_t<double, pybind11::array::c_style> water_vapor_bands{};
     int num_water_vapor_bands{};
 };
 
@@ -43,7 +45,7 @@ public:
     pybind11::array_t<double, pybind11::array::c_style> n2o_transmittance{};
     pybind11::array_t<double, pybind11::array::c_style> h2o_transmittance{};
 
-    Atmosphere_Model model{};
+    int model{};
     pybind11::array_t<double, pybind11::array::c_style> gas_transmittance_table_wavelengths{};
     pybind11::array_t<double, pybind11::array::c_style> air_mass_factor_mixed_gases{};
     pybind11::array_t<double, pybind11::array::c_style> air_mass_factor_water_vapor{};

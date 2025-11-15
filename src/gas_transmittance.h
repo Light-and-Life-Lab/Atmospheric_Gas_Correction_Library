@@ -31,7 +31,7 @@ struct Ancillary_Data
     double* stratospheric_no2_concentration{};
 
     // From e.g. GMAO_MERRA2.20240411T180000.MET.nc
-    double* water_vapor_concentration{};
+    double* precipitable_water{};
 
     // From e.g. ocssw/share/oci/msl12_sensor_info.dat
     double* a_h2o{};
@@ -42,7 +42,7 @@ struct Ancillary_Data
     double* f_h2o{};
     double* g_h2o{};
 
-    int* water_vapor_bands{};
+    double* water_vapor_bands{};
     int num_water_vapor_bands{};
 };
 
@@ -58,7 +58,7 @@ struct Air_Mass_Factor_Lookup_Table
     double* n2o_transmittance{};
     double* h2o_transmittance{};
 
-    Atmosphere_Model model{};
+    int model{};
     double* gas_transmittance_table_wavelengths{};
     double* air_mass_factor_mixed_gases{};
     double* air_mass_factor_water_vapor{};
@@ -92,9 +92,10 @@ struct Transmittance_Record
 
 enum Oxygen_A_Band_Option
 {
+    NO_CORRECTION,
     DING_GORDON, // Apply Ding and Gordon (1995) correction
-    NO_AMF_CORRECTION, // Apply oxygen transmittance from gas transmittance table
-    YES_AMF_CORRECTION, // Compute oxygen transmittance from A-band and surrounding window bands. Requires AMF gas trasmittance table
+    TRANSMITTANCE_TABLE, // Apply oxygen transmittance from gas transmittance table
+    SURROUNDING_WINDOW_BANDS, // Compute oxygen transmittance from A-band and surrounding window bands. Requires AMF gas trasmittance table
 };
 
 void ozone_transmittance(L1_Record* l1_rec, Ancillary_Data* ancillary_data, Transmittance_Record* t_rec, bool do_amf_correction);

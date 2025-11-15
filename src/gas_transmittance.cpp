@@ -6,6 +6,7 @@ setup_pybind11(cfg)
 %>
 
 #include <tuple>
+#include <iostream>
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 
@@ -277,11 +278,15 @@ Transmittance_Record_PY h2o_transmittance(const L1_Record_PY& l1_rec, const Anci
     ancillary_data_c.fraction_tropospheric_no2_above_200m = static_cast<double*>(ancillary_data.fraction_tropospheric_no2_above_200m.request().ptr);
     ancillary_data_c.tropospheric_no2_concentration = static_cast<double*>(ancillary_data.tropospheric_no2_concentration.request().ptr);
     ancillary_data_c.stratospheric_no2_concentration = static_cast<double*>(ancillary_data.stratospheric_no2_concentration.request().ptr);
+    ancillary_data_c.precipitable_water = static_cast<double*>(ancillary_data.precipitable_water.request().ptr);
+    ancillary_data_c.water_vapor_bands = static_cast<double*>(ancillary_data.water_vapor_bands.request().ptr);
+    ancillary_data_c.num_water_vapor_bands = ancillary_data.num_water_vapor_bands;
 
     Air_Mass_Factor_Lookup_Table amf_table_c{};
 
     amf_table_c.h2o_transmittance = static_cast<double*>(amf_table.h2o_transmittance.request().ptr);
-    amf_table_c.air_mass_factor_mixed_gases = static_cast<double*>(amf_table.air_mass_factor_water_vapor.request().ptr);
+    amf_table_c.model = amf_table.model;
+    amf_table_c.air_mass_factor_water_vapor = static_cast<double*>(amf_table.air_mass_factor_water_vapor.request().ptr);
     amf_table_c.gas_transmittance_table_wavelengths = static_cast<double*>(amf_table.gas_transmittance_table_wavelengths.request().ptr);
     amf_table_c.water_vapor_concentration = static_cast<double*>(amf_table.water_vapor_concentration.request().ptr);
     amf_table_c.num_models = amf_table.num_models;
@@ -290,8 +295,12 @@ Transmittance_Record_PY h2o_transmittance(const L1_Record_PY& l1_rec, const Anci
     amf_table_c.num_water_vapor_concentrations = amf_table.num_water_vapor_concentrations;
     
     L1_Record l1_rec_c{};
+
     l1_rec_c.cos_solar_zenith = static_cast<double*>(l1_rec.cos_solar_zenith.request().ptr);
     l1_rec_c.cos_sensor_zenith = static_cast<double*>(l1_rec.cos_sensor_zenith.request().ptr);
+    l1_rec_c.Lt = static_cast<double*>(l1_rec.Lt.request().ptr);
+    l1_rec_c.F0 = static_cast<double*>(l1_rec.F0.request().ptr);
+    l1_rec_c.wavelengths = static_cast<double*>(l1_rec.wavelengths.request().ptr);
     l1_rec_c.num_pixels = l1_rec.num_pixels;
     l1_rec_c.num_wavelengths = l1_rec.num_wavelengths;
 
@@ -312,6 +321,11 @@ Transmittance_Record_PY h2o_transmittance(const L1_Record_PY& l1_rec, const Anci
 
     h2o_transmittance(&l1_rec_c, &ancillary_data_c, &amf_table_c, &t_rec_c, do_amf_correction, use_gas_transmittance_table);
 
+    // for (int i = 0; i < l1_rec_c.num_pixels; i++)
+    // {
+    //     std::cout << t_rec_c.gas_transmittance_solar_zenith[i] << std::endl;
+    // }
+
     return t_rec;
 }
 
@@ -326,6 +340,7 @@ PYBIND11_MODULE(gas_transmittance, m)
         .def_readwrite("fraction_tropospheric_no2_above_200m", &Ancillary_Data_PY::fraction_tropospheric_no2_above_200m)
         .def_readwrite("tropospheric_no2_concentration", &Ancillary_Data_PY::tropospheric_no2_concentration)
         .def_readwrite("stratospheric_no2_concentration", &Ancillary_Data_PY::stratospheric_no2_concentration)
+        .def_readwrite("precipitable_water", &Ancillary_Data_PY::precipitable_water)
         .def_readwrite("a_h2o", &Ancillary_Data_PY::a_h2o)
         .def_readwrite("b_h2o", &Ancillary_Data_PY::b_h2o)
         .def_readwrite("c_h2o", &Ancillary_Data_PY::c_h2o)
@@ -372,8 +387,8 @@ PYBIND11_MODULE(gas_transmittance, m)
 
     py::enum_<Oxygen_A_Band_Option>(m, "Oxygen_A_Band_Option", py::module_local())
         .value("DING_GORDON", Oxygen_A_Band_Option::DING_GORDON)
-        .value("NO_AMF_CORRECTION", Oxygen_A_Band_Option::NO_AMF_CORRECTION)
-        .value("YES_AMF_CORRECTION", Oxygen_A_Band_Option::YES_AMF_CORRECTION);
+        .value("TRANSMITTANCE_TABLE", Oxygen_A_Band_Option::TRANSMITTANCE_TABLE)
+        .value("SURROUNDING_WINDOW_BANDS", Oxygen_A_Band_Option::SURROUNDING_WINDOW_BANDS);
 
     m.def("ozone_transmittance", py::overload_cast<const L1_Record_PY&, const Ancillary_Data_PY&, bool>(&ozone_transmittance));
     m.def("co2_transmittance", py::overload_cast<const L1_Record_PY&, const Air_Mass_Factor_Lookup_Table_PY&, bool>(&co2_transmittance));
