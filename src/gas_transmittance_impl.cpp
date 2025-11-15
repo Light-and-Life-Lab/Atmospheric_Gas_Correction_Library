@@ -91,19 +91,16 @@ float get_airmass_oxygen(L1_Record* l1_rec, Air_Mass_Factor_Lookup_Table* amf_ta
     int32_t num_wavelengths = l1_rec->num_wavelengths;
     int32_t row_offset = ip*num_wavelengths;
     double* wavelength_array = l1_rec->wavelengths;
-    double* Lt = &l1_rec->Lt[row_offset];
-    double u0 = l1_rec->cos_solar_zenith[ip];
-    double* F0 = l1_rec->F0;
     double reflectances[3];
 
     int absorption_window_lower_wavelength_index = windex(window1, wavelength_array, num_wavelengths);
-    reflectances[0] = M_PI*Lt[absorption_window_lower_wavelength_index]/F0[absorption_window_lower_wavelength_index]/u0;
+    reflectances[0] = l1_rec->reflectance[absorption_window_lower_wavelength_index];
 
     int absorption_window_upper_wavelength_index = windex(window2, wavelength_array, num_wavelengths);
-    reflectances[1] = M_PI*Lt[absorption_window_upper_wavelength_index]/F0[absorption_window_upper_wavelength_index]/u0;
+    reflectances[1] = l1_rec->reflectance[absorption_window_upper_wavelength_index];
 
     int band_absorp = windex(absorp_band, wavelength_array, num_wavelengths);
-    reflectances[2] = M_PI*Lt[band_absorp]/F0[band_absorp]/u0;
+    reflectances[2] = l1_rec->reflectance[band_absorp];
 
     double reflectances_interpolated = reflectances[0]+(absorp_band-window1)*(reflectances[1]-reflectances[0])/(window2-window1);
 
@@ -176,23 +173,17 @@ float get_wv_band_ratio(L1_Record* l1_rec, Air_Mass_Factor_Lookup_Table* amf_tab
     int32_t num_wavelengths = l1_rec->num_wavelengths;
     int32_t row_offset = ip*num_wavelengths;
     double* wavelength_array = l1_rec->wavelengths;
-    double u0 = l1_rec->cos_solar_zenith[ip];
-    double* F0 = l1_rec->F0;
     double reflectances[3];
 
     // derive a transmittance using a line height (or in this case, depth) approach
     int absorption_window_lower_wavelength_index = windex(window1, wavelength_array, num_wavelengths);
-    // reflectances[0] = M_PI * l1_rec->Lt[row_offset + absorption_window_lower_wavelength_index] / F0[absorption_window_lower_wavelength_index] / u0;
-    // TODO: Lt is curently populated by reflectance values. Should change name of member variable to be more accurate.
-    reflectances[0] = l1_rec->Lt[row_offset + absorption_window_lower_wavelength_index];
+    reflectances[0] = l1_rec->reflectance[row_offset + absorption_window_lower_wavelength_index];
 
     int absorption_window_upper_wavelength_index = windex(window2, wavelength_array, num_wavelengths);
-    // reflectances[1] = M_PI * l1_rec->Lt[row_offset + absorption_window_upper_wavelength_index] / F0[absorption_window_upper_wavelength_index] / u0;
-    reflectances[1] = l1_rec->Lt[row_offset + absorption_window_upper_wavelength_index];
+    reflectances[1] = l1_rec->reflectance[row_offset + absorption_window_upper_wavelength_index];
 
     int absorption_band_index = windex(absorp_band, wavelength_array, num_wavelengths);
-    // reflectances[2] = M_PI * l1_rec->Lt[row_offset + absorption_band_index] / F0[absorption_band_index] / u0;
-    reflectances[2] =l1_rec->Lt[row_offset + absorption_band_index];
+    reflectances[2] =l1_rec->reflectance[row_offset + absorption_band_index];
 
     double interpolated_reflectance = reflectances[0] + ((absorp_band - window1) / (window2 - window1)) * (reflectances[1] - reflectances[0]);
     double true_water_vapor_transmittance = reflectances[2] / interpolated_reflectance;

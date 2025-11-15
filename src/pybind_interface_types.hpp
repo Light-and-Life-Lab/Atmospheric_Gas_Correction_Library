@@ -61,9 +61,7 @@ struct L1_Record_PY
 public:
     L1_Record_PY(){};
 
-    // TODO: Replace Lt and F0 with reflectance (rhot), but only once OCSSW is running and we can use unit tests to catch errors when refactoring
-    pybind11::array_t<double, pybind11::array::c_style> Lt{};
-    pybind11::array_t<double, pybind11::array::c_style> F0{};
+    pybind11::array_t<double, pybind11::array::c_style> reflectance{};
 
     pybind11::array_t<double, pybind11::array::c_style> cos_solar_zenith{}; 
     pybind11::array_t<double, pybind11::array::c_style> cos_sensor_zenith{};

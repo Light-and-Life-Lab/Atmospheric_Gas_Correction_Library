@@ -71,9 +71,7 @@ struct Air_Mass_Factor_Lookup_Table
 
 struct L1_Record
 {
-    // TODO: Replace Lt and F0 with reflectance (rhot), but only once OCSSW is running and we can use unit tests to catch errors when refactoring
-    double* Lt{};
-    double* F0{};
+    double* reflectance{};
 
     double* cos_solar_zenith{}; 
     double* cos_sensor_zenith{};

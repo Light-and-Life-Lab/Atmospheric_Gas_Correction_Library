@@ -169,8 +169,7 @@ Transmittance_Record_PY o2_transmittance(const L1_Record_PY& l1_rec, const Air_M
     
     L1_Record l1_rec_c{};
 
-    l1_rec_c.Lt = static_cast<double*>(l1_rec.Lt.request().ptr);
-    l1_rec_c.F0 = static_cast<double*>(l1_rec.F0.request().ptr);
+    l1_rec_c.reflectance = static_cast<double*>(l1_rec.reflectance.request().ptr);
     l1_rec_c.cos_solar_zenith = static_cast<double*>(l1_rec.cos_solar_zenith.request().ptr);
     l1_rec_c.cos_sensor_zenith = static_cast<double*>(l1_rec.cos_sensor_zenith.request().ptr);
     l1_rec_c.num_pixels = l1_rec.num_pixels;
@@ -298,8 +297,7 @@ Transmittance_Record_PY h2o_transmittance(const L1_Record_PY& l1_rec, const Anci
 
     l1_rec_c.cos_solar_zenith = static_cast<double*>(l1_rec.cos_solar_zenith.request().ptr);
     l1_rec_c.cos_sensor_zenith = static_cast<double*>(l1_rec.cos_sensor_zenith.request().ptr);
-    l1_rec_c.Lt = static_cast<double*>(l1_rec.Lt.request().ptr);
-    l1_rec_c.F0 = static_cast<double*>(l1_rec.F0.request().ptr);
+    l1_rec_c.reflectance = static_cast<double*>(l1_rec.reflectance.request().ptr);
     l1_rec_c.wavelengths = static_cast<double*>(l1_rec.wavelengths.request().ptr);
     l1_rec_c.num_pixels = l1_rec.num_pixels;
     l1_rec_c.num_wavelengths = l1_rec.num_wavelengths;
@@ -371,8 +369,7 @@ PYBIND11_MODULE(gas_transmittance, m)
 
     py::class_<L1_Record_PY>(m, "L1_Record", py::module_local())
         .def(py::init<>())
-        .def_readwrite("Lt", &L1_Record_PY::Lt)
-        .def_readwrite("F0", &L1_Record_PY::F0)
+        .def_readwrite("reflectance", &L1_Record_PY::reflectance)
         .def_readwrite("cos_solar_zenith", &L1_Record_PY::cos_solar_zenith)
         .def_readwrite("cos_sensor_zenith", &L1_Record_PY::cos_sensor_zenith)
         .def_readwrite("num_pixels", &L1_Record_PY::num_pixels)
