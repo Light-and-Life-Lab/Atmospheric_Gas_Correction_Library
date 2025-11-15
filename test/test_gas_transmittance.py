@@ -238,7 +238,7 @@ def read_OCSSW_h2o_transmittance_benchmark_data():
     return tg_sen_ocssw, tg_sol_ocssw, wavelength_3d
 
 
-@pytest.mark.skip()
+# @pytest.mark.skip()
 def test_ozone_OCSSW(read_ozone_ancillary_data, 
                      read_PACE_geometry_data, 
                      read_OCSMART_ozone_transmittance_benchmark_data, 
@@ -246,6 +246,8 @@ def test_ozone_OCSSW(read_ozone_ancillary_data,
     ancillary_data = gas_transmittance.Ancillary_Data()
     ancillary_data.ozone_absorption_cross_section, ancillary_data.ozone_concentration = read_ozone_ancillary_data
 
+    # TODO: Adapt approach from OCSMART ancillary.py to read from ancillary files directly instead of .npy files
+    # TODO: This will require interpolation of ozone data to l1b grid
     l1_rec = gas_transmittance.L1_Record()
     l1_rec.cos_solar_zenith, l1_rec.cos_sensor_zenith = read_PACE_geometry_data
     l1_rec.num_pixels = l1_rec.cos_solar_zenith.shape[0] * l1_rec.cos_solar_zenith.shape[1]
@@ -274,32 +276,29 @@ def test_ozone_OCSSW(read_ozone_ancillary_data,
     plt.savefig('test/PACE/ozone/transmittance_comparison.png')
 
 
-@pytest.mark.skip()
+# @pytest.mark.skip()
 def test_co2_OCSSW(read_AMF_table, 
-                    read_PACE_geometry_data,  
+                    read_PACE_data,  
                     read_OCSSW_co2_transmittance_benchmark_data):
     amf_table = read_AMF_table
 
-    l1_rec = gas_transmittance.L1_Record()
-    l1_rec.cos_solar_zenith, l1_rec.cos_sensor_zenith = read_PACE_geometry_data
-    l1_rec.num_pixels = l1_rec.cos_solar_zenith.shape[0] * l1_rec.cos_solar_zenith.shape[1]
-    l1_rec.num_wavelengths = len(amf_table.gas_transmittance_table_wavelengths)
+    l1_rec = read_PACE_data
     do_amf_correction = True
 
     t_rec = gas_transmittance.co2_transmittance(l1_rec, amf_table, do_amf_correction)
 
-    tg_sen_gas_correction_lib = t_rec.gas_transmittance_sensor_zenith.reshape((1710, 1272, l1_rec.num_wavelengths))
-    tg_sol_gas_correction_lib = t_rec.gas_transmittance_solar_zenith.reshape((1710, 1272, l1_rec.num_wavelengths))
+    tg_sen_gas_correction_lib = t_rec.gas_transmittance_sensor_zenith.reshape(l1_rec.reflectance.shape)
+    tg_sol_gas_correction_lib = t_rec.gas_transmittance_solar_zenith.reshape(l1_rec.reflectance.shape)
 
     tg_sen_ocssw, tg_sol_ocssw, wavelength_3d = read_OCSSW_co2_transmittance_benchmark_data
 
-    sensor_wavelengths = amf_table.gas_transmittance_table_wavelengths
+    sensor_wavelengths = l1_rec.wavelengths
 
     plt.figure()
     plt.plot(wavelength_3d, tg_sen_ocssw[0, 0, :], '-r')
     plt.plot(wavelength_3d, tg_sol_ocssw[0, 0, :], color='orange')
-    plt.plot(sensor_wavelengths[:195], tg_sen_gas_correction_lib[0, 0, :195], '--b')
-    plt.plot(sensor_wavelengths[:195], tg_sol_gas_correction_lib[0, 0, :195], '--k')
+    plt.plot(sensor_wavelengths[:], tg_sen_gas_correction_lib[0, 0, :], '--b')
+    plt.plot(sensor_wavelengths[:], tg_sol_gas_correction_lib[0, 0, :], '--k')
     plt.ylim([0.95, 1.05])
     plt.xlabel('Wavelength (nm)')
     plt.ylabel('Transmittance')
@@ -307,26 +306,23 @@ def test_co2_OCSSW(read_AMF_table,
     plt.savefig('test/PACE/co2/transmittance_comparison.png')
 
 
-@pytest.mark.skip()
+# @pytest.mark.skip()
 def test_co_OCSSW(read_AMF_table, 
-                    read_PACE_geometry_data,  
+                    read_PACE_data,  
                     read_OCSSW_co_transmittance_benchmark_data):
     amf_table = read_AMF_table
 
-    l1_rec = gas_transmittance.L1_Record()
-    l1_rec.cos_solar_zenith, l1_rec.cos_sensor_zenith = read_PACE_geometry_data
-    l1_rec.num_pixels = l1_rec.cos_solar_zenith.shape[0] * l1_rec.cos_solar_zenith.shape[1]
-    l1_rec.num_wavelengths = len(amf_table.gas_transmittance_table_wavelengths)
+    l1_rec = read_PACE_data
     do_amf_correction = False
 
     t_rec = gas_transmittance.co_transmittance(l1_rec, amf_table, do_amf_correction)
 
-    tg_sen_gas_correction_lib = t_rec.gas_transmittance_sensor_zenith.reshape((1710, 1272, l1_rec.num_wavelengths))
-    tg_sol_gas_correction_lib = t_rec.gas_transmittance_solar_zenith.reshape((1710, 1272, l1_rec.num_wavelengths))
+    tg_sen_gas_correction_lib = t_rec.gas_transmittance_sensor_zenith.reshape(l1_rec.reflectance.shape)
+    tg_sol_gas_correction_lib = t_rec.gas_transmittance_solar_zenith.reshape(l1_rec.reflectance.shape)
 
     tg_sen_ocssw, tg_sol_ocssw, wavelength_3d = read_OCSSW_co_transmittance_benchmark_data
 
-    sensor_wavelengths = amf_table.gas_transmittance_table_wavelengths
+    sensor_wavelengths = l1_rec.wavelengths
 
     plt.figure()
     plt.plot(wavelength_3d, tg_sen_ocssw[0, 0, :], '-r')
@@ -339,32 +335,29 @@ def test_co_OCSSW(read_AMF_table,
     plt.savefig('test/PACE/co/transmittance_comparison.png')
 
 
-@pytest.mark.skip()
+# @pytest.mark.skip()
 def test_ch4_OCSSW(read_AMF_table, 
-                    read_PACE_geometry_data,  
+                    read_PACE_data,  
                     read_OCSSW_ch4_transmittance_benchmark_data):
     amf_table = read_AMF_table
 
-    l1_rec = gas_transmittance.L1_Record()
-    l1_rec.cos_solar_zenith, l1_rec.cos_sensor_zenith = read_PACE_geometry_data
-    l1_rec.num_pixels = l1_rec.cos_solar_zenith.shape[0] * l1_rec.cos_solar_zenith.shape[1]
-    l1_rec.num_wavelengths = len(amf_table.gas_transmittance_table_wavelengths)
+    l1_rec = read_PACE_data
     do_amf_correction = False
 
     t_rec = gas_transmittance.ch4_transmittance(l1_rec, amf_table, do_amf_correction)
 
-    tg_sen_gas_correction_lib = t_rec.gas_transmittance_sensor_zenith.reshape((1710, 1272, l1_rec.num_wavelengths))
-    tg_sol_gas_correction_lib = t_rec.gas_transmittance_solar_zenith.reshape((1710, 1272, l1_rec.num_wavelengths))
+    tg_sen_gas_correction_lib = t_rec.gas_transmittance_sensor_zenith.reshape(l1_rec.reflectance.shape)
+    tg_sol_gas_correction_lib = t_rec.gas_transmittance_solar_zenith.reshape(l1_rec.reflectance.shape)
 
     tg_sen_ocssw, tg_sol_ocssw, wavelength_3d = read_OCSSW_ch4_transmittance_benchmark_data
 
-    sensor_wavelengths = amf_table.gas_transmittance_table_wavelengths
+    sensor_wavelengths = l1_rec.wavelengths
 
     plt.figure()
     plt.plot(wavelength_3d, tg_sen_ocssw[0, 0, :], '-r')
     plt.plot(wavelength_3d, tg_sol_ocssw[0, 0, :], color='orange')
-    plt.plot(sensor_wavelengths[:195], tg_sen_gas_correction_lib[0, 0, :195], '--b')
-    plt.plot(sensor_wavelengths[:195], tg_sol_gas_correction_lib[0, 0, :195], '--k')
+    plt.plot(sensor_wavelengths[:], tg_sen_gas_correction_lib[0, 0, :], '--b')
+    plt.plot(sensor_wavelengths[:], tg_sol_gas_correction_lib[0, 0, :], '--k')
     plt.ylim([0.95, 1.05])
     plt.xlabel('Wavelength (nm)')
     plt.ylabel('Transmittance')
@@ -372,39 +365,36 @@ def test_ch4_OCSSW(read_AMF_table,
     plt.savefig('test/PACE/ch4/transmittance_comparison.png')
 
 
-@pytest.mark.skip()
+# @pytest.mark.skip()
 def test_n2o_OCSSW(read_AMF_table, 
-                    read_PACE_geometry_data,  
+                    read_PACE_data,  
                     read_OCSSW_n2o_transmittance_benchmark_data):
     amf_table = read_AMF_table
 
-    l1_rec = gas_transmittance.L1_Record()
-    l1_rec.cos_solar_zenith, l1_rec.cos_sensor_zenith = read_PACE_geometry_data
-    l1_rec.num_pixels = l1_rec.cos_solar_zenith.shape[0] * l1_rec.cos_solar_zenith.shape[1]
-    l1_rec.num_wavelengths = len(amf_table.gas_transmittance_table_wavelengths)
+    l1_rec = read_PACE_data
     do_amf_correction = False
 
     t_rec = gas_transmittance.n2o_transmittance(l1_rec, amf_table, do_amf_correction)
 
-    tg_sen_gas_correction_lib = t_rec.gas_transmittance_sensor_zenith.reshape((1710, 1272, l1_rec.num_wavelengths))
-    tg_sol_gas_correction_lib = t_rec.gas_transmittance_solar_zenith.reshape((1710, 1272, l1_rec.num_wavelengths))
+    tg_sen_gas_correction_lib = t_rec.gas_transmittance_sensor_zenith.reshape(l1_rec.reflectance.shape)
+    tg_sol_gas_correction_lib = t_rec.gas_transmittance_solar_zenith.reshape(l1_rec.reflectance.shape)
 
     tg_sen_ocssw, tg_sol_ocssw, wavelength_3d = read_OCSSW_n2o_transmittance_benchmark_data
 
-    sensor_wavelengths = amf_table.gas_transmittance_table_wavelengths
+    sensor_wavelengths = l1_rec.wavelengths
 
     plt.figure()
     plt.plot(wavelength_3d, tg_sen_ocssw[0, 0, :], '-r')
     plt.plot(wavelength_3d, tg_sol_ocssw[0, 0, :], color='orange')
-    plt.plot(sensor_wavelengths[:195], tg_sen_gas_correction_lib[0, 0, :195], '--b')
-    plt.plot(sensor_wavelengths[:195], tg_sol_gas_correction_lib[0, 0, :195], '--k')
+    plt.plot(sensor_wavelengths[:], tg_sen_gas_correction_lib[0, 0, :], '--b')
+    plt.plot(sensor_wavelengths[:], tg_sol_gas_correction_lib[0, 0, :], '--k')
     plt.xlabel('Wavelength (nm)')
     plt.ylabel('Transmittance')
     plt.legend(['OCSSW Sensor Zenith', 'OCSSW Solar Zenith', 'Gas Lib Sensor Zenith', 'Gas Lib Solar Zenith'])
     plt.savefig('test/PACE/n2o/transmittance_comparison.png')
 
 
-@pytest.mark.skip()
+# @pytest.mark.skip()
 def test_no2_OCSSW(read_no2_ancillary_data, 
                      read_PACE_geometry_data, 
                      read_OCSMART_no2_transmittance_benchmark_data, 
@@ -416,6 +406,8 @@ def test_no2_OCSSW(read_no2_ancillary_data,
     ancillary_data.tropospheric_no2_concentration, \
     ancillary_data.stratospheric_no2_concentration = read_no2_ancillary_data
 
+    # TODO: Adapt approach from OCSMART ancillary.py to read from ancillary files directly instead of .npy files
+    # TODO: This will require interpolation of ozone data to l1b grid
     l1_rec = gas_transmittance.L1_Record()
     l1_rec.cos_solar_zenith, l1_rec.cos_sensor_zenith = read_PACE_geometry_data
     l1_rec.num_pixels = l1_rec.cos_solar_zenith.shape[0] * l1_rec.cos_solar_zenith.shape[1]
@@ -464,8 +456,8 @@ def test_o2_OCSSW(read_AMF_table,
     t_rec = gas_transmittance.o2_transmittance(l1_rec, amf_table, do_amf_correction, oxygen_A_band_option)
     end_time = time.perf_counter()
 
-    tg_sen_gas_correction_lib = t_rec.gas_transmittance_sensor_zenith.reshape((100, 100, l1_rec.num_wavelengths))
-    tg_sol_gas_correction_lib = t_rec.gas_transmittance_solar_zenith.reshape((100, 100, l1_rec.num_wavelengths))
+    tg_sen_gas_correction_lib = t_rec.gas_transmittance_sensor_zenith.reshape(l1_rec.reflectance.shape)
+    tg_sol_gas_correction_lib = t_rec.gas_transmittance_solar_zenith.reshape(l1_rec.reflectance.shape)
 
     tg_sen_ocssw, tg_sol_ocssw, wavelength_3d = read_OCSSW_o2_transmittance_benchmark_data
 
@@ -514,8 +506,8 @@ def test_h2o_OCSSW(read_AMF_table,
     t_rec = gas_transmittance.h2o_transmittance(l1_rec, ancillary_data, amf_table, do_amf_correction, use_gas_transmittance_table)
     end_time = time.perf_counter()
 
-    tg_sen_gas_correction_lib = t_rec.gas_transmittance_sensor_zenith.reshape((100, 100, l1_rec.num_wavelengths))
-    tg_sol_gas_correction_lib = t_rec.gas_transmittance_solar_zenith.reshape((100, 100, l1_rec.num_wavelengths))
+    tg_sen_gas_correction_lib = t_rec.gas_transmittance_sensor_zenith.reshape(l1_rec.reflectance.shape)
+    tg_sol_gas_correction_lib = t_rec.gas_transmittance_solar_zenith.reshape(l1_rec.reflectance.shape)
 
     tg_sen_ocssw, tg_sol_ocssw, wavelength_3d = read_OCSSW_h2o_transmittance_benchmark_data
 
