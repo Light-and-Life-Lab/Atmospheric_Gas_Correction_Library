@@ -17,6 +17,44 @@ def read_PACE_geometry_data():
 
     return csolz, csenz
 
+@pytest.fixture
+def read_PACE_data():
+    l1_rec = gas_transmittance.L1_Record()
+    start_line = 0
+    start_pixel = 0
+    end_line = 100
+    end_pixel = 100
+
+    with h5py.File('test/PACE/PACE_OCI.20240411T182012.L1B.V3.nc', 'r') as f:
+        solar_zenith = 0.01*np.array(f['/geolocation_data/solar_zenith'][start_line:end_line, start_pixel:end_pixel])
+        sensor_zenith = 0.01*np.array(f['/geolocation_data/sensor_zenith'][start_line:end_line, start_pixel:end_pixel])
+        l1_rec.cos_solar_zenith = np.cos(np.deg2rad(solar_zenith))
+        l1_rec.cos_sensor_zenith = np.cos(np.deg2rad(sensor_zenith))
+        blue_wavelengths = np.array(f['/sensor_band_parameters/blue_wavelength'][1:])
+        red_wavelengths = np.array(f['/sensor_band_parameters/red_wavelength'][3:])
+        sensor_wavelengths = np.zeros(len(blue_wavelengths) + len(red_wavelengths))
+        sensor_wavelengths[0:len(blue_wavelengths)] = blue_wavelengths
+        sensor_wavelengths[len(blue_wavelengths):] = red_wavelengths
+
+        blue_rhot = np.array(f['/observation_data/rhot_blue'][1:, start_line:end_line, start_pixel:end_pixel])
+        red_rhot = np.array(f['/observation_data/rhot_red'][3:, start_line:end_line, start_pixel:end_pixel])
+        assert(blue_rhot.shape[1] == red_rhot.shape[1])
+        assert(blue_rhot.shape[2] == red_rhot.shape[2])
+
+        rhot = np.zeros((blue_rhot.shape[0] + red_rhot.shape[0], blue_rhot.shape[1], blue_rhot.shape[2]))
+        rhot[0:len(blue_wavelengths), :, :] = blue_rhot
+        rhot[len(blue_wavelengths):, :, :] = red_rhot
+        rhot = np.rollaxis(rhot, 0, 3)
+        l1_rec.reflectance = rhot/np.pi*l1_rec.cos_sensor_zenith[:, :, None]
+
+        assert(len(sensor_wavelengths) == l1_rec.reflectance.shape[2])
+
+        l1_rec.wavelengths = sensor_wavelengths
+        l1_rec.num_pixels = len(l1_rec.cos_solar_zenith.flatten())
+        l1_rec.num_wavelengths = len(l1_rec.wavelengths)
+
+    return l1_rec
+
 
 @pytest.fixture
 def read_OCSSW_lat_lon():
@@ -58,6 +96,15 @@ def read_AMF_table():
         'nmodels' : 'num_models',
         'nwavelengths' : 'num_gas_transmittance_wavelengths',
     }
+
+    model_map = {
+        "Tropical": 0,
+        "MidLatSummer" : 1,
+        "MidLatWinter" : 2,
+        "SubarcticSummer" : 3,
+        "SubarcticWinter" : 4,
+        "USstandard62" : 5
+    }
         
     with h5py.File('test/PACE/oci_gas_transmittance_cia_amf_v3.2.nc', 'r') as f:
         for netcdf_node, var_name in netcdf_variables.items():
@@ -69,6 +116,8 @@ def read_AMF_table():
             if netcdf_node in f:
                 var_value = np.array(f[netcdf_node])
                 setattr(amf_table, var_name, len(var_value))
+
+        setattr(amf_table, 'model', model_map["USstandard62"])
 
     return amf_table
 
@@ -189,7 +238,7 @@ def read_OCSSW_h2o_transmittance_benchmark_data():
     return tg_sen_ocssw, tg_sol_ocssw, wavelength_3d
 
 
-# @pytest.mark.skip()
+@pytest.mark.skip()
 def test_ozone_OCSSW(read_ozone_ancillary_data, 
                      read_PACE_geometry_data, 
                      read_OCSMART_ozone_transmittance_benchmark_data, 
@@ -225,7 +274,7 @@ def test_ozone_OCSSW(read_ozone_ancillary_data,
     plt.savefig('test/PACE/ozone/transmittance_comparison.png')
 
 
-# @pytest.mark.skip()
+@pytest.mark.skip()
 def test_co2_OCSSW(read_AMF_table, 
                     read_PACE_geometry_data,  
                     read_OCSSW_co2_transmittance_benchmark_data):
@@ -258,7 +307,7 @@ def test_co2_OCSSW(read_AMF_table,
     plt.savefig('test/PACE/co2/transmittance_comparison.png')
 
 
-# @pytest.mark.skip()
+@pytest.mark.skip()
 def test_co_OCSSW(read_AMF_table, 
                     read_PACE_geometry_data,  
                     read_OCSSW_co_transmittance_benchmark_data):
@@ -290,7 +339,7 @@ def test_co_OCSSW(read_AMF_table,
     plt.savefig('test/PACE/co/transmittance_comparison.png')
 
 
-# @pytest.mark.skip()
+@pytest.mark.skip()
 def test_ch4_OCSSW(read_AMF_table, 
                     read_PACE_geometry_data,  
                     read_OCSSW_ch4_transmittance_benchmark_data):
@@ -323,12 +372,10 @@ def test_ch4_OCSSW(read_AMF_table,
     plt.savefig('test/PACE/ch4/transmittance_comparison.png')
 
 
-# @pytest.mark.skip()
+@pytest.mark.skip()
 def test_n2o_OCSSW(read_AMF_table, 
                     read_PACE_geometry_data,  
-                    read_OCSSW_n2o_transmittance_benchmark_data,
-                    read_OCSSW_lat_lon,
-                    read_OCSMART_lat_lon):
+                    read_OCSSW_n2o_transmittance_benchmark_data):
     amf_table = read_AMF_table
 
     l1_rec = gas_transmittance.L1_Record()
@@ -357,7 +404,7 @@ def test_n2o_OCSSW(read_AMF_table,
     plt.savefig('test/PACE/n2o/transmittance_comparison.png')
 
 
-# @pytest.mark.skip()
+@pytest.mark.skip()
 def test_no2_OCSSW(read_no2_ancillary_data, 
                      read_PACE_geometry_data, 
                      read_OCSMART_no2_transmittance_benchmark_data, 
@@ -398,71 +445,17 @@ def test_no2_OCSSW(read_no2_ancillary_data,
 
 
 # @pytest.mark.skip()
-def test_o2_OCSSW(read_OCSSW_o2_transmittance_benchmark_data,
-                  read_OCSSW_lat_lon,
-                  read_OCSMART_lat_lon):
-    amf_table = gas_transmittance.Air_Mass_Factor_Lookup_Table()
+def test_o2_OCSSW(read_AMF_table,
+                  read_PACE_data,
+                  read_OCSSW_o2_transmittance_benchmark_data):
+    amf_table = read_AMF_table
 
-    with h5py.File("test/PACE/oci_gas_transmittance_cia_amf_v3.2.nc", 'r') as f:
-        o2_transmittance = np.array(f['oxygen_transmittance'])
-        amf_table.air_mass_factor_mixed_gases = np.array(f['air_mass_factor_mixed'])
-        amf_table.num_amf_grid_points = np.array(f['n_air_mass_factor']).size
-        amf_table.gas_transmittance_table_wavelengths = np.array(f['wavelength'])
+    l1_rec = read_PACE_data
+    do_amf_correction = True
 
-    l1_rec = gas_transmittance.L1_Record()
-    start_line = 0
-    start_pixel = 0
-    end_line = 100
-    end_pixel = 100
+    f = interpolate.interp1d(amf_table.gas_transmittance_table_wavelengths, amf_table.o2_transmittance, axis = 0)
+    o2_transmittance_sensor_wavelengths = f(l1_rec.wavelengths)
 
-    with h5py.File('test/PACE/PACE_OCI.20240411T182012.L1B.V3.nc', 'r') as f:
-        solar_zenith = 0.01*np.array(f['/geolocation_data/solar_zenith'][start_line:end_line, start_pixel:end_pixel])
-        sensor_zenith = 0.01*np.array(f['/geolocation_data/sensor_zenith'][start_line:end_line, start_pixel:end_pixel])
-        l1_rec.cos_solar_zenith = np.cos(np.deg2rad(solar_zenith))
-        l1_rec.cos_sensor_zenith = np.cos(np.deg2rad(sensor_zenith))
-        blue_wavelengths = np.array(f['/sensor_band_parameters/blue_wavelength'][1:])
-        red_wavelengths = np.array(f['/sensor_band_parameters/red_wavelength'][3:])
-        sensor_wavelengths = np.zeros(len(blue_wavelengths) + len(red_wavelengths))
-        sensor_wavelengths[0:len(blue_wavelengths)] = blue_wavelengths
-        sensor_wavelengths[len(blue_wavelengths):] = red_wavelengths
-
-        blue_rhot = np.array(f['/observation_data/rhot_blue'][1:, start_line:end_line, start_pixel:end_pixel])
-        red_rhot = np.array(f['/observation_data/rhot_red'][3:, start_line:end_line, start_pixel:end_pixel])
-        assert(blue_rhot.shape[1] == red_rhot.shape[1])
-        assert(blue_rhot.shape[2] == red_rhot.shape[2])
-
-        rhot = np.zeros((blue_rhot.shape[0] + red_rhot.shape[0], blue_rhot.shape[1], blue_rhot.shape[2]))
-        rhot[0:len(blue_wavelengths), :, :] = blue_rhot
-        rhot[len(blue_wavelengths):, :, :] = red_rhot
-        rhot = np.rollaxis(rhot, 0, 3)
-        reflectance = rhot/np.pi*l1_rec.cos_sensor_zenith[:, :, None]
-
-        assert(len(sensor_wavelengths) == reflectance.shape[2])
-
-        l1_rec.wavelengths = sensor_wavelengths
-        l1_rec.num_pixels = len(l1_rec.cos_solar_zenith.flatten())
-        l1_rec.num_wavelengths = len(l1_rec.wavelengths)
-        do_amf_correction = True
-
-    with h5py.File('test/PACE/PACE_OCI.20240411T182012.L2.nc', 'r') as f:
-        tg_sen_benchmark = 5e-5*np.array(f['/geophysical_data/tg_sen'])
-        tg_sol_benchmark = 5e-5*np.array(f['/geophysical_data/tg_sol'])
-        wavelength_3d = np.array(f['/sensor_band_parameters/wavelength_3d'])
-
-    plt.figure()
-    plt.plot(wavelength_3d, tg_sen_benchmark[0, 0, :])
-    plt.plot(wavelength_3d, tg_sol_benchmark[0, 0, :])
-    plt.savefig('test/PACE/benchmark_transmittances.png')
-
-    F0_gt_wavelengths = [112.329, 92.673, 85.208, 82.100, 80.692, 86.329, 95.925, 101.478, 101.788, 98.128, 93.719, 95.656, 97.642, 95.100, 93.133, 95.137, 99.255, 103.093, 99.177, 93.290, 97.047, 105.519, 114.651, 119.597, 116.077, 107.558, 109.618, 119.291, 112.055, 97.243, 97.233, 107.436, 112.781, 106.594, 105.608, 126.993, 156.889, 170.586, 169.248, 169.343, 173.391, 177.938, 178.901, 176.584, 175.633, 174.629, 171.281, 162.301, 153.935, 161.212, 174.113, 178.181, 182.051, 190.560, 195.324, 199.413, 205.297, 205.224, 204.442, 206.345, 207.477, 208.190, 206.088, 203.623, 203.584, 205.278, 207.110, 208.286, 209.299, 206.511, 195.706, 190.027, 195.623, 199.210, 200.467, 199.674, 195.068, 193.092, 195.670, 197.349, 196.529, 193.713, 186.203, 179.120, 181.903, 188.641, 188.972, 188.225, 191.667, 192.903, 192.064, 190.857, 188.243, 188.456, 189.880, 189.660, 189.365, 189.610, 188.825, 185.808, 184.117, 184.857, 184.926, 184.325, 184.315, 185.745, 185.854, 184.273, 184.355, 184.525, 182.317, 178.484, 177.707, 179.744, 179.969, 178.360, 176.334, 176.103, 176.462, 174.718, 172.349, 170.259, 167.958, 167.776, 168.949, 167.509, 165.836, 166.449, 165.916, 164.217, 163.716, 163.528, 162.046, 161.215, 160.637, 160.358, 160.231, 159.892, 159.257, 158.725, 158.332, 158.267, 157.786, 155.176, 151.696, 148.458, 147.693, 149.665, 152.508, 154.888, 155.421, 155.288, 154.996, 154.702, 154.397, 154.032, 153.450, 152.850, 152.293, 151.891, 151.637, 151.432, 151.158, 150.793, 150.431, 149.908, 149.250, 148.497, 147.875, 147.506, 147.418, 147.395, 147.151, 146.716, 146.142, 145.677, 145.179, 144.677, 144.075, 143.268, 142.395, 141.534, 141.038, 140.862, 140.959, 140.985, 140.752, 140.295, 139.692, 139.124, 138.487, 137.908, 137.372, 136.140, 134.717, 134.219, 134.304, 133.385, 132.080, 131.723, 131.437, 130.196, 128.322, 127.705, 127.371, 127.484, 127.690, 127.841, 127.726, 127.292, 126.747, 126.200, 125.866, 125.688, 125.509, 125.165, 124.782, 124.408, 124.097, 123.926, 123.728, 123.220, 122.490, 121.679, 121.056, 120.707, 120.507, 120.407, 120.035, 119.765, 119.542, 119.096, 118.633, 118.122, 117.631, 117.233, 116.445, 114.587, 113.353, 113.677, 113.456, 112.543, 111.714, 110.849, 110.234, 110.170, 109.946, 108.613, 106.799, 106.192, 106.574, 106.537, 105.791, 104.368, 103.511, 103.470, 103.245, 102.549, 101.870, 100.769, 98.572, 94.626, 92.347, 95.812, 98.548, 97.907, 94.326, 91.864, 94.043, 95.080, 94.395, 94.003, 93.393, 93.138, 92.918, 92.343, 92.274, 91.902, 91.528, 81.981, 67.021, 44.511, 35.562, 23.500, 9.111, 7.397] # TODO: Need to figure out how to get real values for F0 in OC-SMART. OCSSW reads them in from sensor_info.dat files
-    f = interpolate.interp1d(amf_table.gas_transmittance_table_wavelengths, F0_gt_wavelengths)
-    F0_sensor_wavelengths = f(sensor_wavelengths)
-
-    f = interpolate.interp1d(amf_table.gas_transmittance_table_wavelengths, o2_transmittance, axis = 0)
-    o2_transmittance_sensor_wavelengths = f(sensor_wavelengths)
-
-    l1_rec.Lt = reflectance
-    l1_rec.F0 = F0_sensor_wavelengths
     amf_table.o2_transmittance = o2_transmittance_sensor_wavelengths
 
     oxygen_A_band_option = gas_transmittance.Oxygen_A_Band_Option.TRANSMITTANCE_TABLE
@@ -476,14 +469,12 @@ def test_o2_OCSSW(read_OCSSW_o2_transmittance_benchmark_data,
 
     tg_sen_ocssw, tg_sol_ocssw, wavelength_3d = read_OCSSW_o2_transmittance_benchmark_data
 
-    OCSSW_lat, OCSSW_lon = read_OCSSW_lat_lon
-    OCSMART_lat, OCSMART_lon = read_OCSMART_lat_lon
-
     plt.figure()
     plt.plot(wavelength_3d, tg_sen_ocssw[0, 0, :], '-r')
     plt.plot(wavelength_3d, tg_sol_ocssw[0, 0, :], color='orange')
-    plt.plot(sensor_wavelengths[:], tg_sen_gas_correction_lib[0, 0, :], '--b')
-    plt.plot(sensor_wavelengths[:], tg_sol_gas_correction_lib[0, 0, :], '--k')
+    plt.plot(l1_rec.wavelengths[:], tg_sen_gas_correction_lib[0, 0, :], '--b')
+    plt.plot(l1_rec.wavelengths[:], tg_sol_gas_correction_lib[0, 0, :], '--k')
+    plt.xlim([750, 800])
     plt.xlabel('Wavelength (nm)')
     plt.ylabel('Transmittance')
     plt.legend(['OCSSW Sensor Zenith', 'OCSSW Solar Zenith', 'Gas Lib Sensor Zenith', 'Gas Lib Solar Zenith'])
@@ -491,57 +482,14 @@ def test_o2_OCSSW(read_OCSSW_o2_transmittance_benchmark_data,
 
 
 # @pytest.mark.skip()
-def test_h2o_OCSSW(read_no2_ancillary_data,
+def test_h2o_OCSSW(read_AMF_table,
+                   read_PACE_data,
+                   read_no2_ancillary_data,
                    read_OCSSW_h2o_transmittance_benchmark_data):
-    amf_table = gas_transmittance.Air_Mass_Factor_Lookup_Table()
+    amf_table = read_AMF_table
 
-    with h5py.File("test/PACE/oci_gas_transmittance_cia_amf_v3.2.nc", 'r') as f:
-        h2o_transmittance = np.array(f['water_vapor_transmittance'])
-        amf_table.model = 5
-        amf_table.air_mass_factor_water_vapor = np.array(f['air_mass_factor_wv'])
-        amf_table.gas_transmittance_table_wavelengths = np.array(f['wavelength'])
-        amf_table.water_vapor_concentration = np.array(f['water_vapor'])
-
-        amf_table.num_models = np.array(f['nmodels']).size
-        # amf_table.num_gas_transmittance_wavelengths = np.array(f['nwavelengths']).size
-        amf_table.num_amf_grid_points = np.array(f['n_air_mass_factor']).size
-        amf_table.num_water_vapor_concentrations = np.array(f['n_water_vapor']).size
-
-
-    l1_rec = gas_transmittance.L1_Record()
-    start_line = 0
-    start_pixel = 0
-    end_line = 100
-    end_pixel = 100
-
-    with h5py.File('test/PACE/PACE_OCI.20240411T182012.L1B.V3.nc', 'r') as f:
-        solar_zenith = 0.01*np.array(f['/geolocation_data/solar_zenith'][start_line:end_line, start_pixel:end_pixel])
-        sensor_zenith = 0.01*np.array(f['/geolocation_data/sensor_zenith'][start_line:end_line, start_pixel:end_pixel])
-        l1_rec.cos_solar_zenith = np.cos(np.deg2rad(solar_zenith))
-        l1_rec.cos_sensor_zenith = np.cos(np.deg2rad(sensor_zenith))
-        blue_wavelengths = np.array(f['/sensor_band_parameters/blue_wavelength'][1:])
-        red_wavelengths = np.array(f['/sensor_band_parameters/red_wavelength'][3:])
-        sensor_wavelengths = np.zeros(len(blue_wavelengths) + len(red_wavelengths))
-        sensor_wavelengths[0:len(blue_wavelengths)] = blue_wavelengths
-        sensor_wavelengths[len(blue_wavelengths):] = red_wavelengths
-
-        blue_rhot = np.array(f['/observation_data/rhot_blue'][1:, start_line:end_line, start_pixel:end_pixel])
-        red_rhot = np.array(f['/observation_data/rhot_red'][3:, start_line:end_line, start_pixel:end_pixel])
-        assert(blue_rhot.shape[1] == red_rhot.shape[1])
-        assert(blue_rhot.shape[2] == red_rhot.shape[2])
-
-        rhot = np.zeros((blue_rhot.shape[0] + red_rhot.shape[0], blue_rhot.shape[1], blue_rhot.shape[2]))
-        rhot[0:len(blue_wavelengths), :, :] = blue_rhot
-        rhot[len(blue_wavelengths):, :, :] = red_rhot
-        rhot = np.rollaxis(rhot, 0, 3)
-        reflectance = rhot/np.pi*l1_rec.cos_sensor_zenith[:, :, None]
-
-        assert(len(sensor_wavelengths) == reflectance.shape[2])
-
-        l1_rec.wavelengths = sensor_wavelengths
-        l1_rec.num_pixels = len(l1_rec.cos_solar_zenith.flatten())
-        l1_rec.num_wavelengths = len(l1_rec.wavelengths)
-        do_amf_correction = True
+    l1_rec = read_PACE_data
+    do_amf_correction = True
 
     ancillary_data = gas_transmittance.Ancillary_Data()
 
@@ -550,31 +498,14 @@ def test_h2o_OCSSW(read_no2_ancillary_data,
     ancillary_data.tropospheric_no2_concentration, \
     ancillary_data.stratospheric_no2_concentration = read_no2_ancillary_data
 
-    ancillary_data.precipitable_water = np.zeros(solar_zenith.size)
+    ancillary_data.precipitable_water = np.zeros(l1_rec.cos_solar_zenith.size)
     ancillary_data.water_vapor_bands = np.array([782, 817, 857], dtype=np.float64)
     ancillary_data.num_water_vapor_bands = ancillary_data.water_vapor_bands.size
 
-    with h5py.File('test/PACE/PACE_OCI.20240411T182012.L2.nc', 'r') as f:
-        tg_sen_benchmark = 5e-5*np.array(f['/geophysical_data/tg_sen'])
-        tg_sol_benchmark = 5e-5*np.array(f['/geophysical_data/tg_sol'])
-        wavelength_3d = np.array(f['/sensor_band_parameters/wavelength_3d'])
+    f = interpolate.interp1d(amf_table.gas_transmittance_table_wavelengths, amf_table.h2o_transmittance, axis = 1)
+    h2o_transmittance_at_sensor_wavelengths = f(l1_rec.wavelengths)
 
-    plt.figure()
-    plt.plot(wavelength_3d, tg_sen_benchmark[0, 0, :])
-    plt.plot(wavelength_3d, tg_sol_benchmark[0, 0, :])
-    plt.savefig('test/PACE/benchmark_transmittances.png')
-
-    F0_gt_wavelengths = [112.329, 92.673, 85.208, 82.100, 80.692, 86.329, 95.925, 101.478, 101.788, 98.128, 93.719, 95.656, 97.642, 95.100, 93.133, 95.137, 99.255, 103.093, 99.177, 93.290, 97.047, 105.519, 114.651, 119.597, 116.077, 107.558, 109.618, 119.291, 112.055, 97.243, 97.233, 107.436, 112.781, 106.594, 105.608, 126.993, 156.889, 170.586, 169.248, 169.343, 173.391, 177.938, 178.901, 176.584, 175.633, 174.629, 171.281, 162.301, 153.935, 161.212, 174.113, 178.181, 182.051, 190.560, 195.324, 199.413, 205.297, 205.224, 204.442, 206.345, 207.477, 208.190, 206.088, 203.623, 203.584, 205.278, 207.110, 208.286, 209.299, 206.511, 195.706, 190.027, 195.623, 199.210, 200.467, 199.674, 195.068, 193.092, 195.670, 197.349, 196.529, 193.713, 186.203, 179.120, 181.903, 188.641, 188.972, 188.225, 191.667, 192.903, 192.064, 190.857, 188.243, 188.456, 189.880, 189.660, 189.365, 189.610, 188.825, 185.808, 184.117, 184.857, 184.926, 184.325, 184.315, 185.745, 185.854, 184.273, 184.355, 184.525, 182.317, 178.484, 177.707, 179.744, 179.969, 178.360, 176.334, 176.103, 176.462, 174.718, 172.349, 170.259, 167.958, 167.776, 168.949, 167.509, 165.836, 166.449, 165.916, 164.217, 163.716, 163.528, 162.046, 161.215, 160.637, 160.358, 160.231, 159.892, 159.257, 158.725, 158.332, 158.267, 157.786, 155.176, 151.696, 148.458, 147.693, 149.665, 152.508, 154.888, 155.421, 155.288, 154.996, 154.702, 154.397, 154.032, 153.450, 152.850, 152.293, 151.891, 151.637, 151.432, 151.158, 150.793, 150.431, 149.908, 149.250, 148.497, 147.875, 147.506, 147.418, 147.395, 147.151, 146.716, 146.142, 145.677, 145.179, 144.677, 144.075, 143.268, 142.395, 141.534, 141.038, 140.862, 140.959, 140.985, 140.752, 140.295, 139.692, 139.124, 138.487, 137.908, 137.372, 136.140, 134.717, 134.219, 134.304, 133.385, 132.080, 131.723, 131.437, 130.196, 128.322, 127.705, 127.371, 127.484, 127.690, 127.841, 127.726, 127.292, 126.747, 126.200, 125.866, 125.688, 125.509, 125.165, 124.782, 124.408, 124.097, 123.926, 123.728, 123.220, 122.490, 121.679, 121.056, 120.707, 120.507, 120.407, 120.035, 119.765, 119.542, 119.096, 118.633, 118.122, 117.631, 117.233, 116.445, 114.587, 113.353, 113.677, 113.456, 112.543, 111.714, 110.849, 110.234, 110.170, 109.946, 108.613, 106.799, 106.192, 106.574, 106.537, 105.791, 104.368, 103.511, 103.470, 103.245, 102.549, 101.870, 100.769, 98.572, 94.626, 92.347, 95.812, 98.548, 97.907, 94.326, 91.864, 94.043, 95.080, 94.395, 94.003, 93.393, 93.138, 92.918, 92.343, 92.274, 91.902, 91.528, 81.981, 67.021, 44.511, 35.562, 23.500, 9.111, 7.397] # TODO: Need to figure out how to get real values for F0 in OC-SMART. OCSSW reads them in from sensor_info.dat files
-    f = interpolate.interp1d(amf_table.gas_transmittance_table_wavelengths, F0_gt_wavelengths)
-    F0_at_sensor_wavelengths = f(sensor_wavelengths)
-
-    f = interpolate.interp1d(amf_table.gas_transmittance_table_wavelengths, h2o_transmittance, axis = 1)
-    h2o_transmittance_at_sensor_wavelengths = f(sensor_wavelengths)
-
-    l1_rec.Lt = reflectance
-    l1_rec.F0 = F0_at_sensor_wavelengths
-    l1_rec.wavelengths = sensor_wavelengths
-    amf_table.num_gas_transmittance_wavelengths = len(sensor_wavelengths)
+    amf_table.num_gas_transmittance_wavelengths = len(l1_rec.wavelengths)
     amf_table.h2o_transmittance = h2o_transmittance_at_sensor_wavelengths
 
     use_gas_transmittance_table = True
@@ -591,8 +522,9 @@ def test_h2o_OCSSW(read_no2_ancillary_data,
     plt.figure()
     plt.plot(wavelength_3d[:], tg_sen_ocssw[0, 0, :], '-r')
     plt.plot(wavelength_3d[:], tg_sol_ocssw[0, 0, :], color='orange')
-    plt.plot(sensor_wavelengths[:], tg_sen_gas_correction_lib[0, 0, :], '--b')
-    plt.plot(sensor_wavelengths[:], tg_sol_gas_correction_lib[0, 0, :], '--k')
+    plt.plot(l1_rec.wavelengths[:], tg_sen_gas_correction_lib[0, 0, :], '--b')
+    plt.plot(l1_rec.wavelengths[:], tg_sol_gas_correction_lib[0, 0, :], '--k')
+    plt.xlim([500, 900])
     plt.xlabel('Wavelength (nm)')
     plt.ylabel('Transmittance')
     plt.legend(['OCSSW Sensor Zenith', 'OCSSW Solar Zenith', 'Gas Lib Sensor Zenith', 'Gas Lib Solar Zenith'])
