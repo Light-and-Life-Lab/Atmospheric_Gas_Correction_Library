@@ -34,10 +34,10 @@ public:
 };
 
 
-struct Air_Mass_Factor_Lookup_Table_PY
+struct Gas_Transmittance_Lookup_Table_PY
 {
 public:
-    Air_Mass_Factor_Lookup_Table_PY(){};
+    Gas_Transmittance_Lookup_Table_PY(){};
     pybind11::array_t<double, pybind11::array::c_style> co2_transmittance{};
     pybind11::array_t<double, pybind11::array::c_style> co_transmittance{};
     pybind11::array_t<double, pybind11::array::c_style> ch4_transmittance{};
@@ -46,12 +46,12 @@ public:
     pybind11::array_t<double, pybind11::array::c_style> h2o_transmittance{};
 
     int model{};
-    pybind11::array_t<double, pybind11::array::c_style> gas_transmittance_table_wavelengths{};
+    pybind11::array_t<double, pybind11::array::c_style> wavelengths{};
     pybind11::array_t<double, pybind11::array::c_style> air_mass_factor_mixed_gases{};
     pybind11::array_t<double, pybind11::array::c_style> air_mass_factor_water_vapor{};
     pybind11::array_t<double, pybind11::array::c_style> water_vapor_concentration{};
     int num_models{};
-    int num_gas_transmittance_wavelengths{};
+    int num_wavelengths{};
     int num_amf_grid_points{}; // Length of both mixed gases and water vapor air mass factor tables
     int num_water_vapor_concentrations{};
 };

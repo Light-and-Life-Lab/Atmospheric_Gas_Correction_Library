@@ -76,8 +76,8 @@ def read_OCSMART_lat_lon():
 
 
 @pytest.fixture
-def read_AMF_table():
-    amf_table = gas_transmittance.Air_Mass_Factor_Lookup_Table()
+def read_gas_transmittance_table():
+    gas_transmittance_table = gas_transmittance.Gas_Transmittance_Lookup_Table()
 
     netcdf_variables = {
             'air_mass_factor_mixed' : "air_mass_factor_mixed_gases",
@@ -89,14 +89,14 @@ def read_AMF_table():
             'oxygen_transmittance' : "o2_transmittance",
             'water_vapor' : "water_vapor_concentration",
             'water_vapor_transmittance' : "h2o_transmittance",
-            'wavelength' : "gas_transmittance_table_wavelengths",
+            'wavelength' : "wavelengths",
         }
     
     netcdf_dimensions = {
         'n_air_mass_factor' : "num_amf_grid_points",
         'n_water_vapor' : "num_water_vapor_concentrations",
         'nmodels' : 'num_models',
-        'nwavelengths' : 'num_gas_transmittance_wavelengths',
+        'nwavelengths' : 'num_wavelengths',
     }
 
     model_map = {
@@ -112,16 +112,16 @@ def read_AMF_table():
         for netcdf_node, var_name in netcdf_variables.items():
             if netcdf_node in f:
                 var_value = np.array(f[netcdf_node])
-                setattr(amf_table, var_name, var_value)
+                setattr(gas_transmittance_table, var_name, var_value)
 
         for netcdf_node, var_name in netcdf_dimensions.items():
             if netcdf_node in f:
                 var_value = np.array(f[netcdf_node])
-                setattr(amf_table, var_name, len(var_value))
+                setattr(gas_transmittance_table, var_name, len(var_value))
 
-        setattr(amf_table, 'model', model_map["USstandard62"])
+        setattr(gas_transmittance_table, 'model', model_map["USstandard62"])
 
-    return amf_table
+    return gas_transmittance_table
 
 
 @pytest.fixture
@@ -304,15 +304,15 @@ def test_ozone_OCSSW(read_ozone_ancillary_data,
 
 
 # @pytest.mark.skip()
-def test_co2_OCSSW(read_AMF_table, 
+def test_co2_OCSSW(read_gas_transmittance_table, 
                     read_PACE_data,  
                     read_OCSSW_co2_transmittance_benchmark_data):
-    amf_table = read_AMF_table
+    gas_transmittance_table = read_gas_transmittance_table
 
     l1_data = read_PACE_data
     do_amf_correction = True
 
-    gas_transmittances = gas_transmittance.co2_transmittance(l1_data, amf_table, do_amf_correction)
+    gas_transmittances = gas_transmittance.co2_transmittance(l1_data, gas_transmittance_table, do_amf_correction)
 
     tg_sen_gas_correction_lib = gas_transmittances.sensor_zenith.reshape(l1_data.reflectance.shape)
     tg_sol_gas_correction_lib = gas_transmittances.solar_zenith.reshape(l1_data.reflectance.shape)
@@ -343,15 +343,15 @@ def test_co2_OCSSW(read_AMF_table,
 
 
 # @pytest.mark.skip()
-def test_co_OCSSW(read_AMF_table, 
+def test_co_OCSSW(read_gas_transmittance_table, 
                     read_PACE_data,  
                     read_OCSSW_co_transmittance_benchmark_data):
-    amf_table = read_AMF_table
+    gas_transmittance_table = read_gas_transmittance_table
 
     l1_data = read_PACE_data
     do_amf_correction = False
 
-    gas_transmittances = gas_transmittance.co_transmittance(l1_data, amf_table, do_amf_correction)
+    gas_transmittances = gas_transmittance.co_transmittance(l1_data, gas_transmittance_table, do_amf_correction)
 
     tg_sen_gas_correction_lib = gas_transmittances.sensor_zenith.reshape(l1_data.reflectance.shape)
     tg_sol_gas_correction_lib = gas_transmittances.solar_zenith.reshape(l1_data.reflectance.shape)
@@ -381,15 +381,15 @@ def test_co_OCSSW(read_AMF_table,
 
 
 # @pytest.mark.skip()
-def test_ch4_OCSSW(read_AMF_table, 
+def test_ch4_OCSSW(read_gas_transmittance_table, 
                     read_PACE_data,  
                     read_OCSSW_ch4_transmittance_benchmark_data):
-    amf_table = read_AMF_table
+    gas_transmittance_table = read_gas_transmittance_table
 
     l1_data = read_PACE_data
     do_amf_correction = False
 
-    gas_transmittances = gas_transmittance.ch4_transmittance(l1_data, amf_table, do_amf_correction)
+    gas_transmittances = gas_transmittance.ch4_transmittance(l1_data, gas_transmittance_table, do_amf_correction)
 
     tg_sen_gas_correction_lib = gas_transmittances.sensor_zenith.reshape(l1_data.reflectance.shape)
     tg_sol_gas_correction_lib = gas_transmittances.solar_zenith.reshape(l1_data.reflectance.shape)
@@ -420,15 +420,15 @@ def test_ch4_OCSSW(read_AMF_table,
 
 
 # @pytest.mark.skip()
-def test_n2o_OCSSW(read_AMF_table, 
+def test_n2o_OCSSW(read_gas_transmittance_table, 
                     read_PACE_data,  
                     read_OCSSW_n2o_transmittance_benchmark_data):
-    amf_table = read_AMF_table
+    gas_transmittance_table = read_gas_transmittance_table
 
     l1_data = read_PACE_data
     do_amf_correction = False
 
-    gas_transmittances = gas_transmittance.n2o_transmittance(l1_data, amf_table, do_amf_correction)
+    gas_transmittances = gas_transmittance.n2o_transmittance(l1_data, gas_transmittance_table, do_amf_correction)
 
     tg_sen_gas_correction_lib = gas_transmittances.sensor_zenith.reshape(l1_data.reflectance.shape)
     tg_sol_gas_correction_lib = gas_transmittances.solar_zenith.reshape(l1_data.reflectance.shape)
@@ -509,23 +509,23 @@ def test_no2_OCSSW(read_no2_ancillary_data,
 
 
 # @pytest.mark.skip()
-def test_o2_OCSSW(read_AMF_table,
+def test_o2_OCSSW(read_gas_transmittance_table,
                   read_PACE_data,
                   read_OCSSW_o2_transmittance_benchmark_data):
-    amf_table = read_AMF_table
+    gas_transmittance_table = read_gas_transmittance_table
 
     l1_data = read_PACE_data
     do_amf_correction = True
 
-    f = interpolate.interp1d(amf_table.gas_transmittance_table_wavelengths, amf_table.o2_transmittance, axis = 0)
+    f = interpolate.interp1d(gas_transmittance_table.wavelengths, gas_transmittance_table.o2_transmittance, axis = 0)
     o2_transmittance_sensor_wavelengths = f(l1_data.wavelengths)
 
-    amf_table.o2_transmittance = o2_transmittance_sensor_wavelengths
+    gas_transmittance_table.o2_transmittance = o2_transmittance_sensor_wavelengths
 
     oxygen_A_band_option = gas_transmittance.Oxygen_A_Band_Option.TRANSMITTANCE_TABLE
 
     start_time = time.perf_counter()
-    gas_transmittances = gas_transmittance.o2_transmittance(l1_data, amf_table, do_amf_correction, oxygen_A_band_option)
+    gas_transmittances = gas_transmittance.o2_transmittance(l1_data, gas_transmittance_table, do_amf_correction, oxygen_A_band_option)
     end_time = time.perf_counter()
 
     tg_sen_gas_correction_lib = gas_transmittances.sensor_zenith.reshape(l1_data.reflectance.shape)
@@ -555,11 +555,11 @@ def test_o2_OCSSW(read_AMF_table,
 
 
 # @pytest.mark.skip()
-def test_h2o_OCSSW(read_AMF_table,
+def test_h2o_OCSSW(read_gas_transmittance_table,
                    read_PACE_data,
                    read_no2_ancillary_data,
                    read_OCSSW_h2o_transmittance_benchmark_data):
-    amf_table = read_AMF_table
+    gas_transmittance_table = read_gas_transmittance_table
 
     l1_data = read_PACE_data
     do_amf_correction = True
@@ -575,16 +575,16 @@ def test_h2o_OCSSW(read_AMF_table,
     ancillary_data.water_vapor_bands = np.array([782, 817, 857], dtype=np.float64)
     ancillary_data.num_water_vapor_bands = ancillary_data.water_vapor_bands.size
 
-    f = interpolate.interp1d(amf_table.gas_transmittance_table_wavelengths, amf_table.h2o_transmittance, axis = 1)
+    f = interpolate.interp1d(gas_transmittance_table.wavelengths, gas_transmittance_table.h2o_transmittance, axis = 1)
     h2o_transmittance_at_sensor_wavelengths = f(l1_data.wavelengths)
 
-    amf_table.num_gas_transmittance_wavelengths = len(l1_data.wavelengths)
-    amf_table.h2o_transmittance = h2o_transmittance_at_sensor_wavelengths
+    gas_transmittance_table.num_wavelengths = len(l1_data.wavelengths)
+    gas_transmittance_table.h2o_transmittance = h2o_transmittance_at_sensor_wavelengths
 
     use_gas_transmittance_table = True
 
     start_time = time.perf_counter()
-    gas_transmittances = gas_transmittance.h2o_transmittance(l1_data, ancillary_data, amf_table, do_amf_correction, use_gas_transmittance_table)
+    gas_transmittances = gas_transmittance.h2o_transmittance(l1_data, ancillary_data, gas_transmittance_table, do_amf_correction, use_gas_transmittance_table)
     end_time = time.perf_counter()
 
     tg_sen_gas_correction_lib = gas_transmittances.sensor_zenith.reshape(l1_data.reflectance.shape)

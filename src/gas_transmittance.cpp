@@ -51,13 +51,13 @@ Gas_Transmittances_PY ozone_transmittance(const L1_Data_PY& l1_data, const Ancil
 }
 
 
-Gas_Transmittances_PY co2_transmittance(const L1_Data_PY& l1_data, const Air_Mass_Factor_Lookup_Table_PY& amf_table, const bool do_amf_correction) 
+Gas_Transmittances_PY co2_transmittance(const L1_Data_PY& l1_data, const Gas_Transmittance_Lookup_Table_PY& gas_transmittance_table, const bool do_amf_correction) 
 {
-    Air_Mass_Factor_Lookup_Table amf_table_c{};
+    Gas_Transmittance_Lookup_Table gas_transmittance_table_c{};
 
-    amf_table_c.co2_transmittance = static_cast<double*>(amf_table.co2_transmittance.request().ptr);
-    amf_table_c.air_mass_factor_mixed_gases = static_cast<double*>(amf_table.air_mass_factor_mixed_gases.request().ptr);
-    amf_table_c.num_amf_grid_points = amf_table.num_amf_grid_points;
+    gas_transmittance_table_c.co2_transmittance = static_cast<double*>(gas_transmittance_table.co2_transmittance.request().ptr);
+    gas_transmittance_table_c.air_mass_factor_mixed_gases = static_cast<double*>(gas_transmittance_table.air_mass_factor_mixed_gases.request().ptr);
+    gas_transmittance_table_c.num_amf_grid_points = gas_transmittance_table.num_amf_grid_points;
 
     L1_Data l1_data_c{};
 
@@ -81,19 +81,19 @@ Gas_Transmittances_PY co2_transmittance(const L1_Data_PY& l1_data, const Air_Mas
     gas_transmittances_c.sensor_zenith = static_cast<double*>(gas_transmittances.sensor_zenith.request().ptr);
     gas_transmittances_c.total = static_cast<double*>(gas_transmittances.total.request().ptr);
 
-    co2_transmittance(&l1_data_c, &amf_table_c, &gas_transmittances_c, do_amf_correction);
+    co2_transmittance(&l1_data_c, &gas_transmittance_table_c, &gas_transmittances_c, do_amf_correction);
 
     return gas_transmittances;
 }
 
 
-Gas_Transmittances_PY co_transmittance(const L1_Data_PY& l1_data, const Air_Mass_Factor_Lookup_Table_PY& amf_table, const bool do_amf_correction) 
+Gas_Transmittances_PY co_transmittance(const L1_Data_PY& l1_data, const Gas_Transmittance_Lookup_Table_PY& gas_transmittance_table, const bool do_amf_correction) 
 {
-    Air_Mass_Factor_Lookup_Table amf_table_c{};
+    Gas_Transmittance_Lookup_Table gas_transmittance_table_c{};
 
-    amf_table_c.co_transmittance = static_cast<double*>(amf_table.co_transmittance.request().ptr);
-    amf_table_c.air_mass_factor_mixed_gases = static_cast<double*>(amf_table.air_mass_factor_mixed_gases.request().ptr);
-    amf_table_c.num_amf_grid_points = amf_table.num_amf_grid_points;
+    gas_transmittance_table_c.co_transmittance = static_cast<double*>(gas_transmittance_table.co_transmittance.request().ptr);
+    gas_transmittance_table_c.air_mass_factor_mixed_gases = static_cast<double*>(gas_transmittance_table.air_mass_factor_mixed_gases.request().ptr);
+    gas_transmittance_table_c.num_amf_grid_points = gas_transmittance_table.num_amf_grid_points;
     
     L1_Data l1_data_c{};
 
@@ -117,19 +117,19 @@ Gas_Transmittances_PY co_transmittance(const L1_Data_PY& l1_data, const Air_Mass
     gas_transmittances_c.sensor_zenith = static_cast<double*>(gas_transmittances.sensor_zenith.request().ptr);
     gas_transmittances_c.total = static_cast<double*>(gas_transmittances.total.request().ptr);
 
-    co_transmittance(&l1_data_c, &amf_table_c, &gas_transmittances_c, do_amf_correction);
+    co_transmittance(&l1_data_c, &gas_transmittance_table_c, &gas_transmittances_c, do_amf_correction);
 
     return gas_transmittances;
 }
 
 
-Gas_Transmittances_PY ch4_transmittance(const L1_Data_PY& l1_data, const Air_Mass_Factor_Lookup_Table_PY& amf_table, const bool do_amf_correction) 
+Gas_Transmittances_PY ch4_transmittance(const L1_Data_PY& l1_data, const Gas_Transmittance_Lookup_Table_PY& gas_transmittance_table, const bool do_amf_correction) 
 {
-    Air_Mass_Factor_Lookup_Table amf_table_c{};
+    Gas_Transmittance_Lookup_Table gas_transmittance_table_c{};
 
-    amf_table_c.ch4_transmittance = static_cast<double*>(amf_table.ch4_transmittance.request().ptr);
-    amf_table_c.air_mass_factor_mixed_gases = static_cast<double*>(amf_table.air_mass_factor_mixed_gases.request().ptr);
-    amf_table_c.num_amf_grid_points = amf_table.num_amf_grid_points;
+    gas_transmittance_table_c.ch4_transmittance = static_cast<double*>(gas_transmittance_table.ch4_transmittance.request().ptr);
+    gas_transmittance_table_c.air_mass_factor_mixed_gases = static_cast<double*>(gas_transmittance_table.air_mass_factor_mixed_gases.request().ptr);
+    gas_transmittance_table_c.num_amf_grid_points = gas_transmittance_table.num_amf_grid_points;
 
     L1_Data l1_data_c{};
 
@@ -153,19 +153,19 @@ Gas_Transmittances_PY ch4_transmittance(const L1_Data_PY& l1_data, const Air_Mas
     gas_transmittances_c.sensor_zenith = static_cast<double*>(gas_transmittances.sensor_zenith.request().ptr);
     gas_transmittances_c.total = static_cast<double*>(gas_transmittances.total.request().ptr);
 
-    ch4_transmittance(&l1_data_c, &amf_table_c, &gas_transmittances_c, do_amf_correction);
+    ch4_transmittance(&l1_data_c, &gas_transmittance_table_c, &gas_transmittances_c, do_amf_correction);
 
     return gas_transmittances;
 }
 
 
-Gas_Transmittances_PY o2_transmittance(const L1_Data_PY& l1_data, const Air_Mass_Factor_Lookup_Table_PY& amf_table, const bool do_amf_correction, Oxygen_A_Band_Option oxygen_A_band_option) 
+Gas_Transmittances_PY o2_transmittance(const L1_Data_PY& l1_data, const Gas_Transmittance_Lookup_Table_PY& gas_transmittance_table, const bool do_amf_correction, Oxygen_A_Band_Option oxygen_A_band_option) 
 {
-    Air_Mass_Factor_Lookup_Table amf_table_c{};
+    Gas_Transmittance_Lookup_Table gas_transmittance_table_c{};
 
-    amf_table_c.o2_transmittance = static_cast<double*>(amf_table.o2_transmittance.request().ptr);
-    amf_table_c.air_mass_factor_mixed_gases = static_cast<double*>(amf_table.air_mass_factor_mixed_gases.request().ptr);
-    amf_table_c.num_amf_grid_points = amf_table.num_amf_grid_points;
+    gas_transmittance_table_c.o2_transmittance = static_cast<double*>(gas_transmittance_table.o2_transmittance.request().ptr);
+    gas_transmittance_table_c.air_mass_factor_mixed_gases = static_cast<double*>(gas_transmittance_table.air_mass_factor_mixed_gases.request().ptr);
+    gas_transmittance_table_c.num_amf_grid_points = gas_transmittance_table.num_amf_grid_points;
     
     L1_Data l1_data_c{};
 
@@ -191,19 +191,19 @@ Gas_Transmittances_PY o2_transmittance(const L1_Data_PY& l1_data, const Air_Mass
     gas_transmittances_c.sensor_zenith = static_cast<double*>(gas_transmittances.sensor_zenith.request().ptr);
     gas_transmittances_c.total = static_cast<double*>(gas_transmittances.total.request().ptr);
 
-    o2_transmittance(&l1_data_c, &amf_table_c, &gas_transmittances_c, do_amf_correction, oxygen_A_band_option);
+    o2_transmittance(&l1_data_c, &gas_transmittance_table_c, &gas_transmittances_c, do_amf_correction, oxygen_A_band_option);
 
     return gas_transmittances;
 }
 
 
-Gas_Transmittances_PY n2o_transmittance(const L1_Data_PY& l1_data, const Air_Mass_Factor_Lookup_Table_PY& amf_table, const bool do_amf_correction) 
+Gas_Transmittances_PY n2o_transmittance(const L1_Data_PY& l1_data, const Gas_Transmittance_Lookup_Table_PY& gas_transmittance_table, const bool do_amf_correction) 
 {
-    Air_Mass_Factor_Lookup_Table amf_table_c{};
+    Gas_Transmittance_Lookup_Table gas_transmittance_table_c{};
 
-    amf_table_c.n2o_transmittance = static_cast<double*>(amf_table.n2o_transmittance.request().ptr);
-    amf_table_c.air_mass_factor_mixed_gases = static_cast<double*>(amf_table.air_mass_factor_mixed_gases.request().ptr);
-    amf_table_c.num_amf_grid_points = amf_table.num_amf_grid_points;
+    gas_transmittance_table_c.n2o_transmittance = static_cast<double*>(gas_transmittance_table.n2o_transmittance.request().ptr);
+    gas_transmittance_table_c.air_mass_factor_mixed_gases = static_cast<double*>(gas_transmittance_table.air_mass_factor_mixed_gases.request().ptr);
+    gas_transmittance_table_c.num_amf_grid_points = gas_transmittance_table.num_amf_grid_points;
     
     L1_Data l1_data_c{};
 
@@ -227,7 +227,7 @@ Gas_Transmittances_PY n2o_transmittance(const L1_Data_PY& l1_data, const Air_Mas
     gas_transmittances_c.sensor_zenith = static_cast<double*>(gas_transmittances.sensor_zenith.request().ptr);
     gas_transmittances_c.total = static_cast<double*>(gas_transmittances.total.request().ptr);
 
-    n2o_transmittance(&l1_data_c, &amf_table_c, &gas_transmittances_c, do_amf_correction);
+    n2o_transmittance(&l1_data_c, &gas_transmittance_table_c, &gas_transmittances_c, do_amf_correction);
 
     return gas_transmittances;
 }
@@ -269,7 +269,7 @@ Gas_Transmittances_PY no2_transmittance(const L1_Data_PY& l1_data, const Ancilla
 }
 
 
-Gas_Transmittances_PY h2o_transmittance(const L1_Data_PY& l1_data, const Ancillary_Data_PY& ancillary_data, const Air_Mass_Factor_Lookup_Table_PY& amf_table, const bool do_amf_correction, const bool use_gas_transmittance_table) 
+Gas_Transmittances_PY h2o_transmittance(const L1_Data_PY& l1_data, const Ancillary_Data_PY& ancillary_data, const Gas_Transmittance_Lookup_Table_PY& gas_transmittance_table, const bool do_amf_correction, const bool use_gas_transmittance_table) 
 {
     Ancillary_Data ancillary_data_c{};
 
@@ -281,17 +281,17 @@ Gas_Transmittances_PY h2o_transmittance(const L1_Data_PY& l1_data, const Ancilla
     ancillary_data_c.water_vapor_bands = static_cast<double*>(ancillary_data.water_vapor_bands.request().ptr);
     ancillary_data_c.num_water_vapor_bands = ancillary_data.num_water_vapor_bands;
 
-    Air_Mass_Factor_Lookup_Table amf_table_c{};
+    Gas_Transmittance_Lookup_Table gas_transmittance_table_c{};
 
-    amf_table_c.h2o_transmittance = static_cast<double*>(amf_table.h2o_transmittance.request().ptr);
-    amf_table_c.model = amf_table.model;
-    amf_table_c.air_mass_factor_water_vapor = static_cast<double*>(amf_table.air_mass_factor_water_vapor.request().ptr);
-    amf_table_c.gas_transmittance_table_wavelengths = static_cast<double*>(amf_table.gas_transmittance_table_wavelengths.request().ptr);
-    amf_table_c.water_vapor_concentration = static_cast<double*>(amf_table.water_vapor_concentration.request().ptr);
-    amf_table_c.num_models = amf_table.num_models;
-    amf_table_c.num_gas_transmittance_wavelengths = amf_table.num_gas_transmittance_wavelengths;
-    amf_table_c.num_amf_grid_points = amf_table.num_amf_grid_points;
-    amf_table_c.num_water_vapor_concentrations = amf_table.num_water_vapor_concentrations;
+    gas_transmittance_table_c.h2o_transmittance = static_cast<double*>(gas_transmittance_table.h2o_transmittance.request().ptr);
+    gas_transmittance_table_c.model = gas_transmittance_table.model;
+    gas_transmittance_table_c.air_mass_factor_water_vapor = static_cast<double*>(gas_transmittance_table.air_mass_factor_water_vapor.request().ptr);
+    gas_transmittance_table_c.wavelengths = static_cast<double*>(gas_transmittance_table.wavelengths.request().ptr);
+    gas_transmittance_table_c.water_vapor_concentration = static_cast<double*>(gas_transmittance_table.water_vapor_concentration.request().ptr);
+    gas_transmittance_table_c.num_models = gas_transmittance_table.num_models;
+    gas_transmittance_table_c.num_wavelengths = gas_transmittance_table.num_wavelengths;
+    gas_transmittance_table_c.num_amf_grid_points = gas_transmittance_table.num_amf_grid_points;
+    gas_transmittance_table_c.num_water_vapor_concentrations = gas_transmittance_table.num_water_vapor_concentrations;
     
     L1_Data l1_data_c{};
 
@@ -317,7 +317,7 @@ Gas_Transmittances_PY h2o_transmittance(const L1_Data_PY& l1_data, const Ancilla
     gas_transmittances_c.sensor_zenith = static_cast<double*>(gas_transmittances.sensor_zenith.request().ptr);
     gas_transmittances_c.total = static_cast<double*>(gas_transmittances.total.request().ptr);
 
-    h2o_transmittance(&l1_data_c, &ancillary_data_c, &amf_table_c, &gas_transmittances_c, do_amf_correction, use_gas_transmittance_table);
+    h2o_transmittance(&l1_data_c, &ancillary_data_c, &gas_transmittance_table_c, &gas_transmittances_c, do_amf_correction, use_gas_transmittance_table);
 
     // for (int i = 0; i < l1_data_c.num_pixels; i++)
     // {
@@ -349,23 +349,23 @@ PYBIND11_MODULE(gas_transmittance, m)
         .def_readwrite("water_vapor_bands", &Ancillary_Data_PY::water_vapor_bands)
         .def_readwrite("num_water_vapor_bands", &Ancillary_Data_PY::num_water_vapor_bands);
 
-    py::class_<Air_Mass_Factor_Lookup_Table_PY>(m, "Air_Mass_Factor_Lookup_Table", py::module_local())
+    py::class_<Gas_Transmittance_Lookup_Table_PY>(m, "Gas_Transmittance_Lookup_Table", py::module_local())
         .def(py::init<>())
-        .def_readwrite("co2_transmittance", &Air_Mass_Factor_Lookup_Table_PY::co2_transmittance)
-        .def_readwrite("co_transmittance", &Air_Mass_Factor_Lookup_Table_PY::co_transmittance)
-        .def_readwrite("ch4_transmittance", &Air_Mass_Factor_Lookup_Table_PY::ch4_transmittance)
-        .def_readwrite("o2_transmittance", &Air_Mass_Factor_Lookup_Table_PY::o2_transmittance)
-        .def_readwrite("n2o_transmittance", &Air_Mass_Factor_Lookup_Table_PY::n2o_transmittance)
-        .def_readwrite("h2o_transmittance", &Air_Mass_Factor_Lookup_Table_PY::h2o_transmittance)
-        .def_readwrite("model", &Air_Mass_Factor_Lookup_Table_PY::model)
-        .def_readwrite("gas_transmittance_table_wavelengths", &Air_Mass_Factor_Lookup_Table_PY::gas_transmittance_table_wavelengths)
-        .def_readwrite("air_mass_factor_mixed_gases", &Air_Mass_Factor_Lookup_Table_PY::air_mass_factor_mixed_gases)
-        .def_readwrite("air_mass_factor_water_vapor", &Air_Mass_Factor_Lookup_Table_PY::air_mass_factor_water_vapor)
-        .def_readwrite("water_vapor_concentration", &Air_Mass_Factor_Lookup_Table_PY::water_vapor_concentration)
-        .def_readwrite("num_models", &Air_Mass_Factor_Lookup_Table_PY::num_models)
-        .def_readwrite("num_gas_transmittance_wavelengths", &Air_Mass_Factor_Lookup_Table_PY::num_gas_transmittance_wavelengths)
-        .def_readwrite("num_amf_grid_points", &Air_Mass_Factor_Lookup_Table_PY::num_amf_grid_points)
-        .def_readwrite("num_water_vapor_concentrations", &Air_Mass_Factor_Lookup_Table_PY::num_water_vapor_concentrations);
+        .def_readwrite("co2_transmittance", &Gas_Transmittance_Lookup_Table_PY::co2_transmittance)
+        .def_readwrite("co_transmittance", &Gas_Transmittance_Lookup_Table_PY::co_transmittance)
+        .def_readwrite("ch4_transmittance", &Gas_Transmittance_Lookup_Table_PY::ch4_transmittance)
+        .def_readwrite("o2_transmittance", &Gas_Transmittance_Lookup_Table_PY::o2_transmittance)
+        .def_readwrite("n2o_transmittance", &Gas_Transmittance_Lookup_Table_PY::n2o_transmittance)
+        .def_readwrite("h2o_transmittance", &Gas_Transmittance_Lookup_Table_PY::h2o_transmittance)
+        .def_readwrite("model", &Gas_Transmittance_Lookup_Table_PY::model)
+        .def_readwrite("wavelengths", &Gas_Transmittance_Lookup_Table_PY::wavelengths)
+        .def_readwrite("air_mass_factor_mixed_gases", &Gas_Transmittance_Lookup_Table_PY::air_mass_factor_mixed_gases)
+        .def_readwrite("air_mass_factor_water_vapor", &Gas_Transmittance_Lookup_Table_PY::air_mass_factor_water_vapor)
+        .def_readwrite("water_vapor_concentration", &Gas_Transmittance_Lookup_Table_PY::water_vapor_concentration)
+        .def_readwrite("num_models", &Gas_Transmittance_Lookup_Table_PY::num_models)
+        .def_readwrite("num_wavelengths", &Gas_Transmittance_Lookup_Table_PY::num_wavelengths)
+        .def_readwrite("num_amf_grid_points", &Gas_Transmittance_Lookup_Table_PY::num_amf_grid_points)
+        .def_readwrite("num_water_vapor_concentrations", &Gas_Transmittance_Lookup_Table_PY::num_water_vapor_concentrations);
 
     py::class_<L1_Data_PY>(m, "L1_Data", py::module_local())
         .def(py::init<>())
@@ -388,11 +388,11 @@ PYBIND11_MODULE(gas_transmittance, m)
         .value("SURROUNDING_WINDOW_BANDS", Oxygen_A_Band_Option::SURROUNDING_WINDOW_BANDS);
 
     m.def("ozone_transmittance", py::overload_cast<const L1_Data_PY&, const Ancillary_Data_PY&, bool>(&ozone_transmittance));
-    m.def("co2_transmittance", py::overload_cast<const L1_Data_PY&, const Air_Mass_Factor_Lookup_Table_PY&, bool>(&co2_transmittance));
-    m.def("co_transmittance", py::overload_cast<const L1_Data_PY&, const Air_Mass_Factor_Lookup_Table_PY&, bool>(&co_transmittance));
-    m.def("ch4_transmittance", py::overload_cast<const L1_Data_PY&, const Air_Mass_Factor_Lookup_Table_PY&, bool>(&ch4_transmittance));
-    m.def("o2_transmittance", py::overload_cast<const L1_Data_PY&, const Air_Mass_Factor_Lookup_Table_PY& ,bool, Oxygen_A_Band_Option>(&o2_transmittance));
-    m.def("n2o_transmittance", py::overload_cast<const L1_Data_PY&, const Air_Mass_Factor_Lookup_Table_PY&, bool>(&n2o_transmittance));
+    m.def("co2_transmittance", py::overload_cast<const L1_Data_PY&, const Gas_Transmittance_Lookup_Table_PY&, bool>(&co2_transmittance));
+    m.def("co_transmittance", py::overload_cast<const L1_Data_PY&, const Gas_Transmittance_Lookup_Table_PY&, bool>(&co_transmittance));
+    m.def("ch4_transmittance", py::overload_cast<const L1_Data_PY&, const Gas_Transmittance_Lookup_Table_PY&, bool>(&ch4_transmittance));
+    m.def("o2_transmittance", py::overload_cast<const L1_Data_PY&, const Gas_Transmittance_Lookup_Table_PY& ,bool, Oxygen_A_Band_Option>(&o2_transmittance));
+    m.def("n2o_transmittance", py::overload_cast<const L1_Data_PY&, const Gas_Transmittance_Lookup_Table_PY&, bool>(&n2o_transmittance));
     m.def("no2_transmittance", py::overload_cast<const L1_Data_PY&, const Ancillary_Data_PY&, bool>(&no2_transmittance));
-    m.def("h2o_transmittance", py::overload_cast<const L1_Data_PY&, const Ancillary_Data_PY&, const Air_Mass_Factor_Lookup_Table_PY&, bool, bool>(&h2o_transmittance));
+    m.def("h2o_transmittance", py::overload_cast<const L1_Data_PY&, const Ancillary_Data_PY&, const Gas_Transmittance_Lookup_Table_PY&, bool, bool>(&h2o_transmittance));
 }
