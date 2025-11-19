@@ -84,23 +84,23 @@ int windex(float wave, double twave[], int ntwave) {
 }
 
 
-float get_airmass_oxygen(L1_Record* l1_rec, Air_Mass_Factor_Lookup_Table* amf_table, int32_t ip, double window1, double absorp_band, double window2)
+float get_airmass_oxygen(L1_Data* l1_data, Air_Mass_Factor_Lookup_Table* amf_table, int32_t ip, double window1, double absorp_band, double window2)
 {
     int32_t i;
 
-    int32_t num_wavelengths = l1_rec->num_wavelengths;
+    int32_t num_wavelengths = l1_data->num_wavelengths;
     int32_t row_offset = ip*num_wavelengths;
-    double* wavelength_array = l1_rec->wavelengths;
+    double* wavelength_array = l1_data->wavelengths;
     double reflectances[3];
 
     int absorption_window_lower_wavelength_index = windex(window1, wavelength_array, num_wavelengths);
-    reflectances[0] = l1_rec->reflectance[absorption_window_lower_wavelength_index];
+    reflectances[0] = l1_data->reflectance[absorption_window_lower_wavelength_index];
 
     int absorption_window_upper_wavelength_index = windex(window2, wavelength_array, num_wavelengths);
-    reflectances[1] = l1_rec->reflectance[absorption_window_upper_wavelength_index];
+    reflectances[1] = l1_data->reflectance[absorption_window_upper_wavelength_index];
 
     int band_absorp = windex(absorp_band, wavelength_array, num_wavelengths);
-    reflectances[2] = l1_rec->reflectance[band_absorp];
+    reflectances[2] = l1_data->reflectance[band_absorp];
 
     double reflectances_interpolated = reflectances[0]+(absorp_band-window1)*(reflectances[1]-reflectances[0])/(window2-window1);
 
@@ -153,7 +153,7 @@ float get_airmass_oxygen(L1_Record* l1_rec, Air_Mass_Factor_Lookup_Table* amf_ta
 }
 
 
-float get_wv_band_ratio(L1_Record* l1_rec, Air_Mass_Factor_Lookup_Table* amf_table, int32_t ip, float window1, float absorp_band, float window2, double amf_total)
+float get_wv_band_ratio(L1_Data* l1_data, Air_Mass_Factor_Lookup_Table* amf_table, int32_t ip, float window1, float absorp_band, float window2, double amf_total)
 {
     std::vector<float> interpolated_transmittances(amf_table->num_water_vapor_concentrations);
 
@@ -170,20 +170,20 @@ float get_wv_band_ratio(L1_Record* l1_rec, Air_Mass_Factor_Lookup_Table* amf_tab
     // The absorption band reflectance divided by the interpolated reflectance therefore gives the "depth of the valley", i.e. the transmittance at the absorption band
     // This is a way of computing the "true" transmittance value at the absorption band using the actual data, and does not require any a priori theoretical knowledge of water vapor transmittance
 
-    int32_t num_wavelengths = l1_rec->num_wavelengths;
+    int32_t num_wavelengths = l1_data->num_wavelengths;
     int32_t row_offset = ip*num_wavelengths;
-    double* wavelength_array = l1_rec->wavelengths;
+    double* wavelength_array = l1_data->wavelengths;
     double reflectances[3];
 
     // derive a transmittance using a line height (or in this case, depth) approach
     int absorption_window_lower_wavelength_index = windex(window1, wavelength_array, num_wavelengths);
-    reflectances[0] = l1_rec->reflectance[row_offset + absorption_window_lower_wavelength_index];
+    reflectances[0] = l1_data->reflectance[row_offset + absorption_window_lower_wavelength_index];
 
     int absorption_window_upper_wavelength_index = windex(window2, wavelength_array, num_wavelengths);
-    reflectances[1] = l1_rec->reflectance[row_offset + absorption_window_upper_wavelength_index];
+    reflectances[1] = l1_data->reflectance[row_offset + absorption_window_upper_wavelength_index];
 
     int absorption_band_index = windex(absorp_band, wavelength_array, num_wavelengths);
-    reflectances[2] =l1_rec->reflectance[row_offset + absorption_band_index];
+    reflectances[2] =l1_data->reflectance[row_offset + absorption_band_index];
 
     double interpolated_reflectance = reflectances[0] + ((absorp_band - window1) / (window2 - window1)) * (reflectances[1] - reflectances[0]);
     double true_water_vapor_transmittance = reflectances[2] / interpolated_reflectance;
@@ -227,26 +227,26 @@ float get_wv_band_ratio(L1_Record* l1_rec, Air_Mass_Factor_Lookup_Table* amf_tab
 }
 
 
-void ozone_transmittance(L1_Record* l1_rec, Ancillary_Data* ancillary_data, Transmittance_Record* t_rec, bool do_amf_correction)
+void ozone_transmittance(L1_Data* l1_data, Ancillary_Data* ancillary_data, Transmittance_Record* t_rec, bool do_amf_correction)
 {
     #pragma omp parallel for
-    for (int ip = 0; ip < l1_rec->num_pixels; ip++)
+    for (int ip = 0; ip < l1_data->num_pixels; ip++)
     {
-        int row_offset = ip*l1_rec->num_wavelengths; // Each row represents a single pixel and has num_wavelengths elements
+        int row_offset = ip*l1_data->num_wavelengths; // Each row represents a single pixel and has num_wavelengths elements
 
-        for (int iw = 0; iw < l1_rec->num_wavelengths; iw++) 
+        for (int iw = 0; iw < l1_data->num_wavelengths; iw++) 
         {
             double ozone_optical_depth = ancillary_data->ozone_concentration[ip] * ancillary_data->ozone_absorption_cross_section[iw];
-            t_rec->gas_transmittance_solar_zenith[row_offset + iw] = exp(-(ozone_optical_depth / l1_rec->cos_solar_zenith[ip]));
+            t_rec->gas_transmittance_solar_zenith[row_offset + iw] = exp(-(ozone_optical_depth / l1_data->cos_solar_zenith[ip]));
 
             if (do_amf_correction) 
             {
-                t_rec->gas_transmittance_total[row_offset + iw] = exp(-ozone_optical_depth * (1.0/l1_rec->cos_solar_zenith[ip] + 1.0/l1_rec->cos_sensor_zenith[ip]));
+                t_rec->gas_transmittance_total[row_offset + iw] = exp(-ozone_optical_depth * (1.0/l1_data->cos_solar_zenith[ip] + 1.0/l1_data->cos_sensor_zenith[ip]));
                 t_rec->gas_transmittance_sensor_zenith[row_offset + iw] = t_rec->gas_transmittance_total[row_offset + iw] / t_rec->gas_transmittance_solar_zenith[row_offset + iw];
             } 
             else 
             {
-                t_rec->gas_transmittance_sensor_zenith[row_offset + iw] = exp(-(ozone_optical_depth / l1_rec->cos_sensor_zenith[ip]));
+                t_rec->gas_transmittance_sensor_zenith[row_offset + iw] = exp(-(ozone_optical_depth / l1_data->cos_sensor_zenith[ip]));
                 t_rec->gas_transmittance_total[row_offset + iw] = t_rec->gas_transmittance_sensor_zenith[row_offset + iw] * t_rec->gas_transmittance_solar_zenith[row_offset + iw];
             }
         }
@@ -254,21 +254,21 @@ void ozone_transmittance(L1_Record* l1_rec, Ancillary_Data* ancillary_data, Tran
 }
 
 
-void co2_transmittance(L1_Record* l1_rec, Air_Mass_Factor_Lookup_Table* amf_table, Transmittance_Record* t_rec, bool do_amf_correction)
+void co2_transmittance(L1_Data* l1_data, Air_Mass_Factor_Lookup_Table* amf_table, Transmittance_Record* t_rec, bool do_amf_correction)
 {
     #pragma omp parallel for
-    for (int ip = 0; ip < l1_rec->num_pixels; ip++)
+    for (int ip = 0; ip < l1_data->num_pixels; ip++)
     {
-        int row_offset = ip*l1_rec->num_wavelengths; // Each row represents a single pixel and has num_wavelengths elements
+        int row_offset = ip*l1_data->num_wavelengths; // Each row represents a single pixel and has num_wavelengths elements
 
-        double amf_solar_zenith = 1.0/l1_rec->cos_solar_zenith[ip];
-        double amf_sensor_zenith = 1.0/l1_rec->cos_sensor_zenith[ip];
+        double amf_solar_zenith = 1.0/l1_data->cos_solar_zenith[ip];
+        double amf_sensor_zenith = 1.0/l1_data->cos_sensor_zenith[ip];
         double amf_total = amf_solar_zenith + amf_sensor_zenith;
 
         auto [index_amf_solz, ratio_solz] = get_amf_index_and_ratio(amf_table, amf_solar_zenith);
         auto [index_amf_total, ratio_total] = get_amf_index_and_ratio(amf_table, amf_total);
 
-        for (int iw = 0; iw < l1_rec->num_wavelengths; iw++) 
+        for (int iw = 0; iw < l1_data->num_wavelengths; iw++) 
         {
             if (do_amf_correction)
             {
@@ -291,21 +291,21 @@ void co2_transmittance(L1_Record* l1_rec, Air_Mass_Factor_Lookup_Table* amf_tabl
 }
 
 
-void co_transmittance(L1_Record* l1_rec, Air_Mass_Factor_Lookup_Table* amf_table, Transmittance_Record* t_rec, bool do_amf_correction) 
+void co_transmittance(L1_Data* l1_data, Air_Mass_Factor_Lookup_Table* amf_table, Transmittance_Record* t_rec, bool do_amf_correction) 
 {
     #pragma omp parallel for
-    for (int ip = 0; ip < l1_rec->num_pixels; ip++)
+    for (int ip = 0; ip < l1_data->num_pixels; ip++)
     {
-        int row_offset = ip*l1_rec->num_wavelengths; // Each row represents a single pixel and has num_wavelengths elements
+        int row_offset = ip*l1_data->num_wavelengths; // Each row represents a single pixel and has num_wavelengths elements
 
-        double amf_solar_zenith = 1.0/l1_rec->cos_solar_zenith[ip];
-        double amf_sensor_zenith = 1.0/l1_rec->cos_sensor_zenith[ip];
+        double amf_solar_zenith = 1.0/l1_data->cos_solar_zenith[ip];
+        double amf_sensor_zenith = 1.0/l1_data->cos_sensor_zenith[ip];
         double amf_total = amf_solar_zenith + amf_sensor_zenith;
 
         auto [index_amf_solz, ratio_solz] = get_amf_index_and_ratio(amf_table, amf_solar_zenith);
         auto [index_amf_total, ratio_total] = get_amf_index_and_ratio(amf_table, amf_total);
 
-        for (int iw = 0; iw < l1_rec->num_wavelengths; iw++) 
+        for (int iw = 0; iw < l1_data->num_wavelengths; iw++) 
         {
             if (do_amf_correction)
             {
@@ -327,21 +327,21 @@ void co_transmittance(L1_Record* l1_rec, Air_Mass_Factor_Lookup_Table* amf_table
     }
 }
 
-void ch4_transmittance(L1_Record* l1_rec, Air_Mass_Factor_Lookup_Table* amf_table, Transmittance_Record* t_rec, bool do_amf_correction)
+void ch4_transmittance(L1_Data* l1_data, Air_Mass_Factor_Lookup_Table* amf_table, Transmittance_Record* t_rec, bool do_amf_correction)
 {
     #pragma omp parallel for
-    for (int ip = 0; ip < l1_rec->num_pixels; ip++)
+    for (int ip = 0; ip < l1_data->num_pixels; ip++)
     {
-        int row_offset = ip*l1_rec->num_wavelengths; // Each row represents a single pixel and has num_wavelengths elements
+        int row_offset = ip*l1_data->num_wavelengths; // Each row represents a single pixel and has num_wavelengths elements
 
-        double amf_solar_zenith = 1.0/l1_rec->cos_solar_zenith[ip];
-        double amf_sensor_zenith = 1.0/l1_rec->cos_sensor_zenith[ip];
+        double amf_solar_zenith = 1.0/l1_data->cos_solar_zenith[ip];
+        double amf_sensor_zenith = 1.0/l1_data->cos_sensor_zenith[ip];
         double amf_total = amf_solar_zenith + amf_sensor_zenith;
 
         auto [index_amf_solz, ratio_solz] = get_amf_index_and_ratio(amf_table, amf_solar_zenith);
         auto [index_amf_total, ratio_total] = get_amf_index_and_ratio(amf_table, amf_total);
 
-        for (int iw = 0; iw < l1_rec->num_wavelengths; iw++) 
+        for (int iw = 0; iw < l1_data->num_wavelengths; iw++) 
         {
             if (do_amf_correction)
             {
@@ -363,15 +363,15 @@ void ch4_transmittance(L1_Record* l1_rec, Air_Mass_Factor_Lookup_Table* amf_tabl
     }
 }
 
-// void o2_transmittance(L1_Record* l1_rec, Air_Mass_Factor_Lookup_Table* amf_table, Transmittance_Record* t_rec, bool do_amf_correction, Oxygen_A_Band_Option oxygen_A_band_option) 
+// void o2_transmittance(L1_Data* l1_data, Air_Mass_Factor_Lookup_Table* amf_table, Transmittance_Record* t_rec, bool do_amf_correction, Oxygen_A_Band_Option oxygen_A_band_option) 
 // {
 //     // #pragma omp parallel for
-//     for (int ip = 0; ip < l1_rec->num_pixels; ip++)
+//     for (int ip = 0; ip < l1_data->num_pixels; ip++)
 //     {
-//         int row_offset = ip*l1_rec->num_wavelengths; // Each row represents a single pixel and has num_wavelengths elements
+//         int row_offset = ip*l1_data->num_wavelengths; // Each row represents a single pixel and has num_wavelengths elements
 
-//         double amf_solar_zenith = 1.0/l1_rec->cos_solar_zenith[ip];
-//         double amf_sensor_zenith = 1.0/l1_rec->cos_sensor_zenith[ip];
+//         double amf_solar_zenith = 1.0/l1_data->cos_solar_zenith[ip];
+//         double amf_sensor_zenith = 1.0/l1_data->cos_sensor_zenith[ip];
 //         double amf_total = amf_solar_zenith + amf_sensor_zenith;
 
 //         auto [index_amf_solz, ratio_solz] = get_amf_index_and_ratio(amf_table, amf_solar_zenith);
@@ -384,14 +384,14 @@ void ch4_transmittance(L1_Record* l1_rec, Air_Mass_Factor_Lookup_Table* amf_tabl
 
 //         if (do_amf_correction && oxygen_A_band_option == Oxygen_A_Band_Option::SURROUNDING_WINDOW_BANDS) 
 //         {
-//             float amf_total_o2 = get_airmass_oxygen(l1_rec, amf_table, ip, 753.0221, 761.7891, 776.81335);
+//             float amf_total_o2 = get_airmass_oxygen(l1_data, amf_table, ip, 753.0221, 761.7891, 776.81335);
 //             float scaling_factor = amf_total_o2 / amf_total;
 
 //             std::cout << "amf_total_o2: " << amf_total_o2 << '\n';
 //             std::cout << "scaling_factor: " << scaling_factor << std::endl;
 
-//             // auto [index_amf_solz_o2, ratio_solz_o2] = get_amf_index_and_ratio(l1_rec, amf_solar_zenith * scaling_factor);
-//             // auto [index_amf_total_o2, ratio_total_o2] = get_amf_index_and_ratio(l1_rec, amf_total * scaling_factor);
+//             // auto [index_amf_solz_o2, ratio_solz_o2] = get_amf_index_and_ratio(l1_data, amf_solar_zenith * scaling_factor);
+//             // auto [index_amf_total_o2, ratio_total_o2] = get_amf_index_and_ratio(l1_data, amf_total * scaling_factor);
 
 //             index_amf_solz_o2 = get_index_lowerbound(amf_table->air_mass_factor_mixed_gases, amf_table->num_amf_grid_points, amf_solar_zenith * scaling_factor);
 //             index_amf_total_o2 = get_index_lowerbound(amf_table->air_mass_factor_mixed_gases, amf_table->num_amf_grid_points, amf_total * scaling_factor);
@@ -402,7 +402,7 @@ void ch4_transmittance(L1_Record* l1_rec, Air_Mass_Factor_Lookup_Table* amf_tabl
 //                                 (amf_table->air_mass_factor_mixed_gases[index_amf_total_o2 + 1] - amf_table->air_mass_factor_mixed_gases[index_amf_total_o2]);
 //         }
 
-//         for (int iw = 0; iw < l1_rec->num_wavelengths; iw++) 
+//         for (int iw = 0; iw < l1_data->num_wavelengths; iw++) 
 //         {
 //             if (do_amf_correction) 
 //             {
@@ -443,17 +443,17 @@ void ch4_transmittance(L1_Record* l1_rec, Air_Mass_Factor_Lookup_Table* amf_tabl
 // }
 
 
-void o2_transmittance(L1_Record* l1_rec, Air_Mass_Factor_Lookup_Table* amf_table, Transmittance_Record* t_rec, bool do_amf_correction, Oxygen_A_Band_Option oxygen_A_band_option)  
+void o2_transmittance(L1_Data* l1_data, Air_Mass_Factor_Lookup_Table* amf_table, Transmittance_Record* t_rec, bool do_amf_correction, Oxygen_A_Band_Option oxygen_A_band_option)  
 {
-    for (int ip = 0; ip < l1_rec->num_pixels; ip++)
+    for (int ip = 0; ip < l1_data->num_pixels; ip++)
     {
         int32_t iw;
 
-        int32_t nwave = l1_rec->num_wavelengths;
+        int32_t nwave = l1_data->num_wavelengths;
         int32_t ipb = ip*nwave;
 
-        double amf_solar_zenith = 1.0/l1_rec->cos_solar_zenith[ip];
-        double amf_sensor_zenith = 1.0/l1_rec->cos_sensor_zenith[ip];
+        double amf_solar_zenith = 1.0/l1_data->cos_solar_zenith[ip];
+        double amf_sensor_zenith = 1.0/l1_data->cos_sensor_zenith[ip];
         double amf_total = amf_solar_zenith + amf_sensor_zenith;
 
         int32_t index_amf_solz;
@@ -480,7 +480,7 @@ void o2_transmittance(L1_Record* l1_rec, Air_Mass_Factor_Lookup_Table* amf_table
 
         if (do_amf_correction && oxygen_A_band_option == Oxygen_A_Band_Option::SURROUNDING_WINDOW_BANDS) 
         {
-            float amf_total_o2 = get_airmass_oxygen(l1_rec, amf_table, ip, 753.0221, 761.7891, 776.81335);
+            float amf_total_o2 = get_airmass_oxygen(l1_data, amf_table, ip, 753.0221, 761.7891, 776.81335);
             float scaling_factor = amf_total_o2 / amf_total;
 
             index_amf_solz_o2 = get_index_lowerbound(amf_table->air_mass_factor_mixed_gases, amf_table->num_amf_grid_points, amf_solar_zenith * scaling_factor);
@@ -542,21 +542,21 @@ void o2_transmittance(L1_Record* l1_rec, Air_Mass_Factor_Lookup_Table* amf_table
 }
 
 
-void n2o_transmittance(L1_Record* l1_rec, Air_Mass_Factor_Lookup_Table* amf_table, Transmittance_Record* t_rec, bool do_amf_correction)
+void n2o_transmittance(L1_Data* l1_data, Air_Mass_Factor_Lookup_Table* amf_table, Transmittance_Record* t_rec, bool do_amf_correction)
 {
     #pragma omp parallel for
-    for (int ip = 0; ip < l1_rec->num_pixels; ip++)
+    for (int ip = 0; ip < l1_data->num_pixels; ip++)
     {
-        int row_offset = ip*l1_rec->num_wavelengths; // Each row represents a single pixel and has num_wavelengths elements
+        int row_offset = ip*l1_data->num_wavelengths; // Each row represents a single pixel and has num_wavelengths elements
 
-        double amf_solar_zenith = 1.0/l1_rec->cos_solar_zenith[ip];
-        double amf_sensor_zenith = 1.0/l1_rec->cos_sensor_zenith[ip];
+        double amf_solar_zenith = 1.0/l1_data->cos_solar_zenith[ip];
+        double amf_sensor_zenith = 1.0/l1_data->cos_sensor_zenith[ip];
         double amf_total = amf_solar_zenith + amf_sensor_zenith;
 
         auto [index_amf_solz, ratio_solz] = get_amf_index_and_ratio(amf_table, amf_solar_zenith);
         auto [index_amf_total, ratio_total] = get_amf_index_and_ratio(amf_table, amf_total);
 
-        for (int iw = 0; iw < l1_rec->num_wavelengths; iw++) 
+        for (int iw = 0; iw < l1_data->num_wavelengths; iw++) 
         {
             if (do_amf_correction)
             {
@@ -578,13 +578,13 @@ void n2o_transmittance(L1_Record* l1_rec, Air_Mass_Factor_Lookup_Table* amf_tabl
     }
 }
 
-void no2_transmittance(L1_Record* l1_rec, Ancillary_Data* ancillary_data, Transmittance_Record* t_rec, bool do_amf_correction)
+void no2_transmittance(L1_Data* l1_data, Ancillary_Data* ancillary_data, Transmittance_Record* t_rec, bool do_amf_correction)
 {
     #pragma omp parallel for
-    for (int ip = 0; ip < l1_rec->num_pixels; ip++)
+    for (int ip = 0; ip < l1_data->num_pixels; ip++)
     {
-        double sec0 = 1.0 / l1_rec->cos_solar_zenith[ip];
-        double sec = 1.0 / l1_rec->cos_sensor_zenith[ip];
+        double sec0 = 1.0 / l1_data->cos_solar_zenith[ip];
+        double sec = 1.0 / l1_data->cos_sensor_zenith[ip];
         double tropospheric_no2_concentration_above_200m{0.0};
 
         if (ancillary_data->tropospheric_no2_concentration[ip] > 0.0)
@@ -595,9 +595,9 @@ void no2_transmittance(L1_Record* l1_rec, Ancillary_Data* ancillary_data, Transm
             tropospheric_no2_concentration_above_200m = ancillary_data->fraction_tropospheric_no2_above_200m[ip] * ancillary_data->tropospheric_no2_concentration[ip];
         }
 
-        int row_offset = ip*l1_rec->num_wavelengths; // Each row represents a single pixel and has num_wavelengths elements
+        int row_offset = ip*l1_data->num_wavelengths; // Each row represents a single pixel and has num_wavelengths elements
 
-        for (int iw = 0; iw < l1_rec->num_wavelengths; iw++) 
+        for (int iw = 0; iw < l1_data->num_wavelengths; iw++) 
         {
             if (ancillary_data->no2_absorption_cross_section[iw] > 0.0) 
             {
@@ -627,13 +627,13 @@ void no2_transmittance(L1_Record* l1_rec, Ancillary_Data* ancillary_data, Transm
 
 
 
-void h2o_transmittance(L1_Record* l1_rec, Ancillary_Data* ancillary_data, Air_Mass_Factor_Lookup_Table* amf_table, Transmittance_Record* t_rec, bool do_amf_correction, bool use_gas_transmittance_table) 
+void h2o_transmittance(L1_Data* l1_data, Ancillary_Data* ancillary_data, Air_Mass_Factor_Lookup_Table* amf_table, Transmittance_Record* t_rec, bool do_amf_correction, bool use_gas_transmittance_table) 
 {
     #pragma omp parallel for
-    for (int ip = 0; ip < l1_rec->num_pixels; ip++)
+    for (int ip = 0; ip < l1_data->num_pixels; ip++)
     {
-        double amf_solar_zenith = 1.0/l1_rec->cos_solar_zenith[ip];
-        double amf_sensor_zenith = 1.0/l1_rec->cos_sensor_zenith[ip];
+        double amf_solar_zenith = 1.0/l1_data->cos_solar_zenith[ip];
+        double amf_sensor_zenith = 1.0/l1_data->cos_sensor_zenith[ip];
         double amf_total = amf_solar_zenith + amf_sensor_zenith;
 
         // wv variable is a table of values quantifying the water vapor present in each pixel of the image
@@ -653,7 +653,7 @@ void h2o_transmittance(L1_Record* l1_rec, Ancillary_Data* ancillary_data, Air_Ma
             double total_columnar_water_vapor = 0;
             for (int iw = 0; iw < ancillary_data->num_water_vapor_bands;) 
             {
-                total_columnar_water_vapor += get_wv_band_ratio(l1_rec, amf_table, ip, ancillary_data->water_vapor_bands[iw], ancillary_data->water_vapor_bands[iw + 1],
+                total_columnar_water_vapor += get_wv_band_ratio(l1_data, amf_table, ip, ancillary_data->water_vapor_bands[iw], ancillary_data->water_vapor_bands[iw + 1],
                                         ancillary_data->water_vapor_bands[iw + 2], amf_total);
                 iw += 3;
             }
@@ -692,9 +692,9 @@ void h2o_transmittance(L1_Record* l1_rec, Ancillary_Data* ancillary_data, Air_Ma
             double water_vapor_concentration_interpolated = (wv -amf_table->water_vapor_concentration[ja])/(amf_table->water_vapor_concentration[ja+1] - amf_table->water_vapor_concentration[ja]);
             
 
-            for (int iw = 0; iw < l1_rec->num_wavelengths; iw++) 
+            for (int iw = 0; iw < l1_data->num_wavelengths; iw++) 
             {
-                int32_t row_offset = ip*l1_rec->num_wavelengths;
+                int32_t row_offset = ip*l1_data->num_wavelengths;
 
                 if (do_amf_correction) 
                 {
@@ -755,23 +755,23 @@ void h2o_transmittance(L1_Record* l1_rec, Ancillary_Data* ancillary_data, Air_Ma
         }        // otherwise apply Zia's tabel from Bo-cai
         else
         {
-            for (int iw = 0; iw < l1_rec->num_wavelengths; iw++)
+            for (int iw = 0; iw < l1_data->num_wavelengths; iw++)
             {
-                int32_t row_offset = ip*l1_rec->num_wavelengths;
+                int32_t row_offset = ip*l1_data->num_wavelengths;
 
                 const double wv = ancillary_data->precipitable_water[ip];
 
                 double water_vapor_transmittance = ancillary_data->a_h2o[iw] + wv * (ancillary_data->b_h2o[iw] + wv * (ancillary_data->c_h2o[iw] + wv * (ancillary_data->d_h2o[iw]
                         + wv * (ancillary_data->e_h2o[iw] + wv * (ancillary_data->f_h2o[iw] + wv * ancillary_data->g_h2o[iw])))));
-                t_rec->gas_transmittance_solar_zenith[row_offset + iw] = pow(water_vapor_transmittance, 1.0 / l1_rec->cos_solar_zenith[ip]);
+                t_rec->gas_transmittance_solar_zenith[row_offset + iw] = pow(water_vapor_transmittance, 1.0 / l1_data->cos_solar_zenith[ip]);
                 if (do_amf_correction)
                 {
-                    t_rec->gas_transmittance_total[row_offset + iw] = pow(water_vapor_transmittance, 1.0 / l1_rec->cos_sensor_zenith[ip]+1.0 / l1_rec->cos_solar_zenith[ip]);
+                    t_rec->gas_transmittance_total[row_offset + iw] = pow(water_vapor_transmittance, 1.0 / l1_data->cos_sensor_zenith[ip]+1.0 / l1_data->cos_solar_zenith[ip]);
                     t_rec->gas_transmittance_sensor_zenith[row_offset + iw] = t_rec->gas_transmittance_total[row_offset + iw] / t_rec->gas_transmittance_solar_zenith[row_offset + iw];
                 }
                 else
                 {
-                    t_rec->gas_transmittance_sensor_zenith[row_offset + iw] = pow(water_vapor_transmittance, 1.0 / l1_rec->cos_sensor_zenith[ip]);
+                    t_rec->gas_transmittance_sensor_zenith[row_offset + iw] = pow(water_vapor_transmittance, 1.0 / l1_data->cos_sensor_zenith[ip]);
                     t_rec->gas_transmittance_total[row_offset + iw] = t_rec->gas_transmittance_sensor_zenith[row_offset + iw] * t_rec->gas_transmittance_solar_zenith[row_offset + iw];
                 }
             }

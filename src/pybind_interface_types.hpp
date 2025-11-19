@@ -56,10 +56,10 @@ public:
     int num_water_vapor_concentrations{};
 };
 
-struct L1_Record_PY
+struct L1_Data_PY
 {
 public:
-    L1_Record_PY(){};
+    L1_Data_PY(){};
 
     pybind11::array_t<double, pybind11::array::c_style> reflectance{};
 
