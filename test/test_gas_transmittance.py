@@ -8,7 +8,7 @@ from scipy import interpolate
 import time
 import pytest
 
-import bin.gas_transmittance as gas_transmittance
+import gas_corrections_cpp.bin.gas_transmittance as gas_transmittance
 
 save_transmittances = False
 
