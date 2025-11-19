@@ -16,7 +16,7 @@ setup_pybind11(cfg)
 
 namespace py = pybind11;
 
-Transmittance_Record_PY ozone_transmittance(const L1_Data_PY& l1_data, const Ancillary_Data_PY& ancillary_data, const bool do_amf_correction) 
+Gas_Transmittances_PY ozone_transmittance(const L1_Data_PY& l1_data, const Ancillary_Data_PY& ancillary_data, const bool do_amf_correction) 
 {
     Ancillary_Data ancillary_data_c{};
     
@@ -33,25 +33,25 @@ Transmittance_Record_PY ozone_transmittance(const L1_Data_PY& l1_data, const Anc
     int n_rows = l1_data_c.num_pixels;
     int n_cols = l1_data_c.num_wavelengths;
 
-    Transmittance_Record_PY t_rec{};
+    Gas_Transmittances_PY gas_transmittances{};
 
-    t_rec.gas_transmittance_solar_zenith = allocate_output_array<double>(n_rows, n_cols);
-    t_rec.gas_transmittance_sensor_zenith = allocate_output_array<double>(n_rows, n_cols);
-    t_rec.gas_transmittance_total = allocate_output_array<double>(n_rows, n_cols);
+    gas_transmittances.solar_zenith = allocate_output_array<double>(n_rows, n_cols);
+    gas_transmittances.sensor_zenith = allocate_output_array<double>(n_rows, n_cols);
+    gas_transmittances.total = allocate_output_array<double>(n_rows, n_cols);
 
-    Transmittance_Record t_rec_c{};
+    Gas_Transmittances gas_transmittances_c{};
 
-    t_rec_c.gas_transmittance_solar_zenith = static_cast<double*>(t_rec.gas_transmittance_solar_zenith.request().ptr);
-    t_rec_c.gas_transmittance_sensor_zenith = static_cast<double*>(t_rec.gas_transmittance_sensor_zenith.request().ptr);
-    t_rec_c.gas_transmittance_total = static_cast<double*>(t_rec.gas_transmittance_total.request().ptr);
+    gas_transmittances_c.solar_zenith = static_cast<double*>(gas_transmittances.solar_zenith.request().ptr);
+    gas_transmittances_c.sensor_zenith = static_cast<double*>(gas_transmittances.sensor_zenith.request().ptr);
+    gas_transmittances_c.total = static_cast<double*>(gas_transmittances.total.request().ptr);
 
-    ozone_transmittance(&l1_data_c, &ancillary_data_c, &t_rec_c, do_amf_correction);
+    ozone_transmittance(&l1_data_c, &ancillary_data_c, &gas_transmittances_c, do_amf_correction);
 
-    return t_rec;
+    return gas_transmittances;
 }
 
 
-Transmittance_Record_PY co2_transmittance(const L1_Data_PY& l1_data, const Air_Mass_Factor_Lookup_Table_PY& amf_table, const bool do_amf_correction) 
+Gas_Transmittances_PY co2_transmittance(const L1_Data_PY& l1_data, const Air_Mass_Factor_Lookup_Table_PY& amf_table, const bool do_amf_correction) 
 {
     Air_Mass_Factor_Lookup_Table amf_table_c{};
 
@@ -69,25 +69,25 @@ Transmittance_Record_PY co2_transmittance(const L1_Data_PY& l1_data, const Air_M
     int n_rows = l1_data_c.num_pixels;
     int n_cols = l1_data_c.num_wavelengths;
 
-    Transmittance_Record_PY t_rec{};
+    Gas_Transmittances_PY gas_transmittances{};
 
-    t_rec.gas_transmittance_solar_zenith = allocate_output_array<double>(n_rows, n_cols);
-    t_rec.gas_transmittance_sensor_zenith = allocate_output_array<double>(n_rows, n_cols);
-    t_rec.gas_transmittance_total = allocate_output_array<double>(n_rows, n_cols);
+    gas_transmittances.solar_zenith = allocate_output_array<double>(n_rows, n_cols);
+    gas_transmittances.sensor_zenith = allocate_output_array<double>(n_rows, n_cols);
+    gas_transmittances.total = allocate_output_array<double>(n_rows, n_cols);
 
-    Transmittance_Record t_rec_c{};
+    Gas_Transmittances gas_transmittances_c{};
 
-    t_rec_c.gas_transmittance_solar_zenith = static_cast<double*>(t_rec.gas_transmittance_solar_zenith.request().ptr);
-    t_rec_c.gas_transmittance_sensor_zenith = static_cast<double*>(t_rec.gas_transmittance_sensor_zenith.request().ptr);
-    t_rec_c.gas_transmittance_total = static_cast<double*>(t_rec.gas_transmittance_total.request().ptr);
+    gas_transmittances_c.solar_zenith = static_cast<double*>(gas_transmittances.solar_zenith.request().ptr);
+    gas_transmittances_c.sensor_zenith = static_cast<double*>(gas_transmittances.sensor_zenith.request().ptr);
+    gas_transmittances_c.total = static_cast<double*>(gas_transmittances.total.request().ptr);
 
-    co2_transmittance(&l1_data_c, &amf_table_c, &t_rec_c, do_amf_correction);
+    co2_transmittance(&l1_data_c, &amf_table_c, &gas_transmittances_c, do_amf_correction);
 
-    return t_rec;
+    return gas_transmittances;
 }
 
 
-Transmittance_Record_PY co_transmittance(const L1_Data_PY& l1_data, const Air_Mass_Factor_Lookup_Table_PY& amf_table, const bool do_amf_correction) 
+Gas_Transmittances_PY co_transmittance(const L1_Data_PY& l1_data, const Air_Mass_Factor_Lookup_Table_PY& amf_table, const bool do_amf_correction) 
 {
     Air_Mass_Factor_Lookup_Table amf_table_c{};
 
@@ -105,25 +105,25 @@ Transmittance_Record_PY co_transmittance(const L1_Data_PY& l1_data, const Air_Ma
     int n_rows = l1_data_c.num_pixels;
     int n_cols = l1_data_c.num_wavelengths;
 
-    Transmittance_Record_PY t_rec{};
+    Gas_Transmittances_PY gas_transmittances{};
 
-    t_rec.gas_transmittance_solar_zenith = allocate_output_array<double>(n_rows, n_cols);
-    t_rec.gas_transmittance_sensor_zenith = allocate_output_array<double>(n_rows, n_cols);
-    t_rec.gas_transmittance_total = allocate_output_array<double>(n_rows, n_cols);
+    gas_transmittances.solar_zenith = allocate_output_array<double>(n_rows, n_cols);
+    gas_transmittances.sensor_zenith = allocate_output_array<double>(n_rows, n_cols);
+    gas_transmittances.total = allocate_output_array<double>(n_rows, n_cols);
 
-    Transmittance_Record t_rec_c{};
+    Gas_Transmittances gas_transmittances_c{};
 
-    t_rec_c.gas_transmittance_solar_zenith = static_cast<double*>(t_rec.gas_transmittance_solar_zenith.request().ptr);
-    t_rec_c.gas_transmittance_sensor_zenith = static_cast<double*>(t_rec.gas_transmittance_sensor_zenith.request().ptr);
-    t_rec_c.gas_transmittance_total = static_cast<double*>(t_rec.gas_transmittance_total.request().ptr);
+    gas_transmittances_c.solar_zenith = static_cast<double*>(gas_transmittances.solar_zenith.request().ptr);
+    gas_transmittances_c.sensor_zenith = static_cast<double*>(gas_transmittances.sensor_zenith.request().ptr);
+    gas_transmittances_c.total = static_cast<double*>(gas_transmittances.total.request().ptr);
 
-    co_transmittance(&l1_data_c, &amf_table_c, &t_rec_c, do_amf_correction);
+    co_transmittance(&l1_data_c, &amf_table_c, &gas_transmittances_c, do_amf_correction);
 
-    return t_rec;
+    return gas_transmittances;
 }
 
 
-Transmittance_Record_PY ch4_transmittance(const L1_Data_PY& l1_data, const Air_Mass_Factor_Lookup_Table_PY& amf_table, const bool do_amf_correction) 
+Gas_Transmittances_PY ch4_transmittance(const L1_Data_PY& l1_data, const Air_Mass_Factor_Lookup_Table_PY& amf_table, const bool do_amf_correction) 
 {
     Air_Mass_Factor_Lookup_Table amf_table_c{};
 
@@ -141,25 +141,25 @@ Transmittance_Record_PY ch4_transmittance(const L1_Data_PY& l1_data, const Air_M
     int n_rows = l1_data_c.num_pixels;
     int n_cols = l1_data_c.num_wavelengths;
 
-    Transmittance_Record_PY t_rec{};
+    Gas_Transmittances_PY gas_transmittances{};
 
-    t_rec.gas_transmittance_solar_zenith = allocate_output_array<double>(n_rows, n_cols);
-    t_rec.gas_transmittance_sensor_zenith = allocate_output_array<double>(n_rows, n_cols);
-    t_rec.gas_transmittance_total = allocate_output_array<double>(n_rows, n_cols);
+    gas_transmittances.solar_zenith = allocate_output_array<double>(n_rows, n_cols);
+    gas_transmittances.sensor_zenith = allocate_output_array<double>(n_rows, n_cols);
+    gas_transmittances.total = allocate_output_array<double>(n_rows, n_cols);
 
-    Transmittance_Record t_rec_c{};
+    Gas_Transmittances gas_transmittances_c{};
 
-    t_rec_c.gas_transmittance_solar_zenith = static_cast<double*>(t_rec.gas_transmittance_solar_zenith.request().ptr);
-    t_rec_c.gas_transmittance_sensor_zenith = static_cast<double*>(t_rec.gas_transmittance_sensor_zenith.request().ptr);
-    t_rec_c.gas_transmittance_total = static_cast<double*>(t_rec.gas_transmittance_total.request().ptr);
+    gas_transmittances_c.solar_zenith = static_cast<double*>(gas_transmittances.solar_zenith.request().ptr);
+    gas_transmittances_c.sensor_zenith = static_cast<double*>(gas_transmittances.sensor_zenith.request().ptr);
+    gas_transmittances_c.total = static_cast<double*>(gas_transmittances.total.request().ptr);
 
-    ch4_transmittance(&l1_data_c, &amf_table_c, &t_rec_c, do_amf_correction);
+    ch4_transmittance(&l1_data_c, &amf_table_c, &gas_transmittances_c, do_amf_correction);
 
-    return t_rec;
+    return gas_transmittances;
 }
 
 
-Transmittance_Record_PY o2_transmittance(const L1_Data_PY& l1_data, const Air_Mass_Factor_Lookup_Table_PY& amf_table, const bool do_amf_correction, Oxygen_A_Band_Option oxygen_A_band_option) 
+Gas_Transmittances_PY o2_transmittance(const L1_Data_PY& l1_data, const Air_Mass_Factor_Lookup_Table_PY& amf_table, const bool do_amf_correction, Oxygen_A_Band_Option oxygen_A_band_option) 
 {
     Air_Mass_Factor_Lookup_Table amf_table_c{};
 
@@ -179,25 +179,25 @@ Transmittance_Record_PY o2_transmittance(const L1_Data_PY& l1_data, const Air_Ma
     int n_rows = l1_data_c.num_pixels;
     int n_cols = l1_data_c.num_wavelengths;
 
-    Transmittance_Record_PY t_rec{};
+    Gas_Transmittances_PY gas_transmittances{};
 
-    t_rec.gas_transmittance_solar_zenith = allocate_output_array<double>(n_rows, n_cols);
-    t_rec.gas_transmittance_sensor_zenith = allocate_output_array<double>(n_rows, n_cols);
-    t_rec.gas_transmittance_total = allocate_output_array<double>(n_rows, n_cols);
+    gas_transmittances.solar_zenith = allocate_output_array<double>(n_rows, n_cols);
+    gas_transmittances.sensor_zenith = allocate_output_array<double>(n_rows, n_cols);
+    gas_transmittances.total = allocate_output_array<double>(n_rows, n_cols);
 
-    Transmittance_Record t_rec_c{};
+    Gas_Transmittances gas_transmittances_c{};
 
-    t_rec_c.gas_transmittance_solar_zenith = static_cast<double*>(t_rec.gas_transmittance_solar_zenith.request().ptr);
-    t_rec_c.gas_transmittance_sensor_zenith = static_cast<double*>(t_rec.gas_transmittance_sensor_zenith.request().ptr);
-    t_rec_c.gas_transmittance_total = static_cast<double*>(t_rec.gas_transmittance_total.request().ptr);
+    gas_transmittances_c.solar_zenith = static_cast<double*>(gas_transmittances.solar_zenith.request().ptr);
+    gas_transmittances_c.sensor_zenith = static_cast<double*>(gas_transmittances.sensor_zenith.request().ptr);
+    gas_transmittances_c.total = static_cast<double*>(gas_transmittances.total.request().ptr);
 
-    o2_transmittance(&l1_data_c, &amf_table_c, &t_rec_c, do_amf_correction, oxygen_A_band_option);
+    o2_transmittance(&l1_data_c, &amf_table_c, &gas_transmittances_c, do_amf_correction, oxygen_A_band_option);
 
-    return t_rec;
+    return gas_transmittances;
 }
 
 
-Transmittance_Record_PY n2o_transmittance(const L1_Data_PY& l1_data, const Air_Mass_Factor_Lookup_Table_PY& amf_table, const bool do_amf_correction) 
+Gas_Transmittances_PY n2o_transmittance(const L1_Data_PY& l1_data, const Air_Mass_Factor_Lookup_Table_PY& amf_table, const bool do_amf_correction) 
 {
     Air_Mass_Factor_Lookup_Table amf_table_c{};
 
@@ -215,25 +215,25 @@ Transmittance_Record_PY n2o_transmittance(const L1_Data_PY& l1_data, const Air_M
     int n_rows = l1_data_c.num_pixels;
     int n_cols = l1_data_c.num_wavelengths;
 
-    Transmittance_Record_PY t_rec{};
+    Gas_Transmittances_PY gas_transmittances{};
 
-    t_rec.gas_transmittance_solar_zenith = allocate_output_array<double>(n_rows, n_cols);
-    t_rec.gas_transmittance_sensor_zenith = allocate_output_array<double>(n_rows, n_cols);
-    t_rec.gas_transmittance_total = allocate_output_array<double>(n_rows, n_cols);
+    gas_transmittances.solar_zenith = allocate_output_array<double>(n_rows, n_cols);
+    gas_transmittances.sensor_zenith = allocate_output_array<double>(n_rows, n_cols);
+    gas_transmittances.total = allocate_output_array<double>(n_rows, n_cols);
 
-    Transmittance_Record t_rec_c{};
+    Gas_Transmittances gas_transmittances_c{};
 
-    t_rec_c.gas_transmittance_solar_zenith = static_cast<double*>(t_rec.gas_transmittance_solar_zenith.request().ptr);
-    t_rec_c.gas_transmittance_sensor_zenith = static_cast<double*>(t_rec.gas_transmittance_sensor_zenith.request().ptr);
-    t_rec_c.gas_transmittance_total = static_cast<double*>(t_rec.gas_transmittance_total.request().ptr);
+    gas_transmittances_c.solar_zenith = static_cast<double*>(gas_transmittances.solar_zenith.request().ptr);
+    gas_transmittances_c.sensor_zenith = static_cast<double*>(gas_transmittances.sensor_zenith.request().ptr);
+    gas_transmittances_c.total = static_cast<double*>(gas_transmittances.total.request().ptr);
 
-    n2o_transmittance(&l1_data_c, &amf_table_c, &t_rec_c, do_amf_correction);
+    n2o_transmittance(&l1_data_c, &amf_table_c, &gas_transmittances_c, do_amf_correction);
 
-    return t_rec;
+    return gas_transmittances;
 }
 
 
-Transmittance_Record_PY no2_transmittance(const L1_Data_PY& l1_data, const Ancillary_Data_PY& ancillary_data, const bool do_amf_correction) 
+Gas_Transmittances_PY no2_transmittance(const L1_Data_PY& l1_data, const Ancillary_Data_PY& ancillary_data, const bool do_amf_correction) 
 {
     Ancillary_Data ancillary_data_c{};
 
@@ -251,25 +251,25 @@ Transmittance_Record_PY no2_transmittance(const L1_Data_PY& l1_data, const Ancil
     int n_rows = l1_data_c.num_pixels;
     int n_cols = l1_data_c.num_wavelengths;
 
-    Transmittance_Record_PY t_rec{};
+    Gas_Transmittances_PY gas_transmittances{};
 
-    t_rec.gas_transmittance_solar_zenith = allocate_output_array<double>(n_rows, n_cols);
-    t_rec.gas_transmittance_sensor_zenith = allocate_output_array<double>(n_rows, n_cols);
-    t_rec.gas_transmittance_total = allocate_output_array<double>(n_rows, n_cols);
+    gas_transmittances.solar_zenith = allocate_output_array<double>(n_rows, n_cols);
+    gas_transmittances.sensor_zenith = allocate_output_array<double>(n_rows, n_cols);
+    gas_transmittances.total = allocate_output_array<double>(n_rows, n_cols);
 
-    Transmittance_Record t_rec_c{};
+    Gas_Transmittances gas_transmittances_c{};
 
-    t_rec_c.gas_transmittance_solar_zenith = static_cast<double*>(t_rec.gas_transmittance_solar_zenith.request().ptr);
-    t_rec_c.gas_transmittance_sensor_zenith = static_cast<double*>(t_rec.gas_transmittance_sensor_zenith.request().ptr);
-    t_rec_c.gas_transmittance_total = static_cast<double*>(t_rec.gas_transmittance_total.request().ptr);
+    gas_transmittances_c.solar_zenith = static_cast<double*>(gas_transmittances.solar_zenith.request().ptr);
+    gas_transmittances_c.sensor_zenith = static_cast<double*>(gas_transmittances.sensor_zenith.request().ptr);
+    gas_transmittances_c.total = static_cast<double*>(gas_transmittances.total.request().ptr);
 
-    no2_transmittance(&l1_data_c, &ancillary_data_c, &t_rec_c, do_amf_correction);
+    no2_transmittance(&l1_data_c, &ancillary_data_c, &gas_transmittances_c, do_amf_correction);
 
-    return t_rec;
+    return gas_transmittances;
 }
 
 
-Transmittance_Record_PY h2o_transmittance(const L1_Data_PY& l1_data, const Ancillary_Data_PY& ancillary_data, const Air_Mass_Factor_Lookup_Table_PY& amf_table, const bool do_amf_correction, const bool use_gas_transmittance_table) 
+Gas_Transmittances_PY h2o_transmittance(const L1_Data_PY& l1_data, const Ancillary_Data_PY& ancillary_data, const Air_Mass_Factor_Lookup_Table_PY& amf_table, const bool do_amf_correction, const bool use_gas_transmittance_table) 
 {
     Ancillary_Data ancillary_data_c{};
 
@@ -305,26 +305,26 @@ Transmittance_Record_PY h2o_transmittance(const L1_Data_PY& l1_data, const Ancil
     int n_rows = l1_data_c.num_pixels;
     int n_cols = l1_data_c.num_wavelengths;
 
-    Transmittance_Record_PY t_rec{};
+    Gas_Transmittances_PY gas_transmittances{};
 
-    t_rec.gas_transmittance_solar_zenith = allocate_output_array<double>(n_rows, n_cols);
-    t_rec.gas_transmittance_sensor_zenith = allocate_output_array<double>(n_rows, n_cols);
-    t_rec.gas_transmittance_total = allocate_output_array<double>(n_rows, n_cols);
+    gas_transmittances.solar_zenith = allocate_output_array<double>(n_rows, n_cols);
+    gas_transmittances.sensor_zenith = allocate_output_array<double>(n_rows, n_cols);
+    gas_transmittances.total = allocate_output_array<double>(n_rows, n_cols);
 
-    Transmittance_Record t_rec_c{};
+    Gas_Transmittances gas_transmittances_c{};
 
-    t_rec_c.gas_transmittance_solar_zenith = static_cast<double*>(t_rec.gas_transmittance_solar_zenith.request().ptr);
-    t_rec_c.gas_transmittance_sensor_zenith = static_cast<double*>(t_rec.gas_transmittance_sensor_zenith.request().ptr);
-    t_rec_c.gas_transmittance_total = static_cast<double*>(t_rec.gas_transmittance_total.request().ptr);
+    gas_transmittances_c.solar_zenith = static_cast<double*>(gas_transmittances.solar_zenith.request().ptr);
+    gas_transmittances_c.sensor_zenith = static_cast<double*>(gas_transmittances.sensor_zenith.request().ptr);
+    gas_transmittances_c.total = static_cast<double*>(gas_transmittances.total.request().ptr);
 
-    h2o_transmittance(&l1_data_c, &ancillary_data_c, &amf_table_c, &t_rec_c, do_amf_correction, use_gas_transmittance_table);
+    h2o_transmittance(&l1_data_c, &ancillary_data_c, &amf_table_c, &gas_transmittances_c, do_amf_correction, use_gas_transmittance_table);
 
     // for (int i = 0; i < l1_data_c.num_pixels; i++)
     // {
-    //     std::cout << t_rec_c.gas_transmittance_solar_zenith[i] << std::endl;
+    //     std::cout << gas_transmittances_c.solar_zenith[i] << std::endl;
     // }
 
-    return t_rec;
+    return gas_transmittances;
 }
 
 
@@ -376,11 +376,11 @@ PYBIND11_MODULE(gas_transmittance, m)
         .def_readwrite("num_wavelengths", &L1_Data_PY::num_wavelengths)
         .def_readwrite("wavelengths", &L1_Data_PY::wavelengths);
 
-    py::class_<Transmittance_Record_PY>(m, "Transmittance_Record", py::module_local())
+    py::class_<Gas_Transmittances_PY>(m, "Gas_Transmittances", py::module_local())
         .def(py::init<>())
-        .def_readwrite("gas_transmittance_solar_zenith", &Transmittance_Record_PY::gas_transmittance_solar_zenith)
-        .def_readwrite("gas_transmittance_sensor_zenith", &Transmittance_Record_PY::gas_transmittance_sensor_zenith)
-        .def_readwrite("gas_transmittance_total", &Transmittance_Record_PY::gas_transmittance_total);
+        .def_readwrite("solar_zenith", &Gas_Transmittances_PY::solar_zenith)
+        .def_readwrite("sensor_zenith", &Gas_Transmittances_PY::sensor_zenith)
+        .def_readwrite("total", &Gas_Transmittances_PY::total);
 
     py::enum_<Oxygen_A_Band_Option>(m, "Oxygen_A_Band_Option", py::module_local())
         .value("DING_GORDON", Oxygen_A_Band_Option::DING_GORDON)

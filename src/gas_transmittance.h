@@ -81,11 +81,11 @@ struct L1_Data
     double* wavelengths{};
 };
 
-struct Transmittance_Record
+struct Gas_Transmittances
 {
-    double* gas_transmittance_solar_zenith{};
-    double* gas_transmittance_sensor_zenith{};
-    double* gas_transmittance_total{};
+    double* solar_zenith{};
+    double* sensor_zenith{};
+    double* total{};
 };
 
 enum Oxygen_A_Band_Option
@@ -96,13 +96,13 @@ enum Oxygen_A_Band_Option
     SURROUNDING_WINDOW_BANDS, // Compute oxygen transmittance from A-band and surrounding window bands. Requires AMF gas trasmittance table
 };
 
-void ozone_transmittance(L1_Data* l1_data, Ancillary_Data* ancillary_data, Transmittance_Record* t_rec, bool do_amf_correction);
-void co2_transmittance(L1_Data* l1_data, Air_Mass_Factor_Lookup_Table* amf_table, Transmittance_Record* t_rec, bool do_amf_correction);
-void co_transmittance(L1_Data* l1_data, Air_Mass_Factor_Lookup_Table* amf_table, Transmittance_Record* t_rec, bool do_amf_correction);
-void ch4_transmittance(L1_Data* l1_data, Air_Mass_Factor_Lookup_Table* amf_table, Transmittance_Record* t_rec, bool do_amf_correction);
-void o2_transmittance(L1_Data* l1_data, Air_Mass_Factor_Lookup_Table* amf_table, Transmittance_Record* t_rec, bool do_amf_correction, Oxygen_A_Band_Option oxygen_A_band_option);
-void n2o_transmittance(L1_Data* l1_data, Air_Mass_Factor_Lookup_Table* amf_table, Transmittance_Record* t_rec, bool do_amf_correction);
-void no2_transmittance(L1_Data* l1_data, Ancillary_Data* ancillary_data, Transmittance_Record* t_rec, bool do_amf_correction);
-void h2o_transmittance(L1_Data* l1_data, Ancillary_Data* ancillary_data, Air_Mass_Factor_Lookup_Table* amf_table, Transmittance_Record* t_rec, bool do_amf_correction, bool use_gas_transmittance_table);
+void ozone_transmittance(L1_Data* l1_data, Ancillary_Data* ancillary_data, Gas_Transmittances* gas_transmittances, bool do_amf_correction);
+void co2_transmittance(L1_Data* l1_data, Air_Mass_Factor_Lookup_Table* amf_table, Gas_Transmittances* gas_transmittances, bool do_amf_correction);
+void co_transmittance(L1_Data* l1_data, Air_Mass_Factor_Lookup_Table* amf_table, Gas_Transmittances* gas_transmittances, bool do_amf_correction);
+void ch4_transmittance(L1_Data* l1_data, Air_Mass_Factor_Lookup_Table* amf_table, Gas_Transmittances* gas_transmittances, bool do_amf_correction);
+void o2_transmittance(L1_Data* l1_data, Air_Mass_Factor_Lookup_Table* amf_table, Gas_Transmittances* gas_transmittances, bool do_amf_correction, Oxygen_A_Band_Option oxygen_A_band_option);
+void n2o_transmittance(L1_Data* l1_data, Air_Mass_Factor_Lookup_Table* amf_table, Gas_Transmittances* gas_transmittances, bool do_amf_correction);
+void no2_transmittance(L1_Data* l1_data, Ancillary_Data* ancillary_data, Gas_Transmittances* gas_transmittances, bool do_amf_correction);
+void h2o_transmittance(L1_Data* l1_data, Ancillary_Data* ancillary_data, Air_Mass_Factor_Lookup_Table* amf_table, Gas_Transmittances* gas_transmittances, bool do_amf_correction, bool use_gas_transmittance_table);
 
 #endif // GAS_TRANSMITTANCE_H

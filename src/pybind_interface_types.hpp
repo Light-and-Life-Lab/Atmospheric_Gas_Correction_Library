@@ -73,14 +73,14 @@ public:
 };
 
 
-struct Transmittance_Record_PY
+struct Gas_Transmittances_PY
 {
 public:
-    Transmittance_Record_PY(){};
+    Gas_Transmittances_PY(){};
     
-    pybind11::array_t<double, pybind11::array::c_style> gas_transmittance_solar_zenith{};
-    pybind11::array_t<double, pybind11::array::c_style> gas_transmittance_sensor_zenith{};
-    pybind11::array_t<double, pybind11::array::c_style> gas_transmittance_total{};
+    pybind11::array_t<double, pybind11::array::c_style> solar_zenith{};
+    pybind11::array_t<double, pybind11::array::c_style> sensor_zenith{};
+    pybind11::array_t<double, pybind11::array::c_style> total{};
 };
 
 #endif // PYBIND_INTERFACE_TYPES_H
