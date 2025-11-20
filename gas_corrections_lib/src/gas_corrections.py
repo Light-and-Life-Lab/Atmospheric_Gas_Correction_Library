@@ -2,7 +2,7 @@ import h5py
 import numpy as np
 from scipy import interpolate
 
-from gas_corrections_cpp.bin import gas_transmittance
+from ..gas_corrections_cpp.bin import gas_transmittance
 
 class Gas_Correction_Manager:
     def __init__(self):
