@@ -33,15 +33,6 @@ struct Ancillary_Data
     // From e.g. GMAO_MERRA2.20240411T180000.MET.nc
     double* precipitable_water{};
 
-    // From e.g. ocssw/share/oci/msl12_sensor_info.dat
-    double* a_h2o{};
-    double* b_h2o{};
-    double* c_h2o{};
-    double* d_h2o{};
-    double* e_h2o{};
-    double* f_h2o{};
-    double* g_h2o{};
-
     double* water_vapor_bands{};
     int num_water_vapor_bands{};
 };
@@ -102,6 +93,6 @@ void ch4_transmittance(L1_Data* l1_data, Gas_Transmittance_Lookup_Table* gas_tra
 void o2_transmittance(L1_Data* l1_data, Gas_Transmittance_Lookup_Table* gas_transmittance_table, Gas_Transmittances* gas_transmittances, bool use_gas_transmittance_lookup_table, Oxygen_A_Band_Option oxygen_A_band_option);
 void n2o_transmittance(L1_Data* l1_data, Gas_Transmittance_Lookup_Table* gas_transmittance_table, Gas_Transmittances* gas_transmittances, bool use_gas_transmittance_lookup_table);
 void no2_transmittance(L1_Data* l1_data, Ancillary_Data* ancillary_data, Gas_Transmittances* gas_transmittances, bool use_gas_transmittance_lookup_table);
-void h2o_transmittance(L1_Data* l1_data, Ancillary_Data* ancillary_data, Gas_Transmittance_Lookup_Table* gas_transmittance_table, Gas_Transmittances* gas_transmittances, bool use_gas_transmittance_lookup_table, bool use_gas_transmittance_table);
+void h2o_transmittance(L1_Data* l1_data, Ancillary_Data* ancillary_data, Gas_Transmittance_Lookup_Table* gas_transmittance_table, Gas_Transmittances* gas_transmittances, bool use_gas_transmittance_lookup_table);
 
 #endif // GAS_TRANSMITTANCE_H

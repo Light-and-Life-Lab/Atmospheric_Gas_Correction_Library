@@ -269,7 +269,7 @@ Gas_Transmittances_PY no2_transmittance(const L1_Data_PY& l1_data, const Ancilla
 }
 
 
-Gas_Transmittances_PY h2o_transmittance(const L1_Data_PY& l1_data, const Ancillary_Data_PY& ancillary_data, const Gas_Transmittance_Lookup_Table_PY& gas_transmittance_table, const bool use_gas_transmittance_lookup_table, const bool use_gas_transmittance_table) 
+Gas_Transmittances_PY h2o_transmittance(const L1_Data_PY& l1_data, const Ancillary_Data_PY& ancillary_data, const Gas_Transmittance_Lookup_Table_PY& gas_transmittance_table, const bool use_gas_transmittance_lookup_table) 
 {
     Ancillary_Data ancillary_data_c{};
 
@@ -317,7 +317,7 @@ Gas_Transmittances_PY h2o_transmittance(const L1_Data_PY& l1_data, const Ancilla
     gas_transmittances_c.sensor_zenith = static_cast<double*>(gas_transmittances.sensor_zenith.request().ptr);
     gas_transmittances_c.total = static_cast<double*>(gas_transmittances.total.request().ptr);
 
-    h2o_transmittance(&l1_data_c, &ancillary_data_c, &gas_transmittance_table_c, &gas_transmittances_c, use_gas_transmittance_lookup_table, use_gas_transmittance_table);
+    h2o_transmittance(&l1_data_c, &ancillary_data_c, &gas_transmittance_table_c, &gas_transmittances_c, use_gas_transmittance_lookup_table);
 
     // for (int i = 0; i < l1_data_c.num_pixels; i++)
     // {
@@ -339,13 +339,6 @@ PYBIND11_MODULE(gas_transmittance, m)
         .def_readwrite("tropospheric_no2_concentration", &Ancillary_Data_PY::tropospheric_no2_concentration)
         .def_readwrite("stratospheric_no2_concentration", &Ancillary_Data_PY::stratospheric_no2_concentration)
         .def_readwrite("precipitable_water", &Ancillary_Data_PY::precipitable_water)
-        .def_readwrite("a_h2o", &Ancillary_Data_PY::a_h2o)
-        .def_readwrite("b_h2o", &Ancillary_Data_PY::b_h2o)
-        .def_readwrite("c_h2o", &Ancillary_Data_PY::c_h2o)
-        .def_readwrite("d_h2o", &Ancillary_Data_PY::d_h2o)
-        .def_readwrite("e_h2o", &Ancillary_Data_PY::e_h2o)
-        .def_readwrite("f_h2o", &Ancillary_Data_PY::f_h2o)
-        .def_readwrite("g_h2o", &Ancillary_Data_PY::g_h2o)
         .def_readwrite("water_vapor_bands", &Ancillary_Data_PY::water_vapor_bands)
         .def_readwrite("num_water_vapor_bands", &Ancillary_Data_PY::num_water_vapor_bands);
 
@@ -394,5 +387,5 @@ PYBIND11_MODULE(gas_transmittance, m)
     m.def("o2_transmittance", py::overload_cast<const L1_Data_PY&, const Gas_Transmittance_Lookup_Table_PY& ,bool, Oxygen_A_Band_Option>(&o2_transmittance));
     m.def("n2o_transmittance", py::overload_cast<const L1_Data_PY&, const Gas_Transmittance_Lookup_Table_PY&, bool>(&n2o_transmittance));
     m.def("no2_transmittance", py::overload_cast<const L1_Data_PY&, const Ancillary_Data_PY&, bool>(&no2_transmittance));
-    m.def("h2o_transmittance", py::overload_cast<const L1_Data_PY&, const Ancillary_Data_PY&, const Gas_Transmittance_Lookup_Table_PY&, bool, bool>(&h2o_transmittance));
+    m.def("h2o_transmittance", py::overload_cast<const L1_Data_PY&, const Ancillary_Data_PY&, const Gas_Transmittance_Lookup_Table_PY&, bool>(&h2o_transmittance));
 }

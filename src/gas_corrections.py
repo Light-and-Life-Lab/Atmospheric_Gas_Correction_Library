@@ -155,7 +155,4 @@ class Gas_Correction_Manager:
         self.gas_transmittance_table.num_wavelengths = len(self.l1_data.wavelengths)
         self.gas_transmittance_table.h2o_transmittance = h2o_transmittance_at_sensor_wavelengths
 
-        # This option is not needed, will remove it from the API soon
-        use_gas_transmittance_table = True
-
-        return gas_transmittance.h2o_transmittance(self.l1_data, ancillary_data, self.gas_transmittance_table, use_gas_transmittance_lookup_table, use_gas_transmittance_table)
+        return gas_transmittance.h2o_transmittance(self.l1_data, ancillary_data, self.gas_transmittance_table, use_gas_transmittance_lookup_table)
