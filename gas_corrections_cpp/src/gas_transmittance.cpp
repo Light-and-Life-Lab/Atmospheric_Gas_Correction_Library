@@ -6,7 +6,6 @@ setup_pybind11(cfg)
 %>
 
 #include <tuple>
-#include <iostream>
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 
@@ -318,11 +317,6 @@ Gas_Transmittances_PY h2o_transmittance(const L1_Data_PY& l1_data, const Ancilla
     gas_transmittances_c.total = static_cast<double*>(gas_transmittances.total.request().ptr);
 
     h2o_transmittance(&l1_data_c, &ancillary_data_c, &gas_transmittance_table_c, &gas_transmittances_c, use_gas_transmittance_lookup_table);
-
-    // for (int i = 0; i < l1_data_c.num_pixels; i++)
-    // {
-    //     std::cout << gas_transmittances_c.solar_zenith[i] << std::endl;
-    // }
 
     return gas_transmittances;
 }
