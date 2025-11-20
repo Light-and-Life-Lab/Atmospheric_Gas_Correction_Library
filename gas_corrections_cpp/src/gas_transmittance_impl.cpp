@@ -339,10 +339,9 @@ void ch4_transmittance(L1_Data* l1_data, Gas_Transmittance_Lookup_Table* gas_tra
 
 void o2_transmittance(L1_Data* l1_data, Gas_Transmittance_Lookup_Table* gas_transmittance_table, Gas_Transmittances* gas_transmittances, bool use_gas_transmittance_lookup_table, Oxygen_A_Band_Option oxygen_A_band_option)  
 {
+    #pragma omp parallel for
     for (int ip = 0; ip < l1_data->num_pixels; ip++)
     {
-        int32_t iw;
-
         int32_t nwave = l1_data->num_wavelengths;
         int32_t ipb = ip*nwave;
 
@@ -388,7 +387,7 @@ void o2_transmittance(L1_Data* l1_data, Gas_Transmittance_Lookup_Table* gas_tran
 
         double* t_o2 = gas_transmittance_table->o2_transmittance;
 
-        for (iw = 0; iw < nwave; iw++) {
+        for (int iw = 0; iw < nwave; iw++) {
             if (use_gas_transmittance_lookup_table) 
             {
                 int32_t index=iw*gas_transmittance_table->num_amf_grid_points;
