@@ -8,7 +8,6 @@ from scipy import interpolate
 import time
 import pytest
 
-from gas_corrections_lib.gas_corrections_cpp.bin import gas_transmittance
 from gas_corrections_lib.src import gas_corrections
 
 save_transmittances = False
@@ -192,23 +191,25 @@ def load_gas_transmittances(gas_subfolder):
 
 
 # @pytest.mark.skip()
-def test_ozone_OCSSW(read_ozone_ancillary_data, 
+def test_ozone_OCSSW(set_up_gas_corrections,
+                     read_ozone_ancillary_data, 
                      read_PACE_geometry_data, 
                      read_OCSMART_ozone_transmittance_benchmark_data, 
                      read_OCSSW_ozone_transmittance_benchmark_data):
     
-    ancillary_data = gas_transmittance.Ancillary_Data()
+    ancillary_data = gas_corrections.Ancillary_Data()
     ancillary_data.ozone_absorption_cross_section, ancillary_data.ozone_concentration = read_ozone_ancillary_data
 
     # TODO: Adapt approach from OCSMART ancillary.py to read from ancillary files directly instead of .npy files
     # TODO: This will require interpolation of ozone data to l1b grid
-    l1_data = gas_transmittance.L1_Data()
+    l1_data = gas_corrections.L1_Data()
     l1_data.cos_solar_zenith, l1_data.cos_sensor_zenith = read_PACE_geometry_data
     l1_data.num_pixels = l1_data.cos_solar_zenith.shape[0] * l1_data.cos_solar_zenith.shape[1]
     l1_data.num_wavelengths = len(ancillary_data.ozone_absorption_cross_section)
     use_gas_transmittance_lookup_table = False
 
-    gas_transmittances = gas_transmittance.ozone_transmittance(l1_data, ancillary_data, use_gas_transmittance_lookup_table)
+    gas_transmittance_manager = set_up_gas_corrections
+    gas_transmittances = gas_transmittance_manager.ozone_transmittance(l1_data=l1_data, ancillary_data=ancillary_data, use_gas_transmittance_lookup_table=use_gas_transmittance_lookup_table)
 
     tg_sol_ocsmart, tg_sen_ocsmart, sensor_wavelengths = read_OCSMART_ozone_transmittance_benchmark_data
 
@@ -378,12 +379,13 @@ def test_n2o_OCSSW(set_up_gas_corrections,
 
 
 # @pytest.mark.skip()
-def test_no2_OCSSW(read_no2_ancillary_data, 
-                     read_PACE_geometry_data, 
-                     read_OCSMART_no2_transmittance_benchmark_data, 
-                     read_OCSSW_no2_transmittance_benchmark_data):
+def test_no2_OCSSW(set_up_gas_corrections,
+                   read_no2_ancillary_data, 
+                   read_PACE_geometry_data, 
+                   read_OCSMART_no2_transmittance_benchmark_data, 
+                   read_OCSSW_no2_transmittance_benchmark_data):
 
-    ancillary_data = gas_transmittance.Ancillary_Data()
+    ancillary_data = gas_corrections.Ancillary_Data()
     ancillary_data.no2_absorption_cross_section, \
     ancillary_data.fraction_tropospheric_no2_above_200m, \
     ancillary_data.tropospheric_no2_concentration, \
@@ -391,13 +393,14 @@ def test_no2_OCSSW(read_no2_ancillary_data,
 
     # TODO: Adapt approach from OCSMART ancillary.py to read from ancillary files directly instead of .npy files
     # TODO: This will require interpolation of ozone data to l1b grid
-    l1_data = gas_transmittance.L1_Data()
+    l1_data = gas_corrections.L1_Data()
     l1_data.cos_solar_zenith, l1_data.cos_sensor_zenith = read_PACE_geometry_data
     l1_data.num_pixels = l1_data.cos_solar_zenith.shape[0] * l1_data.cos_solar_zenith.shape[1]
     l1_data.num_wavelengths = len(ancillary_data.no2_absorption_cross_section)
     use_gas_transmittance_lookup_table = False
 
-    gas_transmittances = gas_transmittance.no2_transmittance(l1_data, ancillary_data, use_gas_transmittance_lookup_table)
+    gas_transmittance_manager = set_up_gas_corrections
+    gas_transmittances = gas_transmittance_manager.no2_transmittance(l1_data=l1_data, ancillary_data=ancillary_data, use_gas_transmittance_lookup_table=use_gas_transmittance_lookup_table)
 
     tg_sol_ocsmart, tg_sen_ocsmart, sensor_wavelengths = read_OCSMART_no2_transmittance_benchmark_data
 

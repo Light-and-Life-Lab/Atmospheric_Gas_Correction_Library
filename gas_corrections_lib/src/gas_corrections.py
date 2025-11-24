@@ -4,12 +4,28 @@ from scipy import interpolate
 
 from ..gas_corrections_cpp.bin import gas_transmittance
 
+
+def L1_Data():
+    return gas_transmittance.L1_Data()
+    
+
+def Ancillary_Data():
+    return gas_transmittance.Ancillary_Data()
+
+
+def validate_keyword_args(keyword_args):
+        for key, value in keyword_args.items():
+            if value is None:
+                raise ValueError(f"Keyword argument {key} cannot have value {value}. Please populate the {key} variable and pass it as a keyword argument.")
+
+
 class Gas_Correction_Manager:
     def __init__(self):
         self.l1_data = None
         self.l1_filename = None
         self.gas_transmittance_table = None
         self.gas_transmittance_table_filename = None
+            
 
     def read_PACE_data(self, l1_filename, **kwargs):
         if self.l1_data is not None and l1_filename == self.l1_filename:
@@ -113,70 +129,119 @@ class Gas_Correction_Manager:
             return self.gas_transmittance_table
 
 
-    def ozone_transmittance(self, ancillary_data, use_gas_transmittance_lookup_table=False):
-        return gas_transmittance.ozone_transmittance(self.l1_data, ancillary_data, use_gas_transmittance_lookup_table)
+    def ozone_transmittance(self, **kwargs):
+        l1_data = kwargs.get("l1_data", self.l1_data)
+        ancillary_data = kwargs.get("ancillary_data", None)
+        use_gas_transmittance_lookup_table = kwargs.get("use_gas_transmittance_lookup_table", False)
+
+        validate_keyword_args(kwargs)
+
+        return gas_transmittance.ozone_transmittance(l1_data, ancillary_data, use_gas_transmittance_lookup_table)
 
 
-    def co2_transmittance(self, use_gas_transmittance_lookup_table=True):
-        f = interpolate.interp1d(self.gas_transmittance_table.wavelengths, self.gas_transmittance_table.co2_transmittance, axis = 0)
-        co2_transmittance_sensor_wavelengths = f(self.l1_data.wavelengths)
+    def co2_transmittance(self, **kwargs):
+        l1_data = kwargs.get("l1_data", self.l1_data)
+        gas_transmittance_table = kwargs.get("gas_transmittance_table", self.gas_transmittance_table)
+        use_gas_transmittance_lookup_table = kwargs.get("use_gas_transmittance_lookup_table", True)
 
-        self.gas_transmittance_table.co2_transmittance = co2_transmittance_sensor_wavelengths
+        f = interpolate.interp1d(gas_transmittance_table.wavelengths, gas_transmittance_table.co2_transmittance, axis = 0)
+        co2_transmittance_sensor_wavelengths = f(l1_data.wavelengths)
 
-        return gas_transmittance.co2_transmittance(self.l1_data, self.gas_transmittance_table, use_gas_transmittance_lookup_table)
+        gas_transmittance_table.co2_transmittance = co2_transmittance_sensor_wavelengths
+
+        validate_keyword_args(kwargs)
+
+        return gas_transmittance.co2_transmittance(l1_data, gas_transmittance_table, use_gas_transmittance_lookup_table)
     
 
-    def co_transmittance(self, use_gas_transmittance_lookup_table=True):
-        f = interpolate.interp1d(self.gas_transmittance_table.wavelengths, self.gas_transmittance_table.co_transmittance, axis = 0)
-        co_transmittance_sensor_wavelengths = f(self.l1_data.wavelengths)
+    def co_transmittance(self, **kwargs):
+        l1_data = kwargs.get("l1_data", self.l1_data)
+        gas_transmittance_table = kwargs.get("gas_transmittance_table", self.gas_transmittance_table)
+        use_gas_transmittance_lookup_table = kwargs.get("use_gas_transmittance_lookup_table", True)
 
-        self.gas_transmittance_table.co_transmittance = co_transmittance_sensor_wavelengths
+        f = interpolate.interp1d(gas_transmittance_table.wavelengths, gas_transmittance_table.co_transmittance, axis = 0)
+        co_transmittance_sensor_wavelengths = f(l1_data.wavelengths)
 
-        return gas_transmittance.co_transmittance(self.l1_data, self.gas_transmittance_table, use_gas_transmittance_lookup_table)
+        gas_transmittance_table.co_transmittance = co_transmittance_sensor_wavelengths
+
+        validate_keyword_args(kwargs)
+
+        return gas_transmittance.co_transmittance(l1_data, gas_transmittance_table, use_gas_transmittance_lookup_table)
     
 
-    def ch4_transmittance(self, use_gas_transmittance_lookup_table=False):
-        f = interpolate.interp1d(self.gas_transmittance_table.wavelengths, self.gas_transmittance_table.ch4_transmittance, axis = 0)
-        ch4_transmittance_sensor_wavelengths = f(self.l1_data.wavelengths)
+    def ch4_transmittance(self, **kwargs):
+        l1_data = kwargs.get("l1_data", self.l1_data)
+        gas_transmittance_table = kwargs.get("gas_transmittance_table", self.gas_transmittance_table)
+        use_gas_transmittance_lookup_table = kwargs.get("use_gas_transmittance_lookup_table", False)
 
-        self.gas_transmittance_table.ch4_transmittance = ch4_transmittance_sensor_wavelengths
+        f = interpolate.interp1d(gas_transmittance_table.wavelengths, gas_transmittance_table.ch4_transmittance, axis = 0)
+        ch4_transmittance_sensor_wavelengths = f(l1_data.wavelengths)
 
-        return gas_transmittance.ch4_transmittance(self.l1_data, self.gas_transmittance_table, use_gas_transmittance_lookup_table)
+        gas_transmittance_table.ch4_transmittance = ch4_transmittance_sensor_wavelengths
+
+        validate_keyword_args(kwargs)
+
+        return gas_transmittance.ch4_transmittance(l1_data, gas_transmittance_table, use_gas_transmittance_lookup_table)
     
 
-    def n2o_transmittance(self, use_gas_transmittance_lookup_table=True):
-        f = interpolate.interp1d(self.gas_transmittance_table.wavelengths, self.gas_transmittance_table.n2o_transmittance, axis = 0)
-        n2o_transmittance_sensor_wavelengths = f(self.l1_data.wavelengths)
+    def n2o_transmittance(self, **kwargs):
+        l1_data = kwargs.get("l1_data", self.l1_data)
+        gas_transmittance_table = kwargs.get("gas_transmittance_table", self.gas_transmittance_table)
+        use_gas_transmittance_lookup_table = kwargs.get("use_gas_transmittance_lookup_table", True)
 
-        self.gas_transmittance_table.n2o_transmittance = n2o_transmittance_sensor_wavelengths
+        f = interpolate.interp1d(gas_transmittance_table.wavelengths, gas_transmittance_table.n2o_transmittance, axis = 0)
+        n2o_transmittance_sensor_wavelengths = f(l1_data.wavelengths)
 
-        return gas_transmittance.n2o_transmittance(self.l1_data, self.gas_transmittance_table, use_gas_transmittance_lookup_table)
+        gas_transmittance_table.n2o_transmittance = n2o_transmittance_sensor_wavelengths
+
+        validate_keyword_args(kwargs)
+
+        return gas_transmittance.n2o_transmittance(l1_data, gas_transmittance_table, use_gas_transmittance_lookup_table)
     
 
-    def no2_transmittance(self, ancillary_data, use_gas_transmittance_lookup_table=False):
-        return gas_transmittance.no2_transmittance(self.l1_data, ancillary_data, use_gas_transmittance_lookup_table)
+    def no2_transmittance(self, **kwargs):
+        l1_data = kwargs.get("l1_data", self.l1_data)
+        ancillary_data = kwargs.get("ancillary_data", None)
+        use_gas_transmittance_lookup_table = kwargs.get("use_gas_transmittance_lookup_table", False)
+
+        validate_keyword_args(kwargs)
+
+        return gas_transmittance.no2_transmittance(l1_data, ancillary_data, use_gas_transmittance_lookup_table)
     
 
-    def o2_transmittance(self, use_gas_transmittance_lookup_table=True, oxygen_A_band_option=gas_transmittance.Oxygen_A_Band_Option.TRANSMITTANCE_TABLE):
-        f = interpolate.interp1d(self.gas_transmittance_table.wavelengths, self.gas_transmittance_table.o2_transmittance, axis = 0)
-        o2_transmittance_sensor_wavelengths = f(self.l1_data.wavelengths)
+    def o2_transmittance(self, **kwargs):
+        l1_data = kwargs.get("l1_data", self.l1_data)
+        gas_transmittance_table = kwargs.get("gas_transmittance_table", self.gas_transmittance_table)
+        oxygen_A_band_option = kwargs.get("oxygen_A_band_option", gas_transmittance.Oxygen_A_Band_Option.TRANSMITTANCE_TABLE)
+        use_gas_transmittance_lookup_table = kwargs.get("use_gas_transmittance_lookup_table", True)
 
-        self.gas_transmittance_table.o2_transmittance = o2_transmittance_sensor_wavelengths
+        f = interpolate.interp1d(gas_transmittance_table.wavelengths, gas_transmittance_table.o2_transmittance, axis = 0)
+        o2_transmittance_sensor_wavelengths = f(l1_data.wavelengths)
 
-        return gas_transmittance.o2_transmittance(self.l1_data, self.gas_transmittance_table, use_gas_transmittance_lookup_table, oxygen_A_band_option)
+        gas_transmittance_table.o2_transmittance = o2_transmittance_sensor_wavelengths
+
+        validate_keyword_args(kwargs)
+
+        return gas_transmittance.o2_transmittance(l1_data, gas_transmittance_table, use_gas_transmittance_lookup_table, oxygen_A_band_option)
     
 
-    def h2o_transmittance(self, use_gas_transmittance_lookup_table=True):
+    def h2o_transmittance(self, **kwargs):
+        l1_data = kwargs.get("l1_data", self.l1_data)
+        gas_transmittance_table = kwargs.get("gas_transmittance_table", self.gas_transmittance_table)
+        use_gas_transmittance_lookup_table = kwargs.get("use_gas_transmittance_lookup_table", True)
+
         ancillary_data = gas_transmittance.Ancillary_Data()
 
-        ancillary_data.precipitable_water = np.zeros(self.l1_data.cos_solar_zenith.size)
+        ancillary_data.precipitable_water = np.zeros(l1_data.cos_solar_zenith.size)
         ancillary_data.water_vapor_bands = np.array([782, 817, 857], dtype=np.float64)
         ancillary_data.num_water_vapor_bands = ancillary_data.water_vapor_bands.size
 
-        f = interpolate.interp1d(self.gas_transmittance_table.wavelengths, self.gas_transmittance_table.h2o_transmittance, axis = 1)
-        h2o_transmittance_at_sensor_wavelengths = f(self.l1_data.wavelengths)
+        f = interpolate.interp1d(gas_transmittance_table.wavelengths, gas_transmittance_table.h2o_transmittance, axis = 1)
+        h2o_transmittance_at_sensor_wavelengths = f(l1_data.wavelengths)
 
-        self.gas_transmittance_table.num_wavelengths = len(self.l1_data.wavelengths)
-        self.gas_transmittance_table.h2o_transmittance = h2o_transmittance_at_sensor_wavelengths
+        gas_transmittance_table.num_wavelengths = len(l1_data.wavelengths)
+        gas_transmittance_table.h2o_transmittance = h2o_transmittance_at_sensor_wavelengths
 
-        return gas_transmittance.h2o_transmittance(self.l1_data, ancillary_data, self.gas_transmittance_table, use_gas_transmittance_lookup_table)
+        validate_keyword_args(kwargs)
+
+        return gas_transmittance.h2o_transmittance(l1_data, ancillary_data, gas_transmittance_table, use_gas_transmittance_lookup_table)
