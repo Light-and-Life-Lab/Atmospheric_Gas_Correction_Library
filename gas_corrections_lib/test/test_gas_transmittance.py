@@ -191,7 +191,7 @@ def load_gas_transmittances(gas_subfolder):
     return solar_zenith_saved, sensor_zenith_saved, total_saved
 
 
-@pytest.mark.skip()
+# @pytest.mark.skip()
 def test_ozone_OCSSW(read_ozone_ancillary_data, 
                      read_PACE_geometry_data, 
                      read_OCSMART_ozone_transmittance_benchmark_data, 
@@ -377,7 +377,7 @@ def test_n2o_OCSSW(set_up_gas_corrections,
     plt.savefig('test/PACE/n2o/transmittance_comparison.png')
 
 
-@pytest.mark.skip()
+# @pytest.mark.skip()
 def test_no2_OCSSW(read_no2_ancillary_data, 
                      read_PACE_geometry_data, 
                      read_OCSMART_no2_transmittance_benchmark_data, 

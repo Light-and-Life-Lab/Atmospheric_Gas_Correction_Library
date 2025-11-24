@@ -27,6 +27,10 @@ class Gas_Correction_Manager:
                 sensor_zenith = 0.01*np.array(f['/geolocation_data/sensor_zenith'][start_line:end_line, start_pixel:end_pixel])
                 l1_data.cos_solar_zenith = np.cos(np.deg2rad(solar_zenith))
                 l1_data.cos_sensor_zenith = np.cos(np.deg2rad(sensor_zenith))
+
+                l1_data.latitude = np.flip(np.array(f['/geolocation_data/latitude']), 0)
+                l1_data.longitude = np.flip(np.array(f['/geolocation_data/longitude']), 0)
+
                 blue_wavelengths = np.array(f['/sensor_band_parameters/blue_wavelength'][1:])
                 red_wavelengths = np.array(f['/sensor_band_parameters/red_wavelength'][3:])
                 sensor_wavelengths = np.zeros(len(blue_wavelengths) + len(red_wavelengths))
@@ -114,18 +118,38 @@ class Gas_Correction_Manager:
 
 
     def co2_transmittance(self, use_gas_transmittance_lookup_table=True):
+        f = interpolate.interp1d(self.gas_transmittance_table.wavelengths, self.gas_transmittance_table.co2_transmittance, axis = 0)
+        co2_transmittance_sensor_wavelengths = f(self.l1_data.wavelengths)
+
+        self.gas_transmittance_table.co2_transmittance = co2_transmittance_sensor_wavelengths
+
         return gas_transmittance.co2_transmittance(self.l1_data, self.gas_transmittance_table, use_gas_transmittance_lookup_table)
     
 
     def co_transmittance(self, use_gas_transmittance_lookup_table=True):
+        f = interpolate.interp1d(self.gas_transmittance_table.wavelengths, self.gas_transmittance_table.co_transmittance, axis = 0)
+        co_transmittance_sensor_wavelengths = f(self.l1_data.wavelengths)
+
+        self.gas_transmittance_table.co_transmittance = co_transmittance_sensor_wavelengths
+
         return gas_transmittance.co_transmittance(self.l1_data, self.gas_transmittance_table, use_gas_transmittance_lookup_table)
     
 
     def ch4_transmittance(self, use_gas_transmittance_lookup_table=False):
+        f = interpolate.interp1d(self.gas_transmittance_table.wavelengths, self.gas_transmittance_table.ch4_transmittance, axis = 0)
+        ch4_transmittance_sensor_wavelengths = f(self.l1_data.wavelengths)
+
+        self.gas_transmittance_table.ch4_transmittance = ch4_transmittance_sensor_wavelengths
+
         return gas_transmittance.ch4_transmittance(self.l1_data, self.gas_transmittance_table, use_gas_transmittance_lookup_table)
     
 
     def n2o_transmittance(self, use_gas_transmittance_lookup_table=True):
+        f = interpolate.interp1d(self.gas_transmittance_table.wavelengths, self.gas_transmittance_table.n2o_transmittance, axis = 0)
+        n2o_transmittance_sensor_wavelengths = f(self.l1_data.wavelengths)
+
+        self.gas_transmittance_table.n2o_transmittance = n2o_transmittance_sensor_wavelengths
+
         return gas_transmittance.n2o_transmittance(self.l1_data, self.gas_transmittance_table, use_gas_transmittance_lookup_table)
     
 

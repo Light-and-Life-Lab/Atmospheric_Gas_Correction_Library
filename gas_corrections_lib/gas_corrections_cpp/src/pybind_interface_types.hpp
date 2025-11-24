@@ -58,10 +58,14 @@ public:
     pybind11::array_t<double, pybind11::array::c_style> cos_solar_zenith{}; 
     pybind11::array_t<double, pybind11::array::c_style> cos_sensor_zenith{};
 
+    pybind11::array_t<double, pybind11::array::c_style> latitude{};
+    pybind11::array_t<double, pybind11::array::c_style> longitude{};
+
+    pybind11::array_t<double, pybind11::array::c_style> wavelengths{};
+
     int num_pixels{};
     int num_wavelengths{};
 
-    pybind11::array_t<double, pybind11::array::c_style> wavelengths{};
 };
 
 

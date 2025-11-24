@@ -359,6 +359,8 @@ PYBIND11_MODULE(gas_transmittance, m)
         .def_readwrite("reflectance", &L1_Data_PY::reflectance)
         .def_readwrite("cos_solar_zenith", &L1_Data_PY::cos_solar_zenith)
         .def_readwrite("cos_sensor_zenith", &L1_Data_PY::cos_sensor_zenith)
+        .def_readwrite("latitude", &L1_Data_PY::latitude)
+        .def_readwrite("longitude", &L1_Data_PY::longitude)
         .def_readwrite("num_pixels", &L1_Data_PY::num_pixels)
         .def_readwrite("num_wavelengths", &L1_Data_PY::num_wavelengths)
         .def_readwrite("wavelengths", &L1_Data_PY::wavelengths);

@@ -65,10 +65,15 @@ struct L1_Data
 
     double* cos_solar_zenith{}; 
     double* cos_sensor_zenith{};
+
+    double* latitude{};
+    double* longitude{};
+    
+    double* wavelengths{};
+
     int num_pixels{};
     int num_wavelengths{};
 
-    double* wavelengths{};
 };
 
 struct Gas_Transmittances
