@@ -13,8 +13,12 @@ def Ancillary_Data():
     return gas_transmittance.Ancillary_Data()
 
 
-def validate_keyword_args(keyword_args):
-        for key, value in keyword_args.items():
+def Oxygen_A_Band_Option():
+    return gas_transmittance.Oxygen_A_Band_Option
+
+
+def validate_keyword_args(args):
+        for key, value in args.items():
             if value is None:
                 raise ValueError(f"Keyword argument {key} cannot have value {value}. Please populate the {key} variable and pass it as a keyword argument.")
 
@@ -28,6 +32,32 @@ class Gas_Correction_Manager:
             
 
     def read_PACE_data(self, l1_filename, **kwargs):
+        """
+        Reads PACE data from a file in the NetCDF file format and stores it into the l1_data member variable.
+        The file contents are cached, so if this function is called for a second time on the same file name then the file contents
+        that were previously read will simply be returned again to prevent redundant (and potentially time consuming) file reads.
+        Optional keyword arguments can be provided to specify subimage (via start/end lines and start/end pixels).
+
+        Args: 
+            l1_filename (str): Name of the PACE NetCDF file to be read (with path included if necessary).
+
+        Keyword Args:
+            The following keyword args may be used to define a subimage of the PACE data. The keyword args are used as indices to
+                slice a numpy array, i.e. arr[start_line:end_line, start_pixel:end_pixel]. If no keyword args are specified,
+                then the whole image is used, i.e. arr[0:, 0:]
+            start_line (int): Used to define the first line (i.e. row) of a subimage. Default value is 0.
+            end_line (int): Used to define the last line (i.e. row) of a subimage. Default value is None.
+            start_pixel (int): Used to define the first line (i.e. column) of a subimage. Default value is 0.
+            end_line (int): Used to define the last line (i.e. column) of a subimage. Default value is None.
+
+        Returns (gas_transmittance.L1_Data):
+            An instance of the L1_Data class (available in the gas corrections library), which contains the PACE data that was read
+            by this function. It is the same instance of the class that is stored in the self.l1_data member variable.
+
+        Example Usage:
+            gas_correction_manager = gas_corrections.Gas_Correction_Manager()
+            gas_correction_manager.read_PACE_data('test/PACE/PACE_OCI.20240411T182012.L1B.V3.nc', start_line=0, end_line=100, start_pixel=0, end_pixel=100)
+        """
         if self.l1_data is not None and l1_filename == self.l1_filename:
             # Avoid redundant reading from a file we already read data from
             return self.l1_data
@@ -76,6 +106,22 @@ class Gas_Correction_Manager:
 
 
     def read_gas_transmittance_table(self, gas_transmittance_table_filename):
+        """
+        Reads gas transmittance lookup tables from a NetCDF file and stores them in the gas_transmittance_table member variable.
+        The file contents are cached, so if this function is called for a second time on the same file name then the file contents
+        that were previously read will simply be returned again to prevent redundant (and potentially time consuming) file reads.
+
+        Args:
+            gas_transmittance_table_filename (str): Name of the lookup table NetCDF file to be read (with path included if necessary).
+
+        Returns (gas_transmittance.Gas_Transmittance_Lookup_Table):
+            An instance of the Gas_Transmittance_Lookup_Table class (available in the gas corrections library), which contains the 
+            lookup tables read in by this function. It is the same instance of the class that is stored in the self.gas_transmittance_table member variable.
+
+        Example Usage:
+            gas_correction_manager = gas_corrections.Gas_Correction_Manager()
+            gas_correction_manager.read_gas_transmittance_table('test/PACE/oci_gas_transmittance_cia_amf_v3.2.nc')
+        """
         if self.gas_transmittance_table is not None and gas_transmittance_table_filename == self.gas_transmittance_table_filename:
             # Avoid redundant reading from a file we already read data from
             return self.gas_transmittance_table
@@ -129,119 +175,446 @@ class Gas_Correction_Manager:
             return self.gas_transmittance_table
 
 
-    def ozone_transmittance(self, **kwargs):
-        l1_data = kwargs.get("l1_data", self.l1_data)
-        ancillary_data = kwargs.get("ancillary_data", None)
-        use_gas_transmittance_lookup_table = kwargs.get("use_gas_transmittance_lookup_table", False)
+def ozone_transmittance(**kwargs):
+    """
+    Computes the ozone transmittance pixel-by-pixel for the image stored in the l1_data member variable.
 
-        validate_keyword_args(kwargs)
+    Keyword Args:
+        l1_data (gas_transmittance.L1_Data): An instance of the L1_Data class (available in the gas corrections library), which
+            contains the image for which transmittance data is to be applied. Default value is None.
+        ancillary_data (gas_transmittance.Ancillary_Data): An instance of the Ancillary_Data class (available in the gas corrections library),
+            which contains ozone cross section and ozone concentration data that has been interpolated to the L1 Data grid. Default value is None.
+        use_gas_transmittance_lookup_table (bool): Flag used to choose whether the algorithm in the gas corrections library uses
+            the gas transmittance lookup tables or an alternate approach that does not use the lookup tables. Default value is False.
 
-        return gas_transmittance.ozone_transmittance(l1_data, ancillary_data, use_gas_transmittance_lookup_table)
+    Returns:
+        Returns a dataclass with three members: (i) solar_zenith, (ii) sensor_zenith, and (iii) total. These contain arrays of 
+        the transmittance values computed along the slant paths at the solar and sensor zenith angles. The total
+        transmittance is the product of the solar zenith and sensor zenith transmittances. Each element of these matrices is 
+        a transmittance value corresponding to the pixel at the same index in the input L1 Data. For example, sensor_zenith[10, 50]
+        is the sensor zenith transmittance corresponding to the pixel located at l1_data[10, 50].
+
+    Example Usage:
+        Read in ozone data from appropriate ancillary file, e.g. ozone_climatology_v2014.hdf. Assume ozone lat and lon grids are
+        stored in oz_lat and oz_lon, and that ozone concentration values are stored in an array ozmap with the same dimensions.
+        Read in solar and sensor zenith arrays from L1 input file and store them in l1b_solz and l1b_senz.
+
+        cos_solar_zenith = np.cos(np.deg2rad(l1b_solz))
+        cos_sensor_zenith = np.cos(np.deg2rad(l1b_senz))
+
+        l1_data = gas_corrections.L1_Data()
+        l1_data.cos_solar_zenith = cos_solar_zenith
+        l1_data.cos_sensor_zenith = cos_sensor_zenith
+        l1_data.num_pixels = len(cos_solar_zenith)
+        l1_data.num_wavelengths = len(ozone_absorption_cross_section)
+
+        # Interpolate ozone map to the L1B grid
+        func = interpolate.RegularGridInterpolator((np.flip(oz_lat), oz_lon), np.flip(ozmap, 0))
+        ozone_concentration = func(np.array([l1b_lat, l1b_lon]).transpose())
+        ozone_concentration = ozone_concentration
+
+        ancillary_data = gas_corrections.Ancillary_Data()
+        ancillary_data.ozone_absorption_cross_section = ozone_absorption_cross_section
+        ancillary_data.ozone_concentration = ozone_concentration
+
+        gas_transmittances = gas_corrections.ozone_transmittance(l1_data=l1_data, \
+                                                                 ancillary_data=ancillary_data, \
+                                                                 use_gas_transmittance_lookup_table=False)
+    """
+    args = dict()
+    l1_data = args['l1_data'] = kwargs.get("l1_data", None)
+    ancillary_data = args['ancillary_data'] = kwargs.get("ancillary_data", None)
+    use_gas_transmittance_lookup_table = kwargs.get("use_gas_transmittance_lookup_table", False)
+
+    validate_keyword_args(args)
+
+    return gas_transmittance.ozone_transmittance(l1_data, ancillary_data, use_gas_transmittance_lookup_table)
 
 
-    def co2_transmittance(self, **kwargs):
-        l1_data = kwargs.get("l1_data", self.l1_data)
-        gas_transmittance_table = kwargs.get("gas_transmittance_table", self.gas_transmittance_table)
-        use_gas_transmittance_lookup_table = kwargs.get("use_gas_transmittance_lookup_table", True)
+def co2_transmittance(**kwargs):
+    """
+    Computes the Carbon Dioxide transmittance pixel-by-pixel for the image stored in the l1_data member variable.
 
-        f = interpolate.interp1d(gas_transmittance_table.wavelengths, gas_transmittance_table.co2_transmittance, axis = 0)
-        co2_transmittance_sensor_wavelengths = f(l1_data.wavelengths)
+    Keyword Args:
+        l1_data (gas_transmittance.L1_Data): An instance of the L1_Data class (available in the gas corrections library), which contains the image for which transmittance data is to be applied.
+            Default value is None.
+        gas_transmittance_table (gas_transmittance.Gas_Transmittance_Lookup_Table): An instance of the Gas_Transmittance_Lookup_Table class (available in the gas corrections library), which contains transmittance lookup tables read in from a NetCDF file. 
+            Default value is None.
+        use_gas_transmittance_lookup_table (bool): Flag used to choose whether the algorithm in the gas corrections library uses the gas transmittance lookup tables or an alternate approach that does not use the lookup tables.
+            Default value is True.
 
-        gas_transmittance_table.co2_transmittance = co2_transmittance_sensor_wavelengths
+    Returns:
+        Returns a dataclass with three members: (i) solar_zenith, (ii) sensor_zenith, and (iii) total. These contain arrays of 
+        the transmittance values computed along the slant paths at the solar and sensor zenith angles. The total
+        transmittance is the product of the solar zenith and sensor zenith transmittances. Each element of these matrices is 
+        a transmittance value corresponding to the pixel at the same index in the input L1 Data. For example, sensor_zenith[10, 50]
+        is the sensor zenith transmittance corresponding to the pixel located at l1_data[10, 50].
 
-        validate_keyword_args(kwargs)
+    Example Usage:
+        Read in solar and sensor zenith arrays from L1 input file and store them in l1b_solz and l1b_senz.
 
-        return gas_transmittance.co2_transmittance(l1_data, gas_transmittance_table, use_gas_transmittance_lookup_table)
-    
+        l1_data = gas_corrections.L1_Data()
+        l1_data.cos_solar_zenith = np.cos(np.deg2rad(l1b_solz))
+        l1_data.cos_sensor_zenith = np.cos(np.deg2rad(l1b_senz))
+        l1_data.num_pixels = len(l1_data.cos_solar_zenith)
+        l1_data.wavelengths = sensor_wavelengths
+        l1_data.num_wavelengths = len(l1_data.wavelengths)
 
-    def co_transmittance(self, **kwargs):
-        l1_data = kwargs.get("l1_data", self.l1_data)
-        gas_transmittance_table = kwargs.get("gas_transmittance_table", self.gas_transmittance_table)
-        use_gas_transmittance_lookup_table = kwargs.get("use_gas_transmittance_lookup_table", True)
+        gas_transmittance_manager = gas_corrections.Gas_Correction_Manager()
+        gas_transmittance_manager.read_gas_transmittance_table("oci_gas_transmittance_cia_amf_v3.2.nc")
 
-        f = interpolate.interp1d(gas_transmittance_table.wavelengths, gas_transmittance_table.co_transmittance, axis = 0)
-        co_transmittance_sensor_wavelengths = f(l1_data.wavelengths)
+        gas_transmittances = gas_corrections.co2_transmittance(l1_data=l1_data, \
+                                                               gas_transmittance_table=gas_transmittance_table, \
+                                                               use_gas_transmittance_lookup_table=True)
+    """
+    args = dict()
+    l1_data = args['l1_data'] = kwargs.get("l1_data", None)
+    gas_transmittance_table = args['gas_transmittance_table'] = kwargs.get("gas_transmittance_table", None)
+    use_gas_transmittance_lookup_table = kwargs.get("use_gas_transmittance_lookup_table", True)
 
-        gas_transmittance_table.co_transmittance = co_transmittance_sensor_wavelengths
+    validate_keyword_args(args)
 
-        validate_keyword_args(kwargs)
+    f = interpolate.interp1d(gas_transmittance_table.wavelengths, gas_transmittance_table.co2_transmittance, axis = 0)
+    co2_transmittance_sensor_wavelengths = f(l1_data.wavelengths)
 
-        return gas_transmittance.co_transmittance(l1_data, gas_transmittance_table, use_gas_transmittance_lookup_table)
-    
+    gas_transmittance_table.co2_transmittance = co2_transmittance_sensor_wavelengths
 
-    def ch4_transmittance(self, **kwargs):
-        l1_data = kwargs.get("l1_data", self.l1_data)
-        gas_transmittance_table = kwargs.get("gas_transmittance_table", self.gas_transmittance_table)
-        use_gas_transmittance_lookup_table = kwargs.get("use_gas_transmittance_lookup_table", False)
 
-        f = interpolate.interp1d(gas_transmittance_table.wavelengths, gas_transmittance_table.ch4_transmittance, axis = 0)
-        ch4_transmittance_sensor_wavelengths = f(l1_data.wavelengths)
+    return gas_transmittance.co2_transmittance(l1_data, gas_transmittance_table, use_gas_transmittance_lookup_table)
 
-        gas_transmittance_table.ch4_transmittance = ch4_transmittance_sensor_wavelengths
 
-        validate_keyword_args(kwargs)
+def co_transmittance(**kwargs):
+    """
+    Computes the Carbon Monoxide transmittance pixel-by-pixel for the image stored in the l1_data member variable.
 
-        return gas_transmittance.ch4_transmittance(l1_data, gas_transmittance_table, use_gas_transmittance_lookup_table)
-    
+    Keyword Args:
+        l1_data (gas_transmittance.L1_Data): An instance of the L1_Data class (available in the gas corrections library), which contains the image for which transmittance data is to be applied.
+            Default value is None.
+        gas_transmittance_table (gas_transmittance.Gas_Transmittance_Lookup_Table): An instance of the Gas_Transmittance_Lookup_Table class (available in the gas corrections library), which contains transmittance lookup tables read in from a NetCDF file. 
+            Default value is None.
+        use_gas_transmittance_lookup_table (bool): Flag used to choose whether the algorithm in the gas corrections library uses the gas transmittance lookup tables or an alternate approach that does not use the lookup tables.
+            Default value is True.
 
-    def n2o_transmittance(self, **kwargs):
-        l1_data = kwargs.get("l1_data", self.l1_data)
-        gas_transmittance_table = kwargs.get("gas_transmittance_table", self.gas_transmittance_table)
-        use_gas_transmittance_lookup_table = kwargs.get("use_gas_transmittance_lookup_table", True)
+    Returns:
+        Returns a dataclass with three members: (i) solar_zenith, (ii) sensor_zenith, and (iii) total. These contain arrays of 
+        the transmittance values computed along the slant paths at the solar and sensor zenith angles. The total
+        transmittance is the product of the solar zenith and sensor zenith transmittances. Each element of these matrices is 
+        a transmittance value corresponding to the pixel at the same index in the input L1 Data. For example, sensor_zenith[10, 50]
+        is the sensor zenith transmittance corresponding to the pixel located at l1_data[10, 50].
 
-        f = interpolate.interp1d(gas_transmittance_table.wavelengths, gas_transmittance_table.n2o_transmittance, axis = 0)
-        n2o_transmittance_sensor_wavelengths = f(l1_data.wavelengths)
+    Example Usage:
+        Read in solar and sensor zenith arrays from L1 input file and store them in l1b_solz and l1b_senz.
 
-        gas_transmittance_table.n2o_transmittance = n2o_transmittance_sensor_wavelengths
+        l1_data = gas_corrections.L1_Data()
+        l1_data.cos_solar_zenith = np.cos(np.deg2rad(l1b_solz))
+        l1_data.cos_sensor_zenith = np.cos(np.deg2rad(l1b_senz))
+        l1_data.num_pixels = len(l1_data.cos_solar_zenith)
+        l1_data.wavelengths = sensor_wavelengths
+        l1_data.num_wavelengths = len(l1_data.wavelengths)
 
-        validate_keyword_args(kwargs)
+        gas_transmittance_manager = gas_corrections.Gas_Correction_Manager()
+        gas_transmittance_manager.read_gas_transmittance_table("oci_gas_transmittance_cia_amf_v3.2.nc")
 
-        return gas_transmittance.n2o_transmittance(l1_data, gas_transmittance_table, use_gas_transmittance_lookup_table)
-    
+        gas_transmittances = gas_corrections.co_transmittance(l1_data=l1_data, \
+                                                              gas_transmittance_table=gas_transmittance_table, \
+                                                              use_gas_transmittance_lookup_table=True)
+    """
+    args = dict()
+    l1_data = args['l1_data'] = kwargs.get("l1_data", None)
+    gas_transmittance_table = args['gas_transmittance_table'] = kwargs.get("gas_transmittance_table", None)
+    use_gas_transmittance_lookup_table = kwargs.get("use_gas_transmittance_lookup_table", True)
 
-    def no2_transmittance(self, **kwargs):
-        l1_data = kwargs.get("l1_data", self.l1_data)
-        ancillary_data = kwargs.get("ancillary_data", None)
-        use_gas_transmittance_lookup_table = kwargs.get("use_gas_transmittance_lookup_table", False)
+    validate_keyword_args(args)
 
-        validate_keyword_args(kwargs)
+    f = interpolate.interp1d(gas_transmittance_table.wavelengths, gas_transmittance_table.co_transmittance, axis = 0)
+    co_transmittance_sensor_wavelengths = f(l1_data.wavelengths)
 
-        return gas_transmittance.no2_transmittance(l1_data, ancillary_data, use_gas_transmittance_lookup_table)
-    
+    gas_transmittance_table.co_transmittance = co_transmittance_sensor_wavelengths
 
-    def o2_transmittance(self, **kwargs):
-        l1_data = kwargs.get("l1_data", self.l1_data)
-        gas_transmittance_table = kwargs.get("gas_transmittance_table", self.gas_transmittance_table)
-        oxygen_A_band_option = kwargs.get("oxygen_A_band_option", gas_transmittance.Oxygen_A_Band_Option.TRANSMITTANCE_TABLE)
-        use_gas_transmittance_lookup_table = kwargs.get("use_gas_transmittance_lookup_table", True)
+    return gas_transmittance.co_transmittance(l1_data, gas_transmittance_table, use_gas_transmittance_lookup_table)
 
-        f = interpolate.interp1d(gas_transmittance_table.wavelengths, gas_transmittance_table.o2_transmittance, axis = 0)
-        o2_transmittance_sensor_wavelengths = f(l1_data.wavelengths)
 
-        gas_transmittance_table.o2_transmittance = o2_transmittance_sensor_wavelengths
+def ch4_transmittance(**kwargs):
+    """
+    Computes the Methane transmittance pixel-by-pixel for the image stored in the l1_data member variable.
 
-        validate_keyword_args(kwargs)
+    Keyword Args:
+        l1_data (gas_transmittance.L1_Data): An instance of the L1_Data class (available in the gas corrections library), which contains the image for which transmittance data is to be applied.
+            Default value is None.
+        gas_transmittance_table (gas_transmittance.Gas_Transmittance_Lookup_Table): An instance of the Gas_Transmittance_Lookup_Table class (available in the gas corrections library), which contains transmittance lookup tables read in from a NetCDF file. 
+            Default value is None.
+        use_gas_transmittance_lookup_table (bool): Flag used to choose whether the algorithm in the gas corrections library uses the gas transmittance lookup tables or an alternate approach that does not use the lookup tables.
+            Default value is False.
 
-        return gas_transmittance.o2_transmittance(l1_data, gas_transmittance_table, use_gas_transmittance_lookup_table, oxygen_A_band_option)
-    
+    Returns:
+        Returns a dataclass with three members: (i) solar_zenith, (ii) sensor_zenith, and (iii) total. These contain arrays of 
+        the transmittance values computed along the slant paths at the solar and sensor zenith angles. The total
+        transmittance is the product of the solar zenith and sensor zenith transmittances. Each element of these matrices is 
+        a transmittance value corresponding to the pixel at the same index in the input L1 Data. For example, sensor_zenith[10, 50]
+        is the sensor zenith transmittance corresponding to the pixel located at l1_data[10, 50].
 
-    def h2o_transmittance(self, **kwargs):
-        l1_data = kwargs.get("l1_data", self.l1_data)
-        gas_transmittance_table = kwargs.get("gas_transmittance_table", self.gas_transmittance_table)
-        use_gas_transmittance_lookup_table = kwargs.get("use_gas_transmittance_lookup_table", True)
+    Example Usage:
+        Read in solar and sensor zenith arrays from L1 input file and store them in l1b_solz and l1b_senz.
 
-        ancillary_data = gas_transmittance.Ancillary_Data()
+        l1_data = gas_corrections.L1_Data()
+        l1_data.cos_solar_zenith = np.cos(np.deg2rad(l1b_solz))
+        l1_data.cos_sensor_zenith = np.cos(np.deg2rad(l1b_senz))
+        l1_data.num_pixels = len(l1_data.cos_solar_zenith)
+        l1_data.wavelengths = sensor_wavelengths
+        l1_data.num_wavelengths = len(l1_data.wavelengths)
 
-        ancillary_data.precipitable_water = np.zeros(l1_data.cos_solar_zenith.size)
-        ancillary_data.water_vapor_bands = np.array([782, 817, 857], dtype=np.float64)
-        ancillary_data.num_water_vapor_bands = ancillary_data.water_vapor_bands.size
+        gas_transmittance_manager = gas_corrections.Gas_Correction_Manager()
+        gas_transmittance_manager.read_gas_transmittance_table("oci_gas_transmittance_cia_amf_v3.2.nc")
 
-        f = interpolate.interp1d(gas_transmittance_table.wavelengths, gas_transmittance_table.h2o_transmittance, axis = 1)
-        h2o_transmittance_at_sensor_wavelengths = f(l1_data.wavelengths)
+        gas_transmittances = gas_corrections.ch4_transmittance(l1_data=l1_data, \
+                                                               gas_transmittance_table=gas_transmittance_table, \
+                                                               use_gas_transmittance_lookup_table=False)
+    """
+    args = dict()
+    l1_data = args['l1_data'] = kwargs.get("l1_data", None)
+    gas_transmittance_table = args['gas_transmittance_table'] = kwargs.get("gas_transmittance_table", None)
+    use_gas_transmittance_lookup_table = kwargs.get("use_gas_transmittance_lookup_table", False)
 
-        gas_transmittance_table.num_wavelengths = len(l1_data.wavelengths)
-        gas_transmittance_table.h2o_transmittance = h2o_transmittance_at_sensor_wavelengths
+    validate_keyword_args(args)
 
-        validate_keyword_args(kwargs)
+    f = interpolate.interp1d(gas_transmittance_table.wavelengths, gas_transmittance_table.ch4_transmittance, axis = 0)
+    ch4_transmittance_sensor_wavelengths = f(l1_data.wavelengths)
 
-        return gas_transmittance.h2o_transmittance(l1_data, ancillary_data, gas_transmittance_table, use_gas_transmittance_lookup_table)
+    gas_transmittance_table.ch4_transmittance = ch4_transmittance_sensor_wavelengths
+
+    return gas_transmittance.ch4_transmittance(l1_data, gas_transmittance_table, use_gas_transmittance_lookup_table)
+
+
+def n2o_transmittance(**kwargs):
+    """
+    Computes the Nitrous Oxide transmittance pixel-by-pixel for the image stored in the l1_data member variable.
+
+    Keyword Args:
+        l1_data (gas_transmittance.L1_Data): An instance of the L1_Data class (available in the gas corrections library), which contains the image for which transmittance data is to be applied.
+            Default value is None.
+        ancillary_data (gas_transmittance.Ancillary_Data): An instance of the Ancillary_Data class (available in the gas corrections library),
+            which contains ozone cross section and ozone concentration data that has been interpolated to the L1 Data grid. Default value is None.
+        use_gas_transmittance_lookup_table (bool): Flag used to choose whether the algorithm in the gas corrections library uses the gas transmittance lookup tables or an alternate approach that does not use the lookup tables.
+            Default value is True.
+
+    Returns:
+        Returns a dataclass with three members: (i) solar_zenith, (ii) sensor_zenith, and (iii) total. These contain arrays of 
+        the transmittance values computed along the slant paths at the solar and sensor zenith angles. The total
+        transmittance is the product of the solar zenith and sensor zenith transmittances. Each element of these matrices is 
+        a transmittance value corresponding to the pixel at the same index in the input L1 Data. For example, sensor_zenith[10, 50]
+        is the sensor zenith transmittance corresponding to the pixel located at l1_data[10, 50].
+
+    Example Usage:
+        Read in solar and sensor zenith arrays from L1 input file and store them in l1b_solz and l1b_senz.
+
+        l1_data = gas_corrections.L1_Data()
+        l1_data.cos_solar_zenith = np.cos(np.deg2rad(l1b_solz))
+        l1_data.cos_sensor_zenith = np.cos(np.deg2rad(l1b_senz))
+        l1_data.num_pixels = len(l1_data.cos_solar_zenith)
+        l1_data.wavelengths = sensor_wavelengths
+        l1_data.num_wavelengths = len(l1_data.wavelengths)
+
+        gas_transmittance_manager = gas_corrections.Gas_Correction_Manager()
+        gas_transmittance_manager.read_gas_transmittance_table("oci_gas_transmittance_cia_amf_v3.2.nc")
+
+        gas_transmittances = gas_corrections.n2o_transmittance(l1_data=l1_data, \
+                                                               gas_transmittance_table=gas_transmittance_table, \
+                                                               use_gas_transmittance_lookup_table=False)
+    """
+    args = dict()
+    l1_data = args['l1_data'] = kwargs.get("l1_data", None)
+    gas_transmittance_table = args['gas_transmittance_table'] = kwargs.get("gas_transmittance_table", None)
+    use_gas_transmittance_lookup_table = kwargs.get("use_gas_transmittance_lookup_table", True)
+
+    validate_keyword_args(args)
+
+    f = interpolate.interp1d(gas_transmittance_table.wavelengths, gas_transmittance_table.n2o_transmittance, axis = 0)
+    n2o_transmittance_sensor_wavelengths = f(l1_data.wavelengths)
+
+    gas_transmittance_table.n2o_transmittance = n2o_transmittance_sensor_wavelengths
+
+    return gas_transmittance.n2o_transmittance(l1_data, gas_transmittance_table, use_gas_transmittance_lookup_table)
+
+
+def no2_transmittance(**kwargs):
+    """
+    Computes the Nitrogen Dioxide transmittance pixel-by-pixel for the image stored in the l1_data member variable.
+
+    Keyword Args:
+        l1_data (gas_transmittance.L1_Data): An instance of the L1_Data class (available in the gas corrections library), which contains the image for which transmittance data is to be applied.
+            Default value is None.
+        ancillary_data (gas_transmittance.Ancillary_Data): An instance of the Ancillary_Data class (available in the gas corrections library),
+            which contains no2 absorption cross section, stratospheric and tropospheric no2 concentrations, and fraction of no2 that lies above 200m.
+            All of these quantities must be interpolated to the L1 Data grid. Default value is None.
+        use_gas_transmittance_lookup_table (bool): Flag used to choose whether the algorithm in the gas corrections library uses the gas transmittance lookup tables or an alternate approach that does not use the lookup tables.
+            Default value is True.
+
+    Returns:
+        Returns a dataclass with three members: (i) solar_zenith, (ii) sensor_zenith, and (iii) total. These contain arrays of 
+        the transmittance values computed along the slant paths at the solar and sensor zenith angles. The total
+        transmittance is the product of the solar zenith and sensor zenith transmittances. Each element of these matrices is 
+        a transmittance value corresponding to the pixel at the same index in the input L1 Data. For example, sensor_zenith[10, 50]
+        is the sensor zenith transmittance corresponding to the pixel located at l1_data[10, 50].
+
+    Example Usage:
+        Read in no2 data from appropriate ancillary files, e.g. 'no2_climatology_v2013.hdf' and 'trop_f_no2_200m.hdf'. Assume no2 lat and lon grids are
+        stored in no2_lat and no2_lon, and that no2 concentration values in  the troposphere and stratosphere are stored in an arrays no2_tropo and no2_strat with the same dimensions.
+        Similarly, the fraction of no2 above 200 m is stored in an array no2_frac with associated lat/lon grids stored in no2_frac_lat and no2_frac_lon.
+        Read in solar and sensor zenith arrays from L1 input file and store them in l1b_solz and l1b_senz.
+
+        cos_solar_zenith = np.cos(np.deg2rad(l1b_solz))
+        cos_sensor_zenith = np.cos(np.deg2rad(l1b_senz))
+
+        l1_data = gas_corrections.L1_Data()
+        l1_data.cos_solar_zenith = cos_solar_zenith
+        l1_data.cos_sensor_zenith = cos_sensor_zenith
+        l1_data.num_pixels = len(cos_solar_zenith)
+        l1_data.num_wavelengths = len(no2_absorption_cross_section)
+        
+        # Interpolate no2 map to the L1B grid
+        func = interpolate.RegularGridInterpolator((np.flip(no2_frac_lat), no2_frac_lon), np.flip(no2_frac, 0))
+        fraction_tropospheric_no2_above_200m = func(np.array([l1b_lat, l1b_lon]).transpose())
+
+        no2_strat = no2_strat[int(month)-1, :, :]
+        func = interpolate.RegularGridInterpolator((np.flip(no2_lat), no2_lon), np.flip(no2_strat, 0))
+        stratospheric_no2_concentration = func(np.array([l1b_lat, l1b_lon]).transpose())
+
+        no2_tropo = no2_tropo[int(month)-1, :, :]
+        func = interpolate.RegularGridInterpolator((np.flip(no2_lat), no2_lon), np.flip(no2_tropo, 0))
+        tropospheric_no2_concentration = func(np.array([l1b_lat, l1b_lon]).transpose())
+
+        ancillary_data = gas_corrections.Ancillary_Data()
+        ancillary_data.no2_absorption_cross_section = no2_absorption_cross_section
+        ancillary_data.fraction_tropospheric_no2_above_200m = fraction_tropospheric_no2_above_200m
+        ancillary_data.tropospheric_no2_concentration = tropospheric_no2_concentration
+        ancillary_data.stratospheric_no2_concentration = stratospheric_no2_concentration
+
+        gas_transmittances = gas_corrections.no2_transmittance(l1_data=l1_data, \
+                                                               ancillary_data=ancillary_data,\
+                                                               use_gas_transmittance_lookup_table=False)
+    """
+    args = dict()
+    l1_data = args['l1_data'] = kwargs.get("l1_data", None)
+    ancillary_data = args['ancillary_data'] = kwargs.get("ancillary_data", None)
+    use_gas_transmittance_lookup_table = kwargs.get("use_gas_transmittance_lookup_table", False)
+
+    validate_keyword_args(args)
+
+    return gas_transmittance.no2_transmittance(l1_data, ancillary_data, use_gas_transmittance_lookup_table)
+
+
+def o2_transmittance(**kwargs):
+    """
+    Computes the Oxygen transmittance pixel-by-pixel for the image stored in the l1_data member variable.
+
+    Keyword Args:
+        l1_data (gas_transmittance.L1_Data): An instance of the L1_Data class (available in the gas corrections library), which contains the image for which transmittance data is to be applied.
+            Default value is None.
+        gas_transmittance_table (gas_transmittance.Gas_Transmittance_Lookup_Table): An instance of the Gas_Transmittance_Lookup_Table class (available in the gas corrections library), which contains transmittance lookup tables read in from a NetCDF file. 
+            Default value is None.
+        oxygen_A_band_option (gas_corrections.Oxygen_A_Band_Option): An set of enumerated values describing the different options for computing the oxygen transmittance. The options are:
+            NO_CORRECTION: Do not do any oxygen corrections
+            DING_GORDON: Apply Ding and Gordon (1995) correction
+            TRANSMITTANCE_TABLE: Apply oxygen transmittance from gas transmittance table
+            SURROUNDING_WINDOW_BANDS: Compute oxygen transmittance from A-band and surrounding window bands (requires AMF gas trasmittance table)
+            Default value is gas_corrections.Oxygen_A_Band_Option.TRANSMITTANCE_TABLE.
+        use_gas_transmittance_lookup_table (bool): Flag used to choose whether the algorithm in the gas corrections library uses the gas transmittance lookup tables or an alternate approach that does not use the lookup tables.
+            Default value is True.
+
+    Returns:
+        Returns a dataclass with three members: (i) solar_zenith, (ii) sensor_zenith, and (iii) total. These contain arrays of 
+        the transmittance values computed along the slant paths at the solar and sensor zenith angles. The total
+        transmittance is the product of the solar zenith and sensor zenith transmittances. Each element of these matrices is 
+        a transmittance value corresponding to the pixel at the same index in the input L1 Data. For example, sensor_zenith[10, 50]
+        is the sensor zenith transmittance corresponding to the pixel located at l1_data[10, 50].
+
+    Example Usage:
+        Read in solar and sensor zenith arrays from L1 input file and store them in l1b_solz and l1b_senz.
+
+        l1_data = gas_corrections.L1_Data()
+        l1_data.cos_sensor_zenith = np.cos(np.deg2rad(l1b_senz))
+        l1_data.cos_solar_zenith = np.cos(np.deg2rad(l1b_solz))
+        l1_data.num_pixels = len(l1_data.cos_solar_zenith)
+        l1_data.reflectance = l1b_reflectance
+        l1_data.wavelengths = sensor_wavelengths
+        l1_data.num_wavelengths = len(sensor_wavelengths)
+
+        gas_transmittance_table = gas_transmittance_manager.read_gas_transmittance_table(gas_transmittance_filepath)
+
+        gas_transmittances = gas_corrections.o2_transmittance(l1_data=l1_data, \
+                                                              gas_transmittance_table=gas_transmittance_table, \
+                                                              oxygen_A_band_option=gas_corrections.Oxygen_A_Band_Option.TRANSMITTANCE_TABLE, \
+                                                              use_gas_transmittance_lookup_table=True)
+    """
+    args = dict()
+    l1_data = args['l1_data'] = kwargs.get("l1_data", None)
+    gas_transmittance_table = args['gas_transmittance_table'] = kwargs.get("gas_transmittance_table", None)
+    oxygen_A_band_option = kwargs.get("oxygen_A_band_option", gas_transmittance.Oxygen_A_Band_Option.TRANSMITTANCE_TABLE)
+    use_gas_transmittance_lookup_table = kwargs.get("use_gas_transmittance_lookup_table", True)
+
+    validate_keyword_args(args)
+
+    f = interpolate.interp1d(gas_transmittance_table.wavelengths, gas_transmittance_table.o2_transmittance, axis = 0)
+    o2_transmittance_sensor_wavelengths = f(l1_data.wavelengths)
+
+    gas_transmittance_table.o2_transmittance = o2_transmittance_sensor_wavelengths
+
+    return gas_transmittance.o2_transmittance(l1_data, gas_transmittance_table, use_gas_transmittance_lookup_table, oxygen_A_band_option)
+
+
+def h2o_transmittance(**kwargs):
+    """
+    Computes the Oxygen transmittance pixel-by-pixel for the image stored in the l1_data member variable.
+
+    Keyword Args:
+        l1_data (gas_transmittance.L1_Data): An instance of the L1_Data class (available in the gas corrections library), which contains the image for which transmittance data is to be applied.
+            Default value is None.
+        gas_transmittance_table (gas_transmittance.Gas_Transmittance_Lookup_Table): An instance of the Gas_Transmittance_Lookup_Table class (available in the gas corrections library), which contains transmittance lookup tables read in from a NetCDF file. 
+            Default value is None.
+        use_gas_transmittance_lookup_table (bool): Flag used to choose whether the algorithm in the gas corrections library uses the gas transmittance lookup tables or an alternate approach that does not use the lookup tables.
+            Default value is True.
+
+    Returns:
+        Returns a dataclass with three members: (i) solar_zenith, (ii) sensor_zenith, and (iii) total. These contain arrays of 
+        the transmittance values computed along the slant paths at the solar and sensor zenith angles. The total
+        transmittance is the product of the solar zenith and sensor zenith transmittances. Each element of these matrices is 
+        a transmittance value corresponding to the pixel at the same index in the input L1 Data. For example, sensor_zenith[10, 50]
+        is the sensor zenith transmittance corresponding to the pixel located at l1_data[10, 50].
+
+    Example Usage:
+        Read in solar and sensor zenith arrays from L1 input file and store them in l1b_solz and l1b_senz.
+
+        l1_data = gas_corrections.L1_Data()
+        l1_data.cos_sensor_zenith = np.cos(np.deg2rad(l1b_senz))
+        l1_data.cos_solar_zenith = np.cos(np.deg2rad(l1b_solz))
+        l1_data.num_pixels = len(l1_data.cos_solar_zenith)
+        l1_data.reflectance = l1b_reflectance
+        l1_data.wavelengths = sensor_wavelengths
+        l1_data.num_wavelengths = len(sensor_wavelengths)
+
+        gas_transmittance_table = gas_transmittance_manager.read_gas_transmittance_table(gas_transmittance_filepath)
+
+        gas_transmittances = gas_corrections.h2o_transmittance(l1_data=l1_data, \
+                                                              gas_transmittance_table=gas_transmittance_table, \
+                                                              use_gas_transmittance_lookup_table=True)
+    """
+    args = dict()
+    l1_data = args['l1_data'] = kwargs.get("l1_data", None)
+    gas_transmittance_table = args['gas_transmittance_table'] = kwargs.get("gas_transmittance_table", None)
+    use_gas_transmittance_lookup_table = kwargs.get("use_gas_transmittance_lookup_table", True)
+
+    validate_keyword_args(args)
+
+    ancillary_data = gas_transmittance.Ancillary_Data()
+
+    ancillary_data.precipitable_water = np.zeros(l1_data.cos_solar_zenith.size)
+    ancillary_data.water_vapor_bands = np.array([782, 817, 857], dtype=np.float64)
+    ancillary_data.num_water_vapor_bands = ancillary_data.water_vapor_bands.size
+
+    f = interpolate.interp1d(gas_transmittance_table.wavelengths, gas_transmittance_table.h2o_transmittance, axis = 1)
+    h2o_transmittance_at_sensor_wavelengths = f(l1_data.wavelengths)
+
+    gas_transmittance_table.num_wavelengths = len(l1_data.wavelengths)
+    gas_transmittance_table.h2o_transmittance = h2o_transmittance_at_sensor_wavelengths        
+
+    return gas_transmittance.h2o_transmittance(l1_data, ancillary_data, gas_transmittance_table, use_gas_transmittance_lookup_table)
