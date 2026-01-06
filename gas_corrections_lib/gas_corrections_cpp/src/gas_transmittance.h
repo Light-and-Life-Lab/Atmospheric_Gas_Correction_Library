@@ -85,10 +85,9 @@ struct Gas_Transmittances
 
 enum Oxygen_A_Band_Option
 {
-    NO_CORRECTION,
-    DING_GORDON, // Apply Ding and Gordon (1995) correction
-    TRANSMITTANCE_TABLE, // Apply oxygen transmittance from gas transmittance table
-    SURROUNDING_WINDOW_BANDS, // Compute oxygen transmittance from A-band and surrounding window bands. Requires AMF gas trasmittance table
+    // Enum values are set to match those found in OCSSW
+    TRANSMITTANCE_TABLE = 2, // Apply oxygen transmittance from gas transmittance table
+    SURROUNDING_WINDOW_BANDS = 3, // Compute oxygen transmittance from A-band and surrounding window bands. Requires AMF gas trasmittance table.
 };
 
 void ozone_transmittance(L1_Data* l1_data, Ancillary_Data* ancillary_data, Gas_Transmittances* gas_transmittances, bool use_gas_transmittance_lookup_table);

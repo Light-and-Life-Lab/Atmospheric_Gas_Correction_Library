@@ -372,8 +372,6 @@ PYBIND11_MODULE(gas_transmittance, m)
         .def_readwrite("total", &Gas_Transmittances_PY::total);
 
     py::enum_<Oxygen_A_Band_Option>(m, "Oxygen_A_Band_Option", py::module_local())
-        .value("NO_CORRECTION", Oxygen_A_Band_Option::NO_CORRECTION)
-        .value("DING_GORDON", Oxygen_A_Band_Option::DING_GORDON)
         .value("TRANSMITTANCE_TABLE", Oxygen_A_Band_Option::TRANSMITTANCE_TABLE)
         .value("SURROUNDING_WINDOW_BANDS", Oxygen_A_Band_Option::SURROUNDING_WINDOW_BANDS);
 
