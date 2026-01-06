@@ -105,6 +105,80 @@ class Gas_Correction_Manager:
             return self.l1_data
 
 
+    def read_HICO_data(self, l1_filename, **kwargs):
+        """
+        Reads HICO data from a file in the NetCDF file format and stores it into the l1_data member variable.
+        The file contents are cached, so if this function is called for a second time on the same file name then the file contents
+        that were previously read will simply be returned again to prevent redundant (and potentially time consuming) file reads.
+        Optional keyword arguments can be provided to specify subimage (via start/end lines and start/end pixels).
+
+        Args: 
+            l1_filename (str): Name of the HICO NetCDF file to be read (with path included if necessary).
+
+        Keyword Args:
+            The following keyword args may be used to define a subimage of the HICO data. The keyword args are used as indices to
+                slice a numpy array, i.e. arr[start_line:end_line, start_pixel:end_pixel]. If no keyword args are specified,
+                then the whole image is used, i.e. arr[0:, 0:]
+            start_line (int): Used to define the first line (i.e. row) of a subimage. Default value is 0.
+            end_line (int): Used to define the last line (i.e. row) of a subimage. Default value is None.
+            start_pixel (int): Used to define the first line (i.e. column) of a subimage. Default value is 0.
+            end_line (int): Used to define the last line (i.e. column) of a subimage. Default value is None.
+
+        Returns (gas_transmittance.L1_Data):
+            An instance of the L1_Data class (available in the gas corrections library), which contains the PACE data that was read
+            by this function. It is the same instance of the class that is stored in the self.l1_data member variable.
+
+        Example Usage:
+            gas_correction_manager = gas_corrections.Gas_Correction_Manager()
+            gas_correction_manager.read_PACE_data('test/PACE/PACE_OCI.20240411T182012.L1B.V3.nc', start_line=0, end_line=100, start_pixel=0, end_pixel=100)
+        """
+        if self.l1_data is not None and l1_filename == self.l1_filename:
+            # Avoid redundant reading from a file we already read data from
+            return self.l1_data
+        else:
+            l1_data = gas_transmittance.L1_Data()
+            start_line = kwargs.get("start_line", 0)
+            end_line = kwargs.get("end_line", None)
+            start_pixel = kwargs.get("start_pixel", 0)
+            end_pixel = kwargs.get("end_pixel", None)
+
+            with h5py.File(l1_filename, 'r') as f:
+                solar_zenith = 0.01*np.array(f['/navigation/solar_zenith'][start_line:end_line, start_pixel:end_pixel])
+                sensor_zenith = 0.01*np.array(f['/navigation/sensor_zenith'][start_line:end_line, start_pixel:end_pixel])
+                l1_data.cos_solar_zenith = np.cos(np.deg2rad(solar_zenith))
+                l1_data.cos_sensor_zenith = np.cos(np.deg2rad(sensor_zenith))
+
+                l1_data.latitude = np.flip(np.array(f['/navigation/latitudes']), 0)
+                l1_data.longitude = np.flip(np.array(f['/navigation/longitudes']), 0)
+
+                # blue_wavelengths = np.array(f['/sensor_band_parameters/blue_wavelength'][1:])
+                # red_wavelengths = np.array(f['/sensor_band_parameters/red_wavelength'][3:])
+                # sensor_wavelengths = np.zeros(len(blue_wavelengths) + len(red_wavelengths))
+                # sensor_wavelengths[0:len(blue_wavelengths)] = blue_wavelengths
+                # sensor_wavelengths[len(blue_wavelengths):] = red_wavelengths
+
+                # blue_rhot = np.array(f['/observation_data/rhot_blue'][1:, start_line:end_line, start_pixel:end_pixel])
+                # red_rhot = np.array(f['/observation_data/rhot_red'][3:, start_line:end_line, start_pixel:end_pixel])
+                # assert(blue_rhot.shape[1] == red_rhot.shape[1])
+                # assert(blue_rhot.shape[2] == red_rhot.shape[2])
+
+                # rhot = np.zeros((blue_rhot.shape[0] + red_rhot.shape[0], blue_rhot.shape[1], blue_rhot.shape[2]))
+                # rhot[0:len(blue_wavelengths), :, :] = blue_rhot
+                # rhot[len(blue_wavelengths):, :, :] = red_rhot
+                # rhot = np.rollaxis(rhot, 0, 3)
+                # l1_data.reflectance = rhot/np.pi*l1_data.cos_sensor_zenith[:, :, None]
+
+                # assert(len(sensor_wavelengths) == l1_data.reflectance.shape[2])
+
+                # l1_data.wavelengths = sensor_wavelengths
+                l1_data.num_pixels = len(l1_data.cos_solar_zenith.flatten())
+                # l1_data.num_wavelengths = len(l1_data.wavelengths)
+
+            self.l1_filename = l1_filename
+            self.l1_data = l1_data
+            return self.l1_data
+
+
     def read_gas_transmittance_table(self, gas_transmittance_table_filename):
         """
         Reads gas transmittance lookup tables from a NetCDF file and stores them in the gas_transmittance_table member variable.
