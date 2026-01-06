@@ -228,6 +228,18 @@ def ozone_transmittance(**kwargs):
 
     validate_keyword_args(args)
 
+    assert(l1_data.cos_solar_zenith.size != 0)
+    assert(l1_data.cos_sensor_zenith.size != 0)
+    assert(ancillary_data.ozone_concentration.size != 0)
+    assert(ancillary_data.ozone_absorption_cross_section.size != 0)
+
+    assert(l1_data.cos_solar_zenith.shape == l1_data.cos_sensor_zenith.shape)
+    assert(l1_data.cos_solar_zenith.shape == ancillary_data.ozone_concentration.shape)
+    assert(l1_data.num_pixels == l1_data.cos_solar_zenith.size)
+    assert(l1_data.num_pixels == l1_data.cos_sensor_zenith.size)
+    assert(l1_data.num_pixels == ancillary_data.ozone_concentration.size)
+    assert(l1_data.num_wavelengths == ancillary_data.ozone_absorption_cross_section.size)
+
     return gas_transmittance.ozone_transmittance(l1_data, ancillary_data, use_gas_transmittance_lookup_table)
 
 
@@ -274,11 +286,23 @@ def co2_transmittance(**kwargs):
 
     validate_keyword_args(args)
 
+    l1_data.num_wavelengths = len(l1_data.wavelengths)
+
     f = interpolate.interp1d(gas_transmittance_table.wavelengths, gas_transmittance_table.co2_transmittance, axis = 0)
     co2_transmittance_sensor_wavelengths = f(l1_data.wavelengths)
 
     gas_transmittance_table.co2_transmittance = co2_transmittance_sensor_wavelengths
 
+    assert(l1_data.cos_solar_zenith.size != 0)
+    assert(l1_data.cos_sensor_zenith.size != 0)
+    assert(l1_data.wavelengths.size != 0)
+    assert(gas_transmittance_table.co2_transmittance.size != 0)
+
+    assert(l1_data.cos_solar_zenith.shape == l1_data.cos_sensor_zenith.shape)
+    assert(l1_data.num_pixels == l1_data.cos_solar_zenith.size)
+    assert(l1_data.num_pixels == l1_data.cos_sensor_zenith.size)
+    assert(l1_data.num_wavelengths == l1_data.wavelengths.size)
+    assert(l1_data.num_wavelengths == gas_transmittance_table.co2_transmittance.shape[0])
 
     return gas_transmittance.co2_transmittance(l1_data, gas_transmittance_table, use_gas_transmittance_lookup_table)
 
@@ -326,10 +350,23 @@ def co_transmittance(**kwargs):
 
     validate_keyword_args(args)
 
+    l1_data.num_wavelengths = len(l1_data.wavelengths)
+
     f = interpolate.interp1d(gas_transmittance_table.wavelengths, gas_transmittance_table.co_transmittance, axis = 0)
     co_transmittance_sensor_wavelengths = f(l1_data.wavelengths)
 
     gas_transmittance_table.co_transmittance = co_transmittance_sensor_wavelengths
+
+    assert(l1_data.cos_solar_zenith.size != 0)
+    assert(l1_data.cos_sensor_zenith.size != 0)
+    assert(l1_data.wavelengths.size != 0)
+    assert(gas_transmittance_table.co_transmittance.size != 0)
+
+    assert(l1_data.cos_solar_zenith.shape == l1_data.cos_sensor_zenith.shape)
+    assert(l1_data.num_pixels == l1_data.cos_solar_zenith.size)
+    assert(l1_data.num_pixels == l1_data.cos_sensor_zenith.size)
+    assert(l1_data.num_wavelengths == l1_data.wavelengths.size)
+    assert(l1_data.num_wavelengths == gas_transmittance_table.co_transmittance.shape[0])
 
     return gas_transmittance.co_transmittance(l1_data, gas_transmittance_table, use_gas_transmittance_lookup_table)
 
@@ -377,10 +414,23 @@ def ch4_transmittance(**kwargs):
 
     validate_keyword_args(args)
 
+    l1_data.num_wavelengths = len(l1_data.wavelengths)
+
     f = interpolate.interp1d(gas_transmittance_table.wavelengths, gas_transmittance_table.ch4_transmittance, axis = 0)
     ch4_transmittance_sensor_wavelengths = f(l1_data.wavelengths)
 
     gas_transmittance_table.ch4_transmittance = ch4_transmittance_sensor_wavelengths
+
+    assert(l1_data.cos_solar_zenith.size != 0)
+    assert(l1_data.cos_sensor_zenith.size != 0)
+    assert(l1_data.wavelengths.size != 0)
+    assert(gas_transmittance_table.ch4_transmittance.size != 0)
+
+    assert(l1_data.cos_solar_zenith.shape == l1_data.cos_sensor_zenith.shape)
+    assert(l1_data.num_pixels == l1_data.cos_solar_zenith.size)
+    assert(l1_data.num_pixels == l1_data.cos_sensor_zenith.size)
+    assert(l1_data.num_wavelengths == l1_data.wavelengths.size)
+    assert(l1_data.num_wavelengths == gas_transmittance_table.ch4_transmittance.shape[0])
 
     return gas_transmittance.ch4_transmittance(l1_data, gas_transmittance_table, use_gas_transmittance_lookup_table)
 
@@ -428,10 +478,23 @@ def n2o_transmittance(**kwargs):
 
     validate_keyword_args(args)
 
+    l1_data.num_wavelengths = len(l1_data.wavelengths)
+
     f = interpolate.interp1d(gas_transmittance_table.wavelengths, gas_transmittance_table.n2o_transmittance, axis = 0)
     n2o_transmittance_sensor_wavelengths = f(l1_data.wavelengths)
 
     gas_transmittance_table.n2o_transmittance = n2o_transmittance_sensor_wavelengths
+
+    assert(l1_data.cos_solar_zenith.size != 0)
+    assert(l1_data.cos_sensor_zenith.size != 0)
+    assert(l1_data.wavelengths.size != 0)
+    assert(gas_transmittance_table.n2o_transmittance.size != 0)
+
+    assert(l1_data.cos_solar_zenith.shape == l1_data.cos_sensor_zenith.shape)
+    assert(l1_data.num_pixels == l1_data.cos_solar_zenith.size)
+    assert(l1_data.num_pixels == l1_data.cos_sensor_zenith.size)
+    assert(l1_data.num_wavelengths == l1_data.wavelengths.size)
+    assert(l1_data.num_wavelengths == gas_transmittance_table.n2o_transmittance.shape[0])
 
     return gas_transmittance.n2o_transmittance(l1_data, gas_transmittance_table, use_gas_transmittance_lookup_table)
 
