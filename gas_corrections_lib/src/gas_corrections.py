@@ -254,12 +254,10 @@ def ozone_transmittance(**kwargs):
     Computes the ozone transmittance pixel-by-pixel for the image stored in the l1_data member variable.
 
     Keyword Args:
-        l1_data (gas_transmittance.L1_Data): An instance of the L1_Data class (available in the gas corrections library), which
+        **l1_data (gas_transmittance.L1_Data)**: An instance of the L1_Data class (available in the gas corrections library), which
             contains the image for which transmittance data is to be applied. Default value is None.
-        ancillary_data (gas_transmittance.Ancillary_Data): An instance of the Ancillary_Data class (available in the gas corrections library),
+        **ancillary_data (gas_transmittance.Ancillary_Data)**: An instance of the Ancillary_Data class (available in the gas corrections library),
             which contains ozone cross section and ozone concentration data that has been interpolated to the L1 Data grid. Default value is None.
-        use_gas_transmittance_lookup_table (bool): Flag used to choose whether the algorithm in the gas corrections library uses
-            the gas transmittance lookup tables or an alternate approach that does not use the lookup tables. Default value is False.
 
     Returns:
         Returns a dataclass with three members: (i) solar_zenith, (ii) sensor_zenith, and (iii) total. These contain arrays of 
@@ -292,13 +290,11 @@ def ozone_transmittance(**kwargs):
         ancillary_data.ozone_concentration = ozone_concentration
 
         gas_transmittances = gas_corrections.ozone_transmittance(l1_data=l1_data, \
-                                                                 ancillary_data=ancillary_data, \
-                                                                 use_gas_transmittance_lookup_table=False)
+                                                                 ancillary_data=ancillary_data)
     """
     args = dict()
     l1_data = args['l1_data'] = kwargs.get("l1_data", None)
     ancillary_data = args['ancillary_data'] = kwargs.get("ancillary_data", None)
-    use_gas_transmittance_lookup_table = kwargs.get("use_gas_transmittance_lookup_table", False)
 
     validate_keyword_args(args)
 
@@ -314,7 +310,7 @@ def ozone_transmittance(**kwargs):
     assert(l1_data.num_pixels == ancillary_data.ozone_concentration.size)
     assert(l1_data.num_wavelengths == ancillary_data.ozone_absorption_cross_section.size)
 
-    return gas_transmittance.ozone_transmittance(l1_data, ancillary_data, use_gas_transmittance_lookup_table)
+    return gas_transmittance.ozone_transmittance(l1_data, ancillary_data)
 
 
 def co2_transmittance(**kwargs):
@@ -322,11 +318,11 @@ def co2_transmittance(**kwargs):
     Computes the Carbon Dioxide transmittance pixel-by-pixel for the image stored in the l1_data member variable.
 
     Keyword Args:
-        l1_data (gas_transmittance.L1_Data): An instance of the L1_Data class (available in the gas corrections library), which contains the image for which transmittance data is to be applied.
+        **l1_data (gas_transmittance.L1_Data)**: An instance of the L1_Data class (available in the gas corrections library), which contains the image for which transmittance data is to be applied.
             Default value is None.
-        gas_transmittance_table (gas_transmittance.Gas_Transmittance_Lookup_Table): An instance of the Gas_Transmittance_Lookup_Table class (available in the gas corrections library), which contains transmittance lookup tables read in from a NetCDF file. 
+        **gas_transmittance_table (gas_transmittance.Gas_Transmittance_Lookup_Table)**: An instance of the Gas_Transmittance_Lookup_Table class (available in the gas corrections library), which contains transmittance lookup tables read in from a NetCDF file. 
             Default value is None.
-        use_gas_transmittance_lookup_table (bool): Flag used to choose whether the algorithm in the gas corrections library uses the gas transmittance lookup tables or an alternate approach that does not use the lookup tables.
+        **use_gas_transmittance_lookup_table (bool)**: Flag used to choose whether the algorithm in the gas corrections library uses the gas transmittance lookup tables or an alternate approach that does not use the lookup tables.
             Default value is True.
 
     Returns:
@@ -386,11 +382,11 @@ def co_transmittance(**kwargs):
     Computes the Carbon Monoxide transmittance pixel-by-pixel for the image stored in the l1_data member variable.
 
     Keyword Args:
-        l1_data (gas_transmittance.L1_Data): An instance of the L1_Data class (available in the gas corrections library), which contains the image for which transmittance data is to be applied.
+        **l1_data (gas_transmittance.L1_Data)**: An instance of the L1_Data class (available in the gas corrections library), which contains the image for which transmittance data is to be applied.
             Default value is None.
-        gas_transmittance_table (gas_transmittance.Gas_Transmittance_Lookup_Table): An instance of the Gas_Transmittance_Lookup_Table class (available in the gas corrections library), which contains transmittance lookup tables read in from a NetCDF file. 
+        **gas_transmittance_table (gas_transmittance.Gas_Transmittance_Lookup_Table)**: An instance of the Gas_Transmittance_Lookup_Table class (available in the gas corrections library), which contains transmittance lookup tables read in from a NetCDF file. 
             Default value is None.
-        use_gas_transmittance_lookup_table (bool): Flag used to choose whether the algorithm in the gas corrections library uses the gas transmittance lookup tables or an alternate approach that does not use the lookup tables.
+        **use_gas_transmittance_lookup_table (bool)**: Flag used to choose whether the algorithm in the gas corrections library uses the gas transmittance lookup tables or an alternate approach that does not use the lookup tables.
             Default value is True.
 
     Returns:
@@ -450,11 +446,11 @@ def ch4_transmittance(**kwargs):
     Computes the Methane transmittance pixel-by-pixel for the image stored in the l1_data member variable.
 
     Keyword Args:
-        l1_data (gas_transmittance.L1_Data): An instance of the L1_Data class (available in the gas corrections library), which contains the image for which transmittance data is to be applied.
+        **l1_data (gas_transmittance.L1_Data)**: An instance of the L1_Data class (available in the gas corrections library), which contains the image for which transmittance data is to be applied.
             Default value is None.
-        gas_transmittance_table (gas_transmittance.Gas_Transmittance_Lookup_Table): An instance of the Gas_Transmittance_Lookup_Table class (available in the gas corrections library), which contains transmittance lookup tables read in from a NetCDF file. 
+        **gas_transmittance_table (gas_transmittance.Gas_Transmittance_Lookup_Table)**: An instance of the Gas_Transmittance_Lookup_Table class (available in the gas corrections library), which contains transmittance lookup tables read in from a NetCDF file. 
             Default value is None.
-        use_gas_transmittance_lookup_table (bool): Flag used to choose whether the algorithm in the gas corrections library uses the gas transmittance lookup tables or an alternate approach that does not use the lookup tables.
+        **use_gas_transmittance_lookup_table (bool)**: Flag used to choose whether the algorithm in the gas corrections library uses the gas transmittance lookup tables or an alternate approach that does not use the lookup tables.
             Default value is True.
 
     Returns:
@@ -514,11 +510,11 @@ def n2o_transmittance(**kwargs):
     Computes the Nitrous Oxide transmittance pixel-by-pixel for the image stored in the l1_data member variable.
 
     Keyword Args:
-        l1_data (gas_transmittance.L1_Data): An instance of the L1_Data class (available in the gas corrections library), which contains the image for which transmittance data is to be applied.
+        **l1_data (gas_transmittance.L1_Data)**: An instance of the L1_Data class (available in the gas corrections library), which contains the image for which transmittance data is to be applied.
             Default value is None.
-        ancillary_data (gas_transmittance.Ancillary_Data): An instance of the Ancillary_Data class (available in the gas corrections library),
+        **ancillary_data (gas_transmittance.Ancillary_Data)**: An instance of the Ancillary_Data class (available in the gas corrections library),
             which contains ozone cross section and ozone concentration data that has been interpolated to the L1 Data grid. Default value is None.
-        use_gas_transmittance_lookup_table (bool): Flag used to choose whether the algorithm in the gas corrections library uses the gas transmittance lookup tables or an alternate approach that does not use the lookup tables.
+        **use_gas_transmittance_lookup_table (bool)**: Flag used to choose whether the algorithm in the gas corrections library uses the gas transmittance lookup tables or an alternate approach that does not use the lookup tables.
             Default value is True.
 
     Returns:
@@ -578,13 +574,11 @@ def no2_transmittance(**kwargs):
     Computes the Nitrogen Dioxide transmittance pixel-by-pixel for the image stored in the l1_data member variable.
 
     Keyword Args:
-        l1_data (gas_transmittance.L1_Data): An instance of the L1_Data class (available in the gas corrections library), which contains the image for which transmittance data is to be applied.
+        **l1_data (gas_transmittance.L1_Data)**: An instance of the L1_Data class (available in the gas corrections library), which contains the image for which transmittance data is to be applied.
             Default value is None.
-        ancillary_data (gas_transmittance.Ancillary_Data): An instance of the Ancillary_Data class (available in the gas corrections library),
+        **ancillary_data (gas_transmittance.Ancillary_Data)**: An instance of the Ancillary_Data class (available in the gas corrections library),
             which contains no2 absorption cross section, stratospheric and tropospheric no2 concentrations, and fraction of no2 that lies above 200m.
             All of these quantities must be interpolated to the L1 Data grid. Default value is None.
-        use_gas_transmittance_lookup_table (bool): Flag used to choose whether the algorithm in the gas corrections library uses the gas transmittance lookup tables or an alternate approach that does not use the lookup tables.
-            Default value is False.
 
     Returns:
         Returns a dataclass with three members: (i) solar_zenith, (ii) sensor_zenith, and (iii) total. These contain arrays of 
@@ -627,17 +621,15 @@ def no2_transmittance(**kwargs):
         ancillary_data.stratospheric_no2_concentration = stratospheric_no2_concentration
 
         gas_transmittances = gas_corrections.no2_transmittance(l1_data=l1_data, \
-                                                               ancillary_data=ancillary_data,\
-                                                               use_gas_transmittance_lookup_table=False)
+                                                               ancillary_data=ancillary_data)
     """
     args = dict()
     l1_data = args['l1_data'] = kwargs.get("l1_data", None)
     ancillary_data = args['ancillary_data'] = kwargs.get("ancillary_data", None)
-    use_gas_transmittance_lookup_table = kwargs.get("use_gas_transmittance_lookup_table", False)
 
     validate_keyword_args(args)
 
-    return gas_transmittance.no2_transmittance(l1_data, ancillary_data, use_gas_transmittance_lookup_table)
+    return gas_transmittance.no2_transmittance(l1_data, ancillary_data)
 
 
 def o2_transmittance(**kwargs):
@@ -645,17 +637,17 @@ def o2_transmittance(**kwargs):
     Computes the Oxygen transmittance pixel-by-pixel for the image stored in the l1_data member variable.
 
     Keyword Args:
-        l1_data (gas_transmittance.L1_Data): An instance of the L1_Data class (available in the gas corrections library), which contains the image for which transmittance data is to be applied.
+        **l1_data (gas_transmittance.L1_Data)**: An instance of the L1_Data class (available in the gas corrections library), which contains the image for which transmittance data is to be applied.
             Default value is None.
-        gas_transmittance_table (gas_transmittance.Gas_Transmittance_Lookup_Table): An instance of the Gas_Transmittance_Lookup_Table class (available in the gas corrections library), which contains transmittance lookup tables read in from a NetCDF file. 
+        **gas_transmittance_table (gas_transmittance.Gas_Transmittance_Lookup_Table)**: An instance of the Gas_Transmittance_Lookup_Table class (available in the gas corrections library), which contains transmittance lookup tables read in from a NetCDF file. 
             Default value is None.
-        oxygen_A_band_option (gas_corrections.Oxygen_A_Band_Option): An set of enumerated values describing the different options for computing the oxygen transmittance. The options are:
+        **oxygen_A_band_option (gas_corrections.Oxygen_A_Band_Option)**: An set of enumerated values describing the different options for computing the oxygen transmittance. The options are:
             NO_CORRECTION: Do not do any oxygen corrections
             DING_GORDON: Apply Ding and Gordon (1995) correction
             TRANSMITTANCE_TABLE: Apply oxygen transmittance from gas transmittance table
             SURROUNDING_WINDOW_BANDS: Compute oxygen transmittance from A-band and surrounding window bands (requires AMF gas trasmittance table)
             Default value is gas_corrections.Oxygen_A_Band_Option.TRANSMITTANCE_TABLE.
-        use_gas_transmittance_lookup_table (bool): Flag used to choose whether the algorithm in the gas corrections library uses the gas transmittance lookup tables or an alternate approach that does not use the lookup tables.
+        **use_gas_transmittance_lookup_table (bool)**: Flag used to choose whether the algorithm in the gas corrections library uses the gas transmittance lookup tables or an alternate approach that does not use the lookup tables.
             Default value is True.
 
     Returns:
@@ -704,11 +696,11 @@ def h2o_transmittance(**kwargs):
     Computes the Oxygen transmittance pixel-by-pixel for the image stored in the l1_data member variable.
 
     Keyword Args:
-        l1_data (gas_transmittance.L1_Data): An instance of the L1_Data class (available in the gas corrections library), which contains the image for which transmittance data is to be applied.
+        **l1_data (gas_transmittance.L1_Data)**: An instance of the L1_Data class (available in the gas corrections library), which contains the image for which transmittance data is to be applied.
             Default value is None.
-        gas_transmittance_table (gas_transmittance.Gas_Transmittance_Lookup_Table): An instance of the Gas_Transmittance_Lookup_Table class (available in the gas corrections library), which contains transmittance lookup tables read in from a NetCDF file. 
+        **gas_transmittance_table (gas_transmittance.Gas_Transmittance_Lookup_Table)**: An instance of the Gas_Transmittance_Lookup_Table class (available in the gas corrections library), which contains transmittance lookup tables read in from a NetCDF file. 
             Default value is None.
-        use_gas_transmittance_lookup_table (bool): Flag used to choose whether the algorithm in the gas corrections library uses the gas transmittance lookup tables or an alternate approach that does not use the lookup tables.
+        **use_gas_transmittance_lookup_table (bool)**: Flag used to choose whether the algorithm in the gas corrections library uses the gas transmittance lookup tables or an alternate approach that does not use the lookup tables.
             Default value is True.
 
     Returns:

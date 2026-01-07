@@ -209,7 +209,7 @@ def test_ozone_OCSSW(read_ozone_ancillary_data,
     l1_data.num_wavelengths = len(ancillary_data.ozone_absorption_cross_section)
 
     gas_transmittance_manager = gas_corrections.Gas_Correction_Manager()
-    gas_transmittances = gas_corrections.ozone_transmittance(l1_data=l1_data, ancillary_data=ancillary_data, use_gas_transmittance_lookup_table=True)
+    gas_transmittances = gas_corrections.ozone_transmittance(l1_data=l1_data, ancillary_data=ancillary_data)
 
     tg_sol_ocsmart, tg_sen_ocsmart, sensor_wavelengths = read_OCSMART_ozone_transmittance_benchmark_data
 
@@ -246,7 +246,7 @@ def test_co2_OCSSW(read_OCSSW_co2_transmittance_benchmark_data):
     gas_correction_manager = gas_corrections.Gas_Correction_Manager()
     l1_data = gas_correction_manager.read_PACE_data('test/PACE/PACE_OCI.20240411T182012.L1B.V3.nc', start_line=0, end_line=100, start_pixel=0, end_pixel=100)
     gas_transmittance_table = gas_correction_manager.read_gas_transmittance_table('test/PACE/oci_gas_transmittance_cia_amf_v3.2.nc')
-    gas_transmittances = gas_corrections.co2_transmittance(l1_data=l1_data, gas_transmittance_table=gas_transmittance_table, use_gas_transmittance_lookup_table=True)
+    gas_transmittances = gas_corrections.co2_transmittance(l1_data=l1_data, gas_transmittance_table=gas_transmittance_table)
 
     tg_sen_gas_correction_lib = gas_transmittances.sensor_zenith.reshape(gas_correction_manager.l1_data.reflectance.shape)
     tg_sol_gas_correction_lib = gas_transmittances.solar_zenith.reshape(gas_correction_manager.l1_data.reflectance.shape)
@@ -282,7 +282,7 @@ def test_co_OCSSW(read_OCSSW_co_transmittance_benchmark_data):
     gas_correction_manager = gas_corrections.Gas_Correction_Manager()
     l1_data = gas_correction_manager.read_PACE_data('test/PACE/PACE_OCI.20240411T182012.L1B.V3.nc', start_line=0, end_line=100, start_pixel=0, end_pixel=100)
     gas_transmittance_table = gas_correction_manager.read_gas_transmittance_table('test/PACE/oci_gas_transmittance_cia_amf_v3.2.nc')
-    gas_transmittances = gas_corrections.co_transmittance(l1_data=l1_data, gas_transmittance_table=gas_transmittance_table, use_gas_transmittance_lookup_table=True)
+    gas_transmittances = gas_corrections.co_transmittance(l1_data=l1_data, gas_transmittance_table=gas_transmittance_table)
 
     tg_sen_gas_correction_lib = gas_transmittances.sensor_zenith.reshape(gas_correction_manager.l1_data.reflectance.shape)
     tg_sol_gas_correction_lib = gas_transmittances.solar_zenith.reshape(gas_correction_manager.l1_data.reflectance.shape)
@@ -318,7 +318,7 @@ def test_ch4_OCSSW(read_OCSSW_ch4_transmittance_benchmark_data):
     gas_transmittance_manager = gas_corrections.Gas_Correction_Manager()
     l1_data = gas_transmittance_manager.read_PACE_data('test/PACE/PACE_OCI.20240411T182012.L1B.V3.nc', start_line=0, end_line=100, start_pixel=0, end_pixel=100)
     gas_transmittance_table = gas_transmittance_manager.read_gas_transmittance_table('test/PACE/oci_gas_transmittance_cia_amf_v3.2.nc')
-    gas_transmittances = gas_corrections.ch4_transmittance(l1_data=l1_data, gas_transmittance_table=gas_transmittance_table, use_gas_transmittance_lookup_table=True)
+    gas_transmittances = gas_corrections.ch4_transmittance(l1_data=l1_data, gas_transmittance_table=gas_transmittance_table)
 
     tg_sen_gas_correction_lib = gas_transmittances.sensor_zenith.reshape(gas_transmittance_manager.l1_data.reflectance.shape)
     tg_sol_gas_correction_lib = gas_transmittances.solar_zenith.reshape(gas_transmittance_manager.l1_data.reflectance.shape)
@@ -354,7 +354,7 @@ def test_n2o_OCSSW(read_OCSSW_n2o_transmittance_benchmark_data):
     gas_transmittance_manager = gas_corrections.Gas_Correction_Manager()
     l1_data = gas_transmittance_manager.read_PACE_data('test/PACE/PACE_OCI.20240411T182012.L1B.V3.nc', start_line=0, end_line=100, start_pixel=0, end_pixel=100)
     gas_transmittance_table = gas_transmittance_manager.read_gas_transmittance_table('test/PACE/oci_gas_transmittance_cia_amf_v3.2.nc')
-    gas_transmittances = gas_corrections.n2o_transmittance(l1_data=l1_data, gas_transmittance_table=gas_transmittance_table, use_gas_transmittance_lookup_table=True)
+    gas_transmittances = gas_corrections.n2o_transmittance(l1_data=l1_data, gas_transmittance_table=gas_transmittance_table)
 
     tg_sen_gas_correction_lib = gas_transmittances.sensor_zenith.reshape(gas_transmittance_manager.l1_data.reflectance.shape)
     tg_sol_gas_correction_lib = gas_transmittances.solar_zenith.reshape(gas_transmittance_manager.l1_data.reflectance.shape)
@@ -404,7 +404,7 @@ def test_no2_OCSSW(read_no2_ancillary_data,
     l1_data.num_wavelengths = len(ancillary_data.no2_absorption_cross_section)
 
     gas_transmittance_manager = gas_corrections.Gas_Correction_Manager()
-    gas_transmittances = gas_corrections.no2_transmittance(l1_data=l1_data, ancillary_data=ancillary_data, use_gas_transmittance_lookup_table=True)
+    gas_transmittances = gas_corrections.no2_transmittance(l1_data=l1_data, ancillary_data=ancillary_data)
 
     tg_sol_ocsmart, tg_sen_ocsmart, sensor_wavelengths = read_OCSMART_no2_transmittance_benchmark_data
 
@@ -443,8 +443,7 @@ def test_o2_OCSSW_transmittance_table_option(read_OCSSW_o2_opt2_transmittance_be
     gas_transmittance_table = gas_transmittance_manager.read_gas_transmittance_table('test/PACE/oci_gas_transmittance_cia_amf_v3.2.nc')
     gas_transmittances = gas_corrections.o2_transmittance(l1_data=l1_data, 
                                                           gas_transmittance_table=gas_transmittance_table, 
-                                                          oxygen_A_band_option=gas_corrections.Oxygen_A_Band_Option().TRANSMITTANCE_TABLE, 
-                                                          use_gas_transmittance_lookup_table=True)
+                                                          oxygen_A_band_option=gas_corrections.Oxygen_A_Band_Option().TRANSMITTANCE_TABLE)
 
     tg_sen_gas_correction_lib = gas_transmittances.sensor_zenith.reshape(gas_transmittance_manager.l1_data.reflectance.shape)
     tg_sol_gas_correction_lib = gas_transmittances.solar_zenith.reshape(gas_transmittance_manager.l1_data.reflectance.shape)
@@ -480,8 +479,7 @@ def test_o2_OCSSW_surrounding_window_bands_option(read_OCSSW_o2_opt3_transmittan
     gas_transmittance_table = gas_transmittance_manager.read_gas_transmittance_table('test/PACE/oci_gas_transmittance_cia_amf_v3.2.nc')
     gas_transmittances = gas_corrections.o2_transmittance(l1_data=l1_data, 
                                                           gas_transmittance_table=gas_transmittance_table, 
-                                                          oxygen_A_band_option=gas_corrections.Oxygen_A_Band_Option().SURROUNDING_WINDOW_BANDS, 
-                                                          use_gas_transmittance_lookup_table=True)
+                                                          oxygen_A_band_option=gas_corrections.Oxygen_A_Band_Option().SURROUNDING_WINDOW_BANDS)
 
     tg_sen_gas_correction_lib = gas_transmittances.sensor_zenith.reshape(gas_transmittance_manager.l1_data.reflectance.shape)
     tg_sol_gas_correction_lib = gas_transmittances.solar_zenith.reshape(gas_transmittance_manager.l1_data.reflectance.shape)
@@ -515,7 +513,7 @@ def test_h2o_OCSSW(read_OCSSW_h2o_transmittance_benchmark_data):
     gas_correction_manager = gas_corrections.Gas_Correction_Manager()
     l1_data = gas_correction_manager.read_PACE_data('test/PACE/PACE_OCI.20240411T182012.L1B.V3.nc', start_line=0, end_line=100, start_pixel=0, end_pixel=100)
     gas_transmittance_table = gas_correction_manager.read_gas_transmittance_table('test/PACE/oci_gas_transmittance_cia_amf_v3.2.nc')
-    gas_transmittances = gas_corrections.h2o_transmittance(l1_data=l1_data, gas_transmittance_table=gas_transmittance_table, use_gas_transmittance_lookup_table=True)
+    gas_transmittances = gas_corrections.h2o_transmittance(l1_data=l1_data, gas_transmittance_table=gas_transmittance_table)
 
     tg_sen_gas_correction_lib = gas_transmittances.sensor_zenith.reshape(gas_correction_manager.l1_data.reflectance.shape)
     tg_sol_gas_correction_lib = gas_transmittances.solar_zenith.reshape(gas_correction_manager.l1_data.reflectance.shape)

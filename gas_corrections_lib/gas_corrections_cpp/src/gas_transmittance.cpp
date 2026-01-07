@@ -15,7 +15,7 @@ setup_pybind11(cfg)
 
 namespace py = pybind11;
 
-Gas_Transmittances_PY ozone_transmittance(const L1_Data_PY& l1_data, const Ancillary_Data_PY& ancillary_data, const bool use_gas_transmittance_lookup_table) 
+Gas_Transmittances_PY ozone_transmittance(const L1_Data_PY& l1_data, const Ancillary_Data_PY& ancillary_data) 
 {
     Ancillary_Data ancillary_data_c{};
     
@@ -44,7 +44,7 @@ Gas_Transmittances_PY ozone_transmittance(const L1_Data_PY& l1_data, const Ancil
     gas_transmittances_c.sensor_zenith = static_cast<double*>(gas_transmittances.sensor_zenith.request().ptr);
     gas_transmittances_c.total = static_cast<double*>(gas_transmittances.total.request().ptr);
 
-    ozone_transmittance(&l1_data_c, &ancillary_data_c, &gas_transmittances_c, use_gas_transmittance_lookup_table);
+    ozone_transmittance(&l1_data_c, &ancillary_data_c, &gas_transmittances_c);
 
     return gas_transmittances;
 }
@@ -232,7 +232,7 @@ Gas_Transmittances_PY n2o_transmittance(const L1_Data_PY& l1_data, const Gas_Tra
 }
 
 
-Gas_Transmittances_PY no2_transmittance(const L1_Data_PY& l1_data, const Ancillary_Data_PY& ancillary_data, const bool use_gas_transmittance_lookup_table) 
+Gas_Transmittances_PY no2_transmittance(const L1_Data_PY& l1_data, const Ancillary_Data_PY& ancillary_data) 
 {
     Ancillary_Data ancillary_data_c{};
 
@@ -262,7 +262,7 @@ Gas_Transmittances_PY no2_transmittance(const L1_Data_PY& l1_data, const Ancilla
     gas_transmittances_c.sensor_zenith = static_cast<double*>(gas_transmittances.sensor_zenith.request().ptr);
     gas_transmittances_c.total = static_cast<double*>(gas_transmittances.total.request().ptr);
 
-    no2_transmittance(&l1_data_c, &ancillary_data_c, &gas_transmittances_c, use_gas_transmittance_lookup_table);
+    no2_transmittance(&l1_data_c, &ancillary_data_c, &gas_transmittances_c);
 
     return gas_transmittances;
 }
@@ -375,12 +375,12 @@ PYBIND11_MODULE(gas_transmittance, m)
         .value("TRANSMITTANCE_TABLE", Oxygen_A_Band_Option::TRANSMITTANCE_TABLE)
         .value("SURROUNDING_WINDOW_BANDS", Oxygen_A_Band_Option::SURROUNDING_WINDOW_BANDS);
 
-    m.def("ozone_transmittance", py::overload_cast<const L1_Data_PY&, const Ancillary_Data_PY&, bool>(&ozone_transmittance));
+    m.def("ozone_transmittance", py::overload_cast<const L1_Data_PY&, const Ancillary_Data_PY&>(&ozone_transmittance));
     m.def("co2_transmittance", py::overload_cast<const L1_Data_PY&, const Gas_Transmittance_Lookup_Table_PY&, bool>(&co2_transmittance));
     m.def("co_transmittance", py::overload_cast<const L1_Data_PY&, const Gas_Transmittance_Lookup_Table_PY&, bool>(&co_transmittance));
     m.def("ch4_transmittance", py::overload_cast<const L1_Data_PY&, const Gas_Transmittance_Lookup_Table_PY&, bool>(&ch4_transmittance));
     m.def("o2_transmittance", py::overload_cast<const L1_Data_PY&, const Gas_Transmittance_Lookup_Table_PY& ,bool, Oxygen_A_Band_Option>(&o2_transmittance));
     m.def("n2o_transmittance", py::overload_cast<const L1_Data_PY&, const Gas_Transmittance_Lookup_Table_PY&, bool>(&n2o_transmittance));
-    m.def("no2_transmittance", py::overload_cast<const L1_Data_PY&, const Ancillary_Data_PY&, bool>(&no2_transmittance));
+    m.def("no2_transmittance", py::overload_cast<const L1_Data_PY&, const Ancillary_Data_PY&>(&no2_transmittance));
     m.def("h2o_transmittance", py::overload_cast<const L1_Data_PY&, const Ancillary_Data_PY&, const Gas_Transmittance_Lookup_Table_PY&, bool>(&h2o_transmittance));
 }

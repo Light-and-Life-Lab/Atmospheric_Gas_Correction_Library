@@ -200,7 +200,7 @@ float get_wv_band_ratio(L1_Data* l1_data, Gas_Transmittance_Lookup_Table* gas_tr
 }
 
 
-void ozone_transmittance(L1_Data* l1_data, Ancillary_Data* ancillary_data, Gas_Transmittances* gas_transmittances, bool use_gas_transmittance_lookup_table)
+void ozone_transmittance(L1_Data* l1_data, Ancillary_Data* ancillary_data, Gas_Transmittances* gas_transmittances)
 {
     #pragma omp parallel for
     for (int ip = 0; ip < l1_data->num_pixels; ip++)
@@ -212,16 +212,16 @@ void ozone_transmittance(L1_Data* l1_data, Ancillary_Data* ancillary_data, Gas_T
             double ozone_optical_depth = ancillary_data->ozone_concentration[ip] * ancillary_data->ozone_absorption_cross_section[iw];
             gas_transmittances->solar_zenith[row_offset + iw] = exp(-(ozone_optical_depth / l1_data->cos_solar_zenith[ip]));
 
-            if (use_gas_transmittance_lookup_table) 
-            {
-                gas_transmittances->total[row_offset + iw] = exp(-ozone_optical_depth * (1.0/l1_data->cos_solar_zenith[ip] + 1.0/l1_data->cos_sensor_zenith[ip]));
-                gas_transmittances->sensor_zenith[row_offset + iw] = gas_transmittances->total[row_offset + iw] / gas_transmittances->solar_zenith[row_offset + iw];
-            } 
-            else 
-            {
+            // if (use_gas_transmittance_lookup_table) 
+            // {
+            //     gas_transmittances->total[row_offset + iw] = exp(-ozone_optical_depth * (1.0/l1_data->cos_solar_zenith[ip] + 1.0/l1_data->cos_sensor_zenith[ip]));
+            //     gas_transmittances->sensor_zenith[row_offset + iw] = gas_transmittances->total[row_offset + iw] / gas_transmittances->solar_zenith[row_offset + iw];
+            // } 
+            // else 
+            // {
                 gas_transmittances->sensor_zenith[row_offset + iw] = exp(-(ozone_optical_depth / l1_data->cos_sensor_zenith[ip]));
                 gas_transmittances->total[row_offset + iw] = gas_transmittances->sensor_zenith[row_offset + iw] * gas_transmittances->solar_zenith[row_offset + iw];
-            }
+            // }
         }
     }
 }
@@ -465,7 +465,7 @@ void n2o_transmittance(L1_Data* l1_data, Gas_Transmittance_Lookup_Table* gas_tra
     }
 }
 
-void no2_transmittance(L1_Data* l1_data, Ancillary_Data* ancillary_data, Gas_Transmittances* gas_transmittances, bool use_gas_transmittance_lookup_table)
+void no2_transmittance(L1_Data* l1_data, Ancillary_Data* ancillary_data, Gas_Transmittances* gas_transmittances)
 {
     #pragma omp parallel for
     for (int ip = 0; ip < l1_data->num_pixels; ip++)
@@ -496,16 +496,16 @@ void no2_transmittance(L1_Data* l1_data, Ancillary_Data* ancillary_data, Gas_Tra
 
                 gas_transmittances->solar_zenith[row_offset + iw] = exp(-(no2_optical_depth_to_200m * sec0));
 
-                if (use_gas_transmittance_lookup_table) 
-                {
-                    gas_transmittances->total[row_offset + iw] = exp(-(no2_optical_depth_to_200m * (sec + sec0)));
-                    gas_transmittances->sensor_zenith[row_offset + iw] = gas_transmittances->total[row_offset + iw] / gas_transmittances->solar_zenith[row_offset + iw];
-                }
-                else
-                {
+                // if (use_gas_transmittance_lookup_table) 
+                // {
+                //     gas_transmittances->total[row_offset + iw] = exp(-(no2_optical_depth_to_200m * (sec + sec0)));
+                //     gas_transmittances->sensor_zenith[row_offset + iw] = gas_transmittances->total[row_offset + iw] / gas_transmittances->solar_zenith[row_offset + iw];
+                // }
+                // else
+                // {
                     gas_transmittances->sensor_zenith[row_offset + iw] = exp(-(no2_optical_depth_to_200m * sec));
                     gas_transmittances->total[row_offset + iw] = gas_transmittances->sensor_zenith[row_offset + iw] * gas_transmittances->solar_zenith[row_offset + iw];
-                }
+                // }
             }
         }
     }
