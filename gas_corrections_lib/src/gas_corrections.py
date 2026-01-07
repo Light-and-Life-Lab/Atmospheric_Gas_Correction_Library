@@ -455,7 +455,7 @@ def ch4_transmittance(**kwargs):
         gas_transmittance_table (gas_transmittance.Gas_Transmittance_Lookup_Table): An instance of the Gas_Transmittance_Lookup_Table class (available in the gas corrections library), which contains transmittance lookup tables read in from a NetCDF file. 
             Default value is None.
         use_gas_transmittance_lookup_table (bool): Flag used to choose whether the algorithm in the gas corrections library uses the gas transmittance lookup tables or an alternate approach that does not use the lookup tables.
-            Default value is False.
+            Default value is True.
 
     Returns:
         Returns a dataclass with three members: (i) solar_zenith, (ii) sensor_zenith, and (iii) total. These contain arrays of 
@@ -479,12 +479,12 @@ def ch4_transmittance(**kwargs):
 
         gas_transmittances = gas_corrections.ch4_transmittance(l1_data=l1_data, \
                                                                gas_transmittance_table=gas_transmittance_table, \
-                                                               use_gas_transmittance_lookup_table=False)
+                                                               use_gas_transmittance_lookup_table=True)
     """
     args = dict()
     l1_data = args['l1_data'] = kwargs.get("l1_data", None)
     gas_transmittance_table = args['gas_transmittance_table'] = kwargs.get("gas_transmittance_table", None)
-    use_gas_transmittance_lookup_table = kwargs.get("use_gas_transmittance_lookup_table", False)
+    use_gas_transmittance_lookup_table = kwargs.get("use_gas_transmittance_lookup_table", True)
 
     validate_keyword_args(args)
 
@@ -543,7 +543,7 @@ def n2o_transmittance(**kwargs):
 
         gas_transmittances = gas_corrections.n2o_transmittance(l1_data=l1_data, \
                                                                gas_transmittance_table=gas_transmittance_table, \
-                                                               use_gas_transmittance_lookup_table=False)
+                                                               use_gas_transmittance_lookup_table=True)
     """
     args = dict()
     l1_data = args['l1_data'] = kwargs.get("l1_data", None)
@@ -584,7 +584,7 @@ def no2_transmittance(**kwargs):
             which contains no2 absorption cross section, stratospheric and tropospheric no2 concentrations, and fraction of no2 that lies above 200m.
             All of these quantities must be interpolated to the L1 Data grid. Default value is None.
         use_gas_transmittance_lookup_table (bool): Flag used to choose whether the algorithm in the gas corrections library uses the gas transmittance lookup tables or an alternate approach that does not use the lookup tables.
-            Default value is True.
+            Default value is False.
 
     Returns:
         Returns a dataclass with three members: (i) solar_zenith, (ii) sensor_zenith, and (iii) total. These contain arrays of 
