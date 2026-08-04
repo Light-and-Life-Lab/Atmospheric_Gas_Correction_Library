@@ -10,7 +10,7 @@ import pytest
 
 from gas_corrections_lib.src import gas_corrections
 
-save_transmittances = False
+save_transmittances = True
 
 @pytest.fixture(scope="session")
 def read_PACE_geometry_data():
@@ -464,11 +464,21 @@ def test_o2_OCSSW_transmittance_table_option(read_OCSSW_o2_opt2_transmittance_be
     plt.plot(wavelength_3d, tg_sol_ocssw[0, 0, :], color='orange')
     plt.plot(gas_transmittance_manager.l1_data.wavelengths[:], tg_sen_gas_correction_lib[0, 0, :], '--b')
     plt.plot(gas_transmittance_manager.l1_data.wavelengths[:], tg_sol_gas_correction_lib[0, 0, :], '--k')
-    plt.xlim([750, 800])
     plt.xlabel('Wavelength (nm)')
     plt.ylabel('Transmittance')
     plt.legend(['OCSSW Sensor Zenith', 'OCSSW Solar Zenith', 'Gas Lib Sensor Zenith', 'Gas Lib Solar Zenith'])
     plt.savefig('test/PACE/o2/transmittance_comparison_oxaband_opt_2.png')
+
+    plt.figure()
+    plt.plot(wavelength_3d, tg_sen_ocssw[0, 0, :], '-r')
+    plt.plot(wavelength_3d, tg_sol_ocssw[0, 0, :], color='orange')
+    plt.plot(gas_transmittance_manager.l1_data.wavelengths[:], tg_sen_gas_correction_lib[0, 0, :], '--b')
+    plt.plot(gas_transmittance_manager.l1_data.wavelengths[:], tg_sol_gas_correction_lib[0, 0, :], '--k')
+    plt.xlim([750, 800])
+    plt.xlabel('Wavelength (nm)')
+    plt.ylabel('Transmittance')
+    plt.legend(['OCSSW Sensor Zenith', 'OCSSW Solar Zenith', 'Gas Lib Sensor Zenith', 'Gas Lib Solar Zenith'])
+    plt.savefig('test/PACE/o2/transmittance_comparison_oxaband_opt_2_A_band_zoom.png')
 
 
 # @pytest.mark.skip()
@@ -500,11 +510,21 @@ def test_o2_OCSSW_surrounding_window_bands_option(read_OCSSW_o2_opt3_transmittan
     plt.plot(wavelength_3d, tg_sol_ocssw[0, 0, :], color='orange')
     plt.plot(gas_transmittance_manager.l1_data.wavelengths[:], tg_sen_gas_correction_lib[0, 0, :], '--b')
     plt.plot(gas_transmittance_manager.l1_data.wavelengths[:], tg_sol_gas_correction_lib[0, 0, :], '--k')
-    plt.xlim([750, 800])
     plt.xlabel('Wavelength (nm)')
     plt.ylabel('Transmittance')
     plt.legend(['OCSSW Sensor Zenith', 'OCSSW Solar Zenith', 'Gas Lib Sensor Zenith', 'Gas Lib Solar Zenith'])
     plt.savefig('test/PACE/o2/transmittance_comparison_oxaband_opt_3.png')
+
+    plt.figure()
+    plt.plot(wavelength_3d, tg_sen_ocssw[0, 0, :], '-r')
+    plt.plot(wavelength_3d, tg_sol_ocssw[0, 0, :], color='orange')
+    plt.plot(gas_transmittance_manager.l1_data.wavelengths[:], tg_sen_gas_correction_lib[0, 0, :], '--b')
+    plt.plot(gas_transmittance_manager.l1_data.wavelengths[:], tg_sol_gas_correction_lib[0, 0, :], '--k')
+    plt.xlim([750, 800])
+    plt.xlabel('Wavelength (nm)')
+    plt.ylabel('Transmittance')
+    plt.legend(['OCSSW Sensor Zenith', 'OCSSW Solar Zenith', 'Gas Lib Sensor Zenith', 'Gas Lib Solar Zenith'])
+    plt.savefig('test/PACE/o2/transmittance_comparison_oxaband_opt_3_A_band_zoom.png')
 
 
 # @pytest.mark.skip()
