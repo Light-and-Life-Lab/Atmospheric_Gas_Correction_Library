@@ -50,7 +50,7 @@ Gas_Transmittances_PY ozone_transmittance(const L1_Data_PY& l1_data, const Ancil
 }
 
 
-Gas_Transmittances_PY co2_transmittance(const L1_Data_PY& l1_data, const Gas_Transmittance_Lookup_Table_PY& gas_transmittance_table, const bool use_gas_transmittance_lookup_table) 
+Gas_Transmittances_PY co2_transmittance(const L1_Data_PY& l1_data, const Gas_Transmittance_Lookup_Table_PY& gas_transmittance_table, const bool lookup_table_has_amf_dimension) 
 {
     Gas_Transmittance_Lookup_Table gas_transmittance_table_c{};
 
@@ -80,13 +80,13 @@ Gas_Transmittances_PY co2_transmittance(const L1_Data_PY& l1_data, const Gas_Tra
     gas_transmittances_c.sensor_zenith = static_cast<double*>(gas_transmittances.sensor_zenith.request().ptr);
     gas_transmittances_c.total = static_cast<double*>(gas_transmittances.total.request().ptr);
 
-    co2_transmittance(&l1_data_c, &gas_transmittance_table_c, &gas_transmittances_c, use_gas_transmittance_lookup_table);
+    co2_transmittance(&l1_data_c, &gas_transmittance_table_c, &gas_transmittances_c, lookup_table_has_amf_dimension);
 
     return gas_transmittances;
 }
 
 
-Gas_Transmittances_PY co_transmittance(const L1_Data_PY& l1_data, const Gas_Transmittance_Lookup_Table_PY& gas_transmittance_table, const bool use_gas_transmittance_lookup_table) 
+Gas_Transmittances_PY co_transmittance(const L1_Data_PY& l1_data, const Gas_Transmittance_Lookup_Table_PY& gas_transmittance_table, const bool lookup_table_has_amf_dimension) 
 {
     Gas_Transmittance_Lookup_Table gas_transmittance_table_c{};
 
@@ -116,13 +116,13 @@ Gas_Transmittances_PY co_transmittance(const L1_Data_PY& l1_data, const Gas_Tran
     gas_transmittances_c.sensor_zenith = static_cast<double*>(gas_transmittances.sensor_zenith.request().ptr);
     gas_transmittances_c.total = static_cast<double*>(gas_transmittances.total.request().ptr);
 
-    co_transmittance(&l1_data_c, &gas_transmittance_table_c, &gas_transmittances_c, use_gas_transmittance_lookup_table);
+    co_transmittance(&l1_data_c, &gas_transmittance_table_c, &gas_transmittances_c, lookup_table_has_amf_dimension);
 
     return gas_transmittances;
 }
 
 
-Gas_Transmittances_PY ch4_transmittance(const L1_Data_PY& l1_data, const Gas_Transmittance_Lookup_Table_PY& gas_transmittance_table, const bool use_gas_transmittance_lookup_table) 
+Gas_Transmittances_PY ch4_transmittance(const L1_Data_PY& l1_data, const Gas_Transmittance_Lookup_Table_PY& gas_transmittance_table, const bool lookup_table_has_amf_dimension) 
 {
     Gas_Transmittance_Lookup_Table gas_transmittance_table_c{};
 
@@ -152,13 +152,13 @@ Gas_Transmittances_PY ch4_transmittance(const L1_Data_PY& l1_data, const Gas_Tra
     gas_transmittances_c.sensor_zenith = static_cast<double*>(gas_transmittances.sensor_zenith.request().ptr);
     gas_transmittances_c.total = static_cast<double*>(gas_transmittances.total.request().ptr);
 
-    ch4_transmittance(&l1_data_c, &gas_transmittance_table_c, &gas_transmittances_c, use_gas_transmittance_lookup_table);
+    ch4_transmittance(&l1_data_c, &gas_transmittance_table_c, &gas_transmittances_c, lookup_table_has_amf_dimension);
 
     return gas_transmittances;
 }
 
 
-Gas_Transmittances_PY o2_transmittance(const L1_Data_PY& l1_data, const Gas_Transmittance_Lookup_Table_PY& gas_transmittance_table, const bool use_gas_transmittance_lookup_table, Oxygen_A_Band_Option oxygen_A_band_option) 
+Gas_Transmittances_PY o2_transmittance(const L1_Data_PY& l1_data, const Gas_Transmittance_Lookup_Table_PY& gas_transmittance_table, const bool lookup_table_has_amf_dimension, Oxygen_A_Band_Option oxygen_A_band_option) 
 {
     Gas_Transmittance_Lookup_Table gas_transmittance_table_c{};
 
@@ -190,13 +190,13 @@ Gas_Transmittances_PY o2_transmittance(const L1_Data_PY& l1_data, const Gas_Tran
     gas_transmittances_c.sensor_zenith = static_cast<double*>(gas_transmittances.sensor_zenith.request().ptr);
     gas_transmittances_c.total = static_cast<double*>(gas_transmittances.total.request().ptr);
 
-    o2_transmittance(&l1_data_c, &gas_transmittance_table_c, &gas_transmittances_c, use_gas_transmittance_lookup_table, oxygen_A_band_option);
+    o2_transmittance(&l1_data_c, &gas_transmittance_table_c, &gas_transmittances_c, lookup_table_has_amf_dimension, oxygen_A_band_option);
 
     return gas_transmittances;
 }
 
 
-Gas_Transmittances_PY n2o_transmittance(const L1_Data_PY& l1_data, const Gas_Transmittance_Lookup_Table_PY& gas_transmittance_table, const bool use_gas_transmittance_lookup_table) 
+Gas_Transmittances_PY n2o_transmittance(const L1_Data_PY& l1_data, const Gas_Transmittance_Lookup_Table_PY& gas_transmittance_table, const bool lookup_table_has_amf_dimension) 
 {
     Gas_Transmittance_Lookup_Table gas_transmittance_table_c{};
 
@@ -226,7 +226,7 @@ Gas_Transmittances_PY n2o_transmittance(const L1_Data_PY& l1_data, const Gas_Tra
     gas_transmittances_c.sensor_zenith = static_cast<double*>(gas_transmittances.sensor_zenith.request().ptr);
     gas_transmittances_c.total = static_cast<double*>(gas_transmittances.total.request().ptr);
 
-    n2o_transmittance(&l1_data_c, &gas_transmittance_table_c, &gas_transmittances_c, use_gas_transmittance_lookup_table);
+    n2o_transmittance(&l1_data_c, &gas_transmittance_table_c, &gas_transmittances_c, lookup_table_has_amf_dimension);
 
     return gas_transmittances;
 }
@@ -268,7 +268,7 @@ Gas_Transmittances_PY no2_transmittance(const L1_Data_PY& l1_data, const Ancilla
 }
 
 
-Gas_Transmittances_PY h2o_transmittance(const L1_Data_PY& l1_data, const Ancillary_Data_PY& ancillary_data, const Gas_Transmittance_Lookup_Table_PY& gas_transmittance_table, const bool use_gas_transmittance_lookup_table) 
+Gas_Transmittances_PY h2o_transmittance(const L1_Data_PY& l1_data, const Ancillary_Data_PY& ancillary_data, const Gas_Transmittance_Lookup_Table_PY& gas_transmittance_table, const bool lookup_table_has_amf_dimension) 
 {
     Ancillary_Data ancillary_data_c{};
 
@@ -316,7 +316,7 @@ Gas_Transmittances_PY h2o_transmittance(const L1_Data_PY& l1_data, const Ancilla
     gas_transmittances_c.sensor_zenith = static_cast<double*>(gas_transmittances.sensor_zenith.request().ptr);
     gas_transmittances_c.total = static_cast<double*>(gas_transmittances.total.request().ptr);
 
-    h2o_transmittance(&l1_data_c, &ancillary_data_c, &gas_transmittance_table_c, &gas_transmittances_c, use_gas_transmittance_lookup_table);
+    h2o_transmittance(&l1_data_c, &ancillary_data_c, &gas_transmittance_table_c, &gas_transmittances_c, lookup_table_has_amf_dimension);
 
     return gas_transmittances;
 }

@@ -331,8 +331,6 @@ def co2_transmittance(**kwargs):
             Default value is None.
         **gas_transmittance_table (gas_transmittance.Gas_Transmittance_Lookup_Table)**: An instance of the Gas_Transmittance_Lookup_Table class (available in the gas corrections library), which contains transmittance lookup tables read in from a NetCDF file. 
             Default value is None.
-        **use_gas_transmittance_lookup_table (bool)**: Flag used to choose whether the algorithm in the gas corrections library uses the gas transmittance lookup tables or an alternate approach that does not use the lookup tables.
-            Default value is True.
 
     Returns:
         Returns a dataclass with three members: (i) solar_zenith, (ii) sensor_zenith, and (iii) total. These contain arrays of 
@@ -355,16 +353,15 @@ def co2_transmittance(**kwargs):
         gas_transmittance_manager.read_gas_transmittance_table("oci_gas_transmittance_cia_amf_v3.2.nc")
 
         gas_transmittances = gas_corrections.co2_transmittance(l1_data=l1_data, \
-                                                               gas_transmittance_table=gas_transmittance_table, \
-                                                               use_gas_transmittance_lookup_table=True)
+                                                               gas_transmittance_table=gas_transmittance_table)
     """
-    valid_kwargs = ['l1_data', 'gas_transmittance_table', 'use_gas_transmittance_lookup_table']
+    valid_kwargs = ['l1_data', 'gas_transmittance_table']
     check_for_invalid_keyword_args(kwargs, valid_kwargs)
 
     args = dict()
     l1_data = args['l1_data'] = kwargs.get("l1_data", None)
     gas_transmittance_table = args['gas_transmittance_table'] = kwargs.get("gas_transmittance_table", None)
-    use_gas_transmittance_lookup_table = args['use_gas_transmittance_lookup_table'] = kwargs.get("use_gas_transmittance_lookup_table", True)
+    lookup_table_has_amf_dimension = bool(gas_transmittance_table.num_amf_grid_points)
 
     validate_keyword_args(args)
 
@@ -386,7 +383,7 @@ def co2_transmittance(**kwargs):
     assert(l1_data.num_wavelengths == l1_data.wavelengths.size)
     assert(l1_data.num_wavelengths == gas_transmittance_table.co2_transmittance.shape[0])
 
-    return gas_transmittance.co2_transmittance(l1_data, gas_transmittance_table, use_gas_transmittance_lookup_table)
+    return gas_transmittance.co2_transmittance(l1_data, gas_transmittance_table, lookup_table_has_amf_dimension)
 
 
 def co_transmittance(**kwargs):
@@ -398,8 +395,6 @@ def co_transmittance(**kwargs):
             Default value is None.
         **gas_transmittance_table (gas_transmittance.Gas_Transmittance_Lookup_Table)**: An instance of the Gas_Transmittance_Lookup_Table class (available in the gas corrections library), which contains transmittance lookup tables read in from a NetCDF file. 
             Default value is None.
-        **use_gas_transmittance_lookup_table (bool)**: Flag used to choose whether the algorithm in the gas corrections library uses the gas transmittance lookup tables or an alternate approach that does not use the lookup tables.
-            Default value is True.
 
     Returns:
         Returns a dataclass with three members: (i) solar_zenith, (ii) sensor_zenith, and (iii) total. These contain arrays of 
@@ -422,16 +417,15 @@ def co_transmittance(**kwargs):
         gas_transmittance_manager.read_gas_transmittance_table("oci_gas_transmittance_cia_amf_v3.2.nc")
 
         gas_transmittances = gas_corrections.co_transmittance(l1_data=l1_data, \
-                                                              gas_transmittance_table=gas_transmittance_table, \
-                                                              use_gas_transmittance_lookup_table=True)
+                                                              gas_transmittance_table=gas_transmittance_table)
     """
-    valid_kwargs = ['l1_data', 'gas_transmittance_table', 'use_gas_transmittance_lookup_table']
+    valid_kwargs = ['l1_data', 'gas_transmittance_table']
     check_for_invalid_keyword_args(kwargs, valid_kwargs)
 
     args = dict()
     l1_data = args['l1_data'] = kwargs.get("l1_data", None)
     gas_transmittance_table = args['gas_transmittance_table'] = kwargs.get("gas_transmittance_table", None)
-    use_gas_transmittance_lookup_table = args['use_gas_transmittance_lookup_table'] = kwargs.get("use_gas_transmittance_lookup_table", True)
+    lookup_table_has_amf_dimension = bool(gas_transmittance_table.num_amf_grid_points)
 
     validate_keyword_args(args)
 
@@ -453,7 +447,7 @@ def co_transmittance(**kwargs):
     assert(l1_data.num_wavelengths == l1_data.wavelengths.size)
     assert(l1_data.num_wavelengths == gas_transmittance_table.co_transmittance.shape[0])
 
-    return gas_transmittance.co_transmittance(l1_data, gas_transmittance_table, use_gas_transmittance_lookup_table)
+    return gas_transmittance.co_transmittance(l1_data, gas_transmittance_table, lookup_table_has_amf_dimension)
 
 
 def ch4_transmittance(**kwargs):
@@ -465,8 +459,6 @@ def ch4_transmittance(**kwargs):
             Default value is None.
         **gas_transmittance_table (gas_transmittance.Gas_Transmittance_Lookup_Table)**: An instance of the Gas_Transmittance_Lookup_Table class (available in the gas corrections library), which contains transmittance lookup tables read in from a NetCDF file. 
             Default value is None.
-        **use_gas_transmittance_lookup_table (bool)**: Flag used to choose whether the algorithm in the gas corrections library uses the gas transmittance lookup tables or an alternate approach that does not use the lookup tables.
-            Default value is True.
 
     Returns:
         Returns a dataclass with three members: (i) solar_zenith, (ii) sensor_zenith, and (iii) total. These contain arrays of 
@@ -489,16 +481,15 @@ def ch4_transmittance(**kwargs):
         gas_transmittance_manager.read_gas_transmittance_table("oci_gas_transmittance_cia_amf_v3.2.nc")
 
         gas_transmittances = gas_corrections.ch4_transmittance(l1_data=l1_data, \
-                                                               gas_transmittance_table=gas_transmittance_table, \
-                                                               use_gas_transmittance_lookup_table=True)
+                                                               gas_transmittance_table=gas_transmittance_table)
     """
-    valid_kwargs = ['l1_data', 'gas_transmittance_table', 'use_gas_transmittance_lookup_table']
+    valid_kwargs = ['l1_data', 'gas_transmittance_table']
     check_for_invalid_keyword_args(kwargs, valid_kwargs)
 
     args = dict()
     l1_data = args['l1_data'] = kwargs.get("l1_data", None)
     gas_transmittance_table = args['gas_transmittance_table'] = kwargs.get("gas_transmittance_table", None)
-    use_gas_transmittance_lookup_table = args['use_gas_transmittance_lookup_table'] = kwargs.get("use_gas_transmittance_lookup_table", True)
+    lookup_table_has_amf_dimension = bool(gas_transmittance_table.num_amf_grid_points)
 
     validate_keyword_args(args)
 
@@ -520,7 +511,7 @@ def ch4_transmittance(**kwargs):
     assert(l1_data.num_wavelengths == l1_data.wavelengths.size)
     assert(l1_data.num_wavelengths == gas_transmittance_table.ch4_transmittance.shape[0])
 
-    return gas_transmittance.ch4_transmittance(l1_data, gas_transmittance_table, use_gas_transmittance_lookup_table)
+    return gas_transmittance.ch4_transmittance(l1_data, gas_transmittance_table, lookup_table_has_amf_dimension)
 
 
 def n2o_transmittance(**kwargs):
@@ -532,8 +523,6 @@ def n2o_transmittance(**kwargs):
             Default value is None.
         **ancillary_data (gas_transmittance.Ancillary_Data)**: An instance of the Ancillary_Data class (available in the gas corrections library),
             which contains ozone cross section and ozone concentration data that has been interpolated to the L1 Data grid. Default value is None.
-        **use_gas_transmittance_lookup_table (bool)**: Flag used to choose whether the algorithm in the gas corrections library uses the gas transmittance lookup tables or an alternate approach that does not use the lookup tables.
-            Default value is True.
 
     Returns:
         Returns a dataclass with three members: (i) solar_zenith, (ii) sensor_zenith, and (iii) total. These contain arrays of 
@@ -556,16 +545,15 @@ def n2o_transmittance(**kwargs):
         gas_transmittance_manager.read_gas_transmittance_table("oci_gas_transmittance_cia_amf_v3.2.nc")
 
         gas_transmittances = gas_corrections.n2o_transmittance(l1_data=l1_data, \
-                                                               gas_transmittance_table=gas_transmittance_table, \
-                                                               use_gas_transmittance_lookup_table=True)
+                                                               gas_transmittance_table=gas_transmittance_table)
     """
-    valid_kwargs = ['l1_data', 'gas_transmittance_table', 'use_gas_transmittance_lookup_table']
+    valid_kwargs = ['l1_data', 'gas_transmittance_table']
     check_for_invalid_keyword_args(kwargs, valid_kwargs)
 
     args = dict()
     l1_data = args['l1_data'] = kwargs.get("l1_data", None)
     gas_transmittance_table = args['gas_transmittance_table'] = kwargs.get("gas_transmittance_table", None)
-    use_gas_transmittance_lookup_table = args['use_gas_transmittance_lookup_table'] = kwargs.get("use_gas_transmittance_lookup_table", True)
+    lookup_table_has_amf_dimension = bool(gas_transmittance_table.num_amf_grid_points)
 
     validate_keyword_args(args)
 
@@ -587,7 +575,7 @@ def n2o_transmittance(**kwargs):
     assert(l1_data.num_wavelengths == l1_data.wavelengths.size)
     assert(l1_data.num_wavelengths == gas_transmittance_table.n2o_transmittance.shape[0])
 
-    return gas_transmittance.n2o_transmittance(l1_data, gas_transmittance_table, use_gas_transmittance_lookup_table)
+    return gas_transmittance.n2o_transmittance(l1_data, gas_transmittance_table, lookup_table_has_amf_dimension)
 
 
 def no2_transmittance(**kwargs):
@@ -690,8 +678,6 @@ def o2_transmittance(**kwargs):
             TRANSMITTANCE_TABLE: Apply oxygen transmittance from gas transmittance table
             SURROUNDING_WINDOW_BANDS: Compute oxygen transmittance from A-band and surrounding window bands (requires AMF gas trasmittance table)
             Default value is gas_corrections.Oxygen_A_Band_Option.TRANSMITTANCE_TABLE.
-        **use_gas_transmittance_lookup_table (bool)**: Flag used to choose whether the algorithm in the gas corrections library uses the gas transmittance lookup tables or an alternate approach that does not use the lookup tables.
-            Default value is True.
 
     Returns:
         Returns a dataclass with three members: (i) solar_zenith, (ii) sensor_zenith, and (iii) total. These contain arrays of 
@@ -715,17 +701,16 @@ def o2_transmittance(**kwargs):
 
         gas_transmittances = gas_corrections.o2_transmittance(l1_data=l1_data, \
                                                               gas_transmittance_table=gas_transmittance_table, \
-                                                              oxygen_A_band_option=gas_corrections.Oxygen_A_Band_Option.TRANSMITTANCE_TABLE, \
-                                                              use_gas_transmittance_lookup_table=True)
+                                                              oxygen_A_band_option=gas_corrections.Oxygen_A_Band_Option.TRANSMITTANCE_TABLE)
     """
-    valid_kwargs = ['l1_data', 'gas_transmittance_table', 'oxygen_A_band_option', 'use_gas_transmittance_lookup_table']
+    valid_kwargs = ['l1_data', 'gas_transmittance_table', 'oxygen_A_band_option']
     check_for_invalid_keyword_args(kwargs, valid_kwargs)
 
     args = dict()
     l1_data = args['l1_data'] = kwargs.get("l1_data", None)
     gas_transmittance_table = args['gas_transmittance_table'] = kwargs.get("gas_transmittance_table", None)
     oxygen_A_band_option = kwargs.get("oxygen_A_band_option", gas_transmittance.Oxygen_A_Band_Option.TRANSMITTANCE_TABLE)
-    use_gas_transmittance_lookup_table = args['use_gas_transmittance_lookup_table'] = kwargs.get("use_gas_transmittance_lookup_table", True)
+    lookup_table_has_amf_dimension = bool(gas_transmittance_table.num_amf_grid_points)
 
     validate_keyword_args(args)
 
@@ -745,7 +730,7 @@ def o2_transmittance(**kwargs):
     assert(l1_data.num_wavelengths == l1_data.wavelengths.size)
     assert(l1_data.num_wavelengths == gas_transmittance_table.o2_transmittance.shape[0])
 
-    return gas_transmittance.o2_transmittance(l1_data, gas_transmittance_table, use_gas_transmittance_lookup_table, oxygen_A_band_option)
+    return gas_transmittance.o2_transmittance(l1_data, gas_transmittance_table, lookup_table_has_amf_dimension, oxygen_A_band_option)
 
 
 def h2o_transmittance(**kwargs):
@@ -757,8 +742,6 @@ def h2o_transmittance(**kwargs):
             Default value is None.
         **gas_transmittance_table (gas_transmittance.Gas_Transmittance_Lookup_Table)**: An instance of the Gas_Transmittance_Lookup_Table class (available in the gas corrections library), which contains transmittance lookup tables read in from a NetCDF file. 
             Default value is None.
-        **use_gas_transmittance_lookup_table (bool)**: Flag used to choose whether the algorithm in the gas corrections library uses the gas transmittance lookup tables or an alternate approach that does not use the lookup tables.
-            Default value is True.
 
     Returns:
         Returns a dataclass with three members: (i) solar_zenith, (ii) sensor_zenith, and (iii) total. These contain arrays of 
@@ -781,16 +764,15 @@ def h2o_transmittance(**kwargs):
         gas_transmittance_table = gas_transmittance_manager.read_gas_transmittance_table(gas_transmittance_filepath)
 
         gas_transmittances = gas_corrections.h2o_transmittance(l1_data=l1_data, \
-                                                              gas_transmittance_table=gas_transmittance_table, \
-                                                              use_gas_transmittance_lookup_table=True)
+                                                              gas_transmittance_table=gas_transmittance_table)
     """
-    valid_kwargs = ['l1_data', 'gas_transmittance_table', 'use_gas_transmittance_lookup_table']
+    valid_kwargs = ['l1_data', 'gas_transmittance_table']
     check_for_invalid_keyword_args(kwargs, valid_kwargs)
     
     args = dict()
     l1_data = args['l1_data'] = kwargs.get("l1_data", None)
     gas_transmittance_table = args['gas_transmittance_table'] = kwargs.get("gas_transmittance_table", None)
-    use_gas_transmittance_lookup_table = args['use_gas_transmittance_lookup_table'] = kwargs.get("use_gas_transmittance_lookup_table", True)
+    lookup_table_has_amf_dimension = bool(gas_transmittance_table.num_amf_grid_points)
 
     validate_keyword_args(args)
 
@@ -817,4 +799,4 @@ def h2o_transmittance(**kwargs):
     assert(l1_data.num_wavelengths == l1_data.wavelengths.size)
     assert(l1_data.num_wavelengths == gas_transmittance_table.h2o_transmittance.shape[1])    
 
-    return gas_transmittance.h2o_transmittance(l1_data, ancillary_data, gas_transmittance_table, use_gas_transmittance_lookup_table)
+    return gas_transmittance.h2o_transmittance(l1_data, ancillary_data, gas_transmittance_table, lookup_table_has_amf_dimension)
