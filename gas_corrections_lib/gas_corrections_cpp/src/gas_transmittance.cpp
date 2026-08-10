@@ -1,10 +1,3 @@
-<%
-cfg['compiler_args'] = ['-std=c++2a', '-O3', '-fopenmp']
-cfg['linker_args'] = ['-fopenmp']
-cfg['sources'] = ['gas_transmittance_impl.cpp']
-setup_pybind11(cfg)
-%>
-
 #include <tuple>
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
