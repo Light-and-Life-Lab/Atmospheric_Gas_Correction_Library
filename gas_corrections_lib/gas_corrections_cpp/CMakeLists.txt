@@ -21,4 +21,4 @@ pybind11_add_module(gas_transmittance
 target_include_directories(gas_transmittance PRIVATE include)
 target_link_libraries(gas_transmittance PRIVATE OpenMP::OpenMP_CXX)
 
-install(TARGETS gas_transmittance DESTINATION .)
+install(TARGETS gas_transmittance DESTINATION gas_corrections_lib/gas_corrections_cpp)
