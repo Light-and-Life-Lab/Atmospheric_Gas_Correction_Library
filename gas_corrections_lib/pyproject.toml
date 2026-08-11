@@ -1,0 +1,15 @@
+[build-system]
+requires = ["scikit-build-core", "pybind11"]
+build-backend = "scikit_build_core.build"
+
+[project]
+dynamic = ["version"]
+name = "lll-gas-corr-lib"
+dependencies = [
+    "numpy",
+    "scipy",
+    "matplotlib"
+    "h5py",
+    "pyhdf"
+    "pytest"
+]
