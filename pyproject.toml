@@ -45,4 +45,8 @@ build-verbosity = 1
 before-all = "yum install -y epel-release && yum install -y hdf-devel"
 
 [tool.cibuildwheel.macos]
-before-all = "HOMEBREW_NO_ASK=1 brew install osgeo/osgeo4mac/osgeo-hdf4"
+before-all = """
+brew tap osgeo/osgeo4mac;
+brew trust --formula osgeo/osgeo4mac/osgeo-hdf4;
+brew install osgeo-hdf4;
+"""
