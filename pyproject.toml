@@ -46,8 +46,7 @@ before-all = "yum install -y epel-release && yum install -y hdf-devel"
 
 [tool.cibuildwheel.macos]
 before-all = """
-export HOMEBREW_NO_ASK=1;
-brew tap osgeo/osgeo4mac;
-brew trust --formula osgeo/osgeo4mac/osgeo-hdf4;
-brew install osgeo-hdf4;
+HOMEBREW_NO_ASK=1 brew tap osgeo/osgeo4mac && \
+HOMEBREW_NO_ASK=1 brew trust --formula osgeo/osgeo4mac/osgeo-hdf4 && \
+HOMEBREW_NO_ASK=1 brew install osgeo-hdf4
 """
