@@ -10,6 +10,7 @@ import time
 import pytest
 import calendar
 from datetime import datetime, timedelta
+from pathlib import Path
 
 from gas_corrections_lib.src import gas_corrections
 
@@ -19,20 +20,21 @@ from gas_corrections_lib.src import gas_corrections
 
 save_transmittances = False
 
+TEST_DIR = str(Path(__file__).parent)
 
 @pytest.fixture(scope="session")
 def read_PACE_data():
-    l1_data = gas_corrections.read_PACE_data('test/PACE/PACE_OCI.20240411T182012.L1B.V3.nc', start_line=0, end_line=100, start_pixel=0, end_pixel=100)
+    l1_data = gas_corrections.read_PACE_data(TEST_DIR + '/PACE/PACE_OCI.20240411T182012.L1B.V3.nc', start_line=0, end_line=100, start_pixel=0, end_pixel=100)
 
     return l1_data
 
 
 @pytest.fixture(scope="session")
 def read_MET_data():
-    with Dataset('test/PACE/GMAO_MERRA2.20240411T180000.MET.nc','r') as fd:
+    with Dataset(TEST_DIR + '/PACE/GMAO_MERRA2.20240411T180000.MET.nc','r') as fd:
         ozone1 = fd.variables['TO3'][:]*0.001
 
-    with Dataset('test/PACE/GMAO_MERRA2.20240411T190000.MET.nc','r') as fd:
+    with Dataset(TEST_DIR + '/PACE/GMAO_MERRA2.20240411T190000.MET.nc','r') as fd:
         ozone2 = fd.variables['TO3'][:]*0.001
 
     return ozone1, ozone2
@@ -40,7 +42,7 @@ def read_MET_data():
 
 
 def parse_timestamp():
-    with h5py.File('test/PACE/PACE_OCI.20240411T182012.L1B.V3.nc', 'r') as f:
+    with h5py.File(TEST_DIR + '/PACE/PACE_OCI.20240411T182012.L1B.V3.nc', 'r') as f:
         start_time = f.attrs['time_coverage_start'].decode()
         end_time = f.attrs['time_coverage_end'].decode()
     
@@ -75,7 +77,7 @@ def get_MET_delta_t():
 
 @pytest.fixture(scope="session")
 def read_OCSSW_lat_lon():
-    with h5py.File('test/PACE/ozone/PACE_OCI.20240411T182012.L2.ozone.nc', 'r') as f:
+    with h5py.File(TEST_DIR + '/PACE/ozone/PACE_OCI.20240411T182012.L2.ozone.nc', 'r') as f:
         OCSSW_lat = np.array(f['/navigation_data/latitude'])
         OCSSW_lon = np.array(f['/navigation_data/longitude'])
 
@@ -84,31 +86,31 @@ def read_OCSSW_lat_lon():
 
 @pytest.fixture(scope="session")
 def read_gas_transmittance_table():
-    gas_transmittance_table = gas_corrections.read_gas_transmittance_table('test/PACE/oci_gas_transmittance_cia_amf_v3.2.nc')
+    gas_transmittance_table = gas_corrections.read_gas_transmittance_table(TEST_DIR + '/PACE/oci_gas_transmittance_cia_amf_v3.2.nc')
 
     return gas_transmittance_table
 
 
 @pytest.fixture(scope="session")
 def read_ozone_ancillary_data():
-    koz = np.load('test/PACE/ozone/koz.npy')
-    ozone_concentration = np.load('test/PACE/ozone/oz_concentration.npy')
+    koz = np.load(TEST_DIR + '/PACE/ozone/koz.npy')
+    ozone_concentration = np.load(TEST_DIR + '/PACE/ozone/oz_concentration.npy')
 
     return koz, ozone_concentration
 
 
 @pytest.fixture(scope="session")
 def read_OCSMART_ozone_transmittance_benchmark_data():
-    tg_sol_ocsmart = np.load('test/PACE/ozone/tg_sol_oz.npy')
-    tg_sen_ocsmart = np.load('test/PACE/ozone/tg_sen_oz.npy')
-    sensor_wavelengths = np.load('test/PACE/OCSMART_wavelengths.npy')
+    tg_sol_ocsmart = np.load(TEST_DIR + '/PACE/ozone/tg_sol_oz.npy')
+    tg_sen_ocsmart = np.load(TEST_DIR + '/PACE/ozone/tg_sen_oz.npy')
+    sensor_wavelengths = np.load(TEST_DIR + '/PACE/OCSMART_wavelengths.npy')
 
     return tg_sol_ocsmart, tg_sen_ocsmart, sensor_wavelengths
 
 
 @pytest.fixture(scope="session")
 def read_OCSSW_ozone_transmittance_benchmark_data():
-    with h5py.File('test/PACE/ozone/PACE_OCI.20240411T182012.L2.ozone.nc', 'r') as f:
+    with h5py.File(TEST_DIR + '/PACE/ozone/PACE_OCI.20240411T182012.L2.ozone.nc', 'r') as f:
         tg_sen_ocssw = 5e-5*np.array(f['/geophysical_data/tg_sen'])
         tg_sol_ocssw = 5e-5*np.array(f['/geophysical_data/tg_sol'])
         wavelength_3d = np.array(f['/sensor_band_parameters/wavelength_3d'])
@@ -118,27 +120,27 @@ def read_OCSSW_ozone_transmittance_benchmark_data():
 
 @pytest.fixture(scope="session")
 def read_no2_ancillary_data():
-    kno2 = np.load('test/PACE/no2/k_no2.npy')
-    no2_frac = np.load('test/PACE/no2/no2_frac.npy')
-    no2_tropo = np.load('test/PACE/no2/no2_tropo.npy')
-    no2_strat = np.load('test/PACE/no2/no2_strat.npy')
+    kno2 = np.load(TEST_DIR + '/PACE/no2/k_no2.npy')
+    no2_frac = np.load(TEST_DIR + '/PACE/no2/no2_frac.npy')
+    no2_tropo = np.load(TEST_DIR + '/PACE/no2/no2_tropo.npy')
+    no2_strat = np.load(TEST_DIR + '/PACE/no2/no2_strat.npy')
 
     return kno2, no2_frac, no2_tropo, no2_strat
 
 
 @pytest.fixture(scope="session")
 def read_OCSMART_no2_transmittance_benchmark_data():
-    tg_sol_ocsmart = np.load('test/PACE/no2/tg_sol_no2.npy')
-    tg_sen_ocsmart = np.load('test/PACE/no2/tg_sen_no2.npy')
-    tg_sen_ocsmart = np.load('test/PACE/no2/tg_sen_no2.npy')
-    sensor_wavelengths = np.load('test/PACE/OCSMART_wavelengths.npy')
+    tg_sol_ocsmart = np.load(TEST_DIR + '/PACE/no2/tg_sol_no2.npy')
+    tg_sen_ocsmart = np.load(TEST_DIR + '/PACE/no2/tg_sen_no2.npy')
+    tg_sen_ocsmart = np.load(TEST_DIR + '/PACE/no2/tg_sen_no2.npy')
+    sensor_wavelengths = np.load(TEST_DIR + '/PACE/OCSMART_wavelengths.npy')
 
     return tg_sol_ocsmart, tg_sen_ocsmart, sensor_wavelengths
 
 
 @pytest.fixture(scope="session")
 def read_OCSSW_no2_transmittance_benchmark_data():
-    with h5py.File('test/PACE/no2/PACE_OCI.20240411T182012.L2.no2.nc', 'r') as f:
+    with h5py.File(TEST_DIR + '/PACE/no2/PACE_OCI.20240411T182012.L2.no2.nc', 'r') as f:
         tg_sen_ocssw = 5e-5*np.array(f['/geophysical_data/tg_sen'])
         tg_sol_ocssw = 5e-5*np.array(f['/geophysical_data/tg_sol'])
         wavelength_3d = np.array(f['/sensor_band_parameters/wavelength_3d'])
@@ -148,7 +150,7 @@ def read_OCSSW_no2_transmittance_benchmark_data():
 
 @pytest.fixture(scope="session")
 def read_OCSSW_co2_transmittance_benchmark_data():
-    with h5py.File('test/PACE/co2/PACE_OCI.20240411T182012.L2.co2.nc', 'r') as f:
+    with h5py.File(TEST_DIR + '/PACE/co2/PACE_OCI.20240411T182012.L2.co2.nc', 'r') as f:
         tg_sen_ocssw = 5e-5*np.array(f['/geophysical_data/tg_sen'])
         tg_sol_ocssw = 5e-5*np.array(f['/geophysical_data/tg_sol'])
         wavelength_3d = np.array(f['/sensor_band_parameters/wavelength_3d'])
@@ -158,7 +160,7 @@ def read_OCSSW_co2_transmittance_benchmark_data():
 
 @pytest.fixture(scope="session")
 def read_OCSSW_co_transmittance_benchmark_data():
-    with h5py.File('test/PACE/co/PACE_OCI.20240411T182012.L2.co.nc', 'r') as f:
+    with h5py.File(TEST_DIR + '/PACE/co/PACE_OCI.20240411T182012.L2.co.nc', 'r') as f:
         tg_sen_ocssw = 5e-5*np.array(f['/geophysical_data/tg_sen'])
         tg_sol_ocssw = 5e-5*np.array(f['/geophysical_data/tg_sol'])
         wavelength_3d = np.array(f['/sensor_band_parameters/wavelength_3d'])
@@ -168,7 +170,7 @@ def read_OCSSW_co_transmittance_benchmark_data():
 
 @pytest.fixture(scope="session")
 def read_OCSSW_ch4_transmittance_benchmark_data():
-    with h5py.File('test/PACE/ch4/PACE_OCI.20240411T182012.L2.ch4.nc', 'r') as f:
+    with h5py.File(TEST_DIR + '/PACE/ch4/PACE_OCI.20240411T182012.L2.ch4.nc', 'r') as f:
         tg_sen_ocssw = 5e-5*np.array(f['/geophysical_data/tg_sen'])
         tg_sol_ocssw = 5e-5*np.array(f['/geophysical_data/tg_sol'])
         wavelength_3d = np.array(f['/sensor_band_parameters/wavelength_3d'])
@@ -178,7 +180,7 @@ def read_OCSSW_ch4_transmittance_benchmark_data():
 
 @pytest.fixture(scope="session")
 def read_OCSSW_n2o_transmittance_benchmark_data():
-    with h5py.File('test/PACE/n2o/PACE_OCI.20240411T182012.L2.n2o.nc', 'r') as f:
+    with h5py.File(TEST_DIR + '/PACE/n2o/PACE_OCI.20240411T182012.L2.n2o.nc', 'r') as f:
         tg_sen_ocssw = 5e-5*np.array(f['/geophysical_data/tg_sen'])
         tg_sol_ocssw = 5e-5*np.array(f['/geophysical_data/tg_sol'])
         wavelength_3d = np.array(f['/sensor_band_parameters/wavelength_3d'])
@@ -188,7 +190,7 @@ def read_OCSSW_n2o_transmittance_benchmark_data():
 
 @pytest.fixture(scope="session")
 def read_OCSSW_o2_opt2_transmittance_benchmark_data():
-    with h5py.File('test/PACE/o2/PACE_OCI.20240411T182012.L2.o2.oxaband_opt_2.nc', 'r') as f:
+    with h5py.File(TEST_DIR + '/PACE/o2/PACE_OCI.20240411T182012.L2.o2.oxaband_opt_2.nc', 'r') as f:
         tg_sen_ocssw = 5e-5*np.array(f['/geophysical_data/tg_sen'])
         tg_sol_ocssw = 5e-5*np.array(f['/geophysical_data/tg_sol'])
         wavelength_3d = np.array(f['/sensor_band_parameters/wavelength_3d'])
@@ -198,7 +200,7 @@ def read_OCSSW_o2_opt2_transmittance_benchmark_data():
 
 @pytest.fixture(scope="session")
 def read_OCSSW_o2_opt3_transmittance_benchmark_data():
-    with h5py.File('test/PACE/o2/PACE_OCI.20240411T182012.L2.o2.oxaband_opt_3.nc', 'r') as f:
+    with h5py.File(TEST_DIR + '/PACE/o2/PACE_OCI.20240411T182012.L2.o2.oxaband_opt_3.nc', 'r') as f:
         tg_sen_ocssw = 5e-5*np.array(f['/geophysical_data/tg_sen'])
         tg_sol_ocssw = 5e-5*np.array(f['/geophysical_data/tg_sol'])
         wavelength_3d = np.array(f['/sensor_band_parameters/wavelength_3d'])
@@ -208,7 +210,7 @@ def read_OCSSW_o2_opt3_transmittance_benchmark_data():
 
 @pytest.fixture(scope="session")
 def read_OCSSW_h2o_transmittance_benchmark_data():
-    with h5py.File('test/PACE/h2o/PACE_OCI.20240411T182012.L2.h2o.nc', 'r') as f:
+    with h5py.File(TEST_DIR + '/PACE/h2o/PACE_OCI.20240411T182012.L2.h2o.nc', 'r') as f:
         tg_sen_ocssw = 5e-5*np.array(f['/geophysical_data/tg_sen'])
         tg_sol_ocssw = 5e-5*np.array(f['/geophysical_data/tg_sol'])
         wavelength_3d = np.array(f['/sensor_band_parameters/wavelength_3d'])
@@ -217,14 +219,14 @@ def read_OCSSW_h2o_transmittance_benchmark_data():
 
 
 def save_gas_transmittances(gas_transmittances, gas_subfolder):
-    output_path = 'test/PACE/' + gas_subfolder + '/'
+    output_path = TEST_DIR + '/PACE/' + gas_subfolder + '/'
     np.save(output_path + 'solar_zenith.npy', gas_transmittances.solar_zenith)
     np.save(output_path + 'sensor_zenith.npy', gas_transmittances.sensor_zenith)
     np.save(output_path + 'total.npy', gas_transmittances.total)
 
 
 def load_gas_transmittances(gas_subfolder):
-    output_path = 'test/PACE/' + gas_subfolder + '/'
+    output_path = TEST_DIR + '/PACE/' + gas_subfolder + '/'
     solar_zenith_saved = np.load(output_path + 'solar_zenith.npy')
     sensor_zenith_saved = np.load(output_path + 'sensor_zenith.npy')
     total_saved = np.load(output_path + 'total.npy')
@@ -258,7 +260,7 @@ def test_ozone_OCSSW(read_OCSSW_lat_lon,
     ozmap[oz_nline-1,:]=ozmap[oz_nline-2,:]
 
     gas_correction_manager = gas_corrections.Gas_Correction_Manager()
-    l1_data = gas_correction_manager.read_PACE_data('test/PACE/PACE_OCI.20240411T182012.L1B.V3.nc', start_line=0, end_line=100, start_pixel=0, end_pixel=100)
+    l1_data = gas_correction_manager.read_PACE_data(TEST_DIR + '/PACE/PACE_OCI.20240411T182012.L1B.V3.nc', start_line=0, end_line=100, start_pixel=0, end_pixel=100)
     l1_data.num_wavelengths = len(ozone_absorption_cross_section)
 
     # Interpolate ozone map to the L1B grid
@@ -297,15 +299,15 @@ def test_ozone_OCSSW(read_OCSSW_lat_lon,
     plt.xlabel('Wavelength (nm)')
     plt.ylabel('Transmittance')
     plt.legend(['OCSSW Sensor Zenith', 'OCSSW Solar Zenith', 'OCSMART Sensor Zenith', 'OCSMART Solar Zenith', 'Gas Lib Sensor Zenith', 'Gas Lib Solar Zenith'])
-    plt.savefig('test/PACE/ozone/transmittance_comparison.png')
+    plt.savefig(TEST_DIR + '/PACE/ozone/transmittance_comparison.png')
 
 
 # @pytest.mark.skip()
 def test_co2_OCSSW(read_OCSSW_co2_transmittance_benchmark_data):
 
     gas_correction_manager = gas_corrections.Gas_Correction_Manager()
-    l1_data = gas_correction_manager.read_PACE_data('test/PACE/PACE_OCI.20240411T182012.L1B.V3.nc', start_line=0, end_line=100, start_pixel=0, end_pixel=100)
-    gas_transmittance_table = gas_correction_manager.read_gas_transmittance_table('test/PACE/oci_gas_transmittance_cia_amf_v3.2.nc')
+    l1_data = gas_correction_manager.read_PACE_data(TEST_DIR + '/PACE/PACE_OCI.20240411T182012.L1B.V3.nc', start_line=0, end_line=100, start_pixel=0, end_pixel=100)
+    gas_transmittance_table = gas_correction_manager.read_gas_transmittance_table(TEST_DIR + '/PACE/oci_gas_transmittance_cia_amf_v3.2.nc')
     gas_transmittances = gas_corrections.co2_transmittance(l1_data=l1_data, gas_transmittance_table=gas_transmittance_table)
 
     tg_sen_gas_correction_lib = gas_transmittances.sensor_zenith.reshape(gas_correction_manager.l1_data.reflectance.shape)
@@ -333,15 +335,15 @@ def test_co2_OCSSW(read_OCSSW_co2_transmittance_benchmark_data):
     plt.xlabel('Wavelength (nm)')
     plt.ylabel('Transmittance')
     plt.legend(['OCSSW Sensor Zenith', 'OCSSW Solar Zenith', 'Gas Lib Sensor Zenith', 'Gas Lib Solar Zenith'])
-    plt.savefig('test/PACE/co2/transmittance_comparison.png')
+    plt.savefig(TEST_DIR + '/PACE/co2/transmittance_comparison.png')
 
 
 # @pytest.mark.skip()
 def test_co_OCSSW(read_OCSSW_co_transmittance_benchmark_data):
 
     gas_correction_manager = gas_corrections.Gas_Correction_Manager()
-    l1_data = gas_correction_manager.read_PACE_data('test/PACE/PACE_OCI.20240411T182012.L1B.V3.nc', start_line=0, end_line=100, start_pixel=0, end_pixel=100)
-    gas_transmittance_table = gas_correction_manager.read_gas_transmittance_table('test/PACE/oci_gas_transmittance_cia_amf_v3.2.nc')
+    l1_data = gas_correction_manager.read_PACE_data(TEST_DIR + '/PACE/PACE_OCI.20240411T182012.L1B.V3.nc', start_line=0, end_line=100, start_pixel=0, end_pixel=100)
+    gas_transmittance_table = gas_correction_manager.read_gas_transmittance_table(TEST_DIR + '/PACE/oci_gas_transmittance_cia_amf_v3.2.nc')
     gas_transmittances = gas_corrections.co_transmittance(l1_data=l1_data, gas_transmittance_table=gas_transmittance_table)
 
     tg_sen_gas_correction_lib = gas_transmittances.sensor_zenith.reshape(gas_correction_manager.l1_data.reflectance.shape)
@@ -369,15 +371,15 @@ def test_co_OCSSW(read_OCSSW_co_transmittance_benchmark_data):
     plt.xlabel('Wavelength (nm)')
     plt.ylabel('Transmittance')
     plt.legend(['OCSSW Sensor Zenith', 'OCSSW Solar Zenith', 'Gas Lib Sensor Zenith', 'Gas Lib Solar Zenith'])
-    plt.savefig('test/PACE/co/transmittance_comparison.png')
+    plt.savefig(TEST_DIR + '/PACE/co/transmittance_comparison.png')
 
 
 # @pytest.mark.skip()
 def test_ch4_OCSSW(read_OCSSW_ch4_transmittance_benchmark_data):
 
     gas_transmittance_manager = gas_corrections.Gas_Correction_Manager()
-    l1_data = gas_transmittance_manager.read_PACE_data('test/PACE/PACE_OCI.20240411T182012.L1B.V3.nc', start_line=0, end_line=100, start_pixel=0, end_pixel=100)
-    gas_transmittance_table = gas_transmittance_manager.read_gas_transmittance_table('test/PACE/oci_gas_transmittance_cia_amf_v3.2.nc')
+    l1_data = gas_transmittance_manager.read_PACE_data(TEST_DIR + '/PACE/PACE_OCI.20240411T182012.L1B.V3.nc', start_line=0, end_line=100, start_pixel=0, end_pixel=100)
+    gas_transmittance_table = gas_transmittance_manager.read_gas_transmittance_table(TEST_DIR + '/PACE/oci_gas_transmittance_cia_amf_v3.2.nc')
     gas_transmittances = gas_corrections.ch4_transmittance(l1_data=l1_data, gas_transmittance_table=gas_transmittance_table)
 
     tg_sen_gas_correction_lib = gas_transmittances.sensor_zenith.reshape(gas_transmittance_manager.l1_data.reflectance.shape)
@@ -405,15 +407,15 @@ def test_ch4_OCSSW(read_OCSSW_ch4_transmittance_benchmark_data):
     plt.xlabel('Wavelength (nm)')
     plt.ylabel('Transmittance')
     plt.legend(['OCSSW Sensor Zenith', 'OCSSW Solar Zenith', 'Gas Lib Sensor Zenith', 'Gas Lib Solar Zenith'])
-    plt.savefig('test/PACE/ch4/transmittance_comparison.png')
+    plt.savefig(TEST_DIR + '/PACE/ch4/transmittance_comparison.png')
 
 
 # @pytest.mark.skip()
 def test_n2o_OCSSW(read_OCSSW_n2o_transmittance_benchmark_data):
 
     gas_transmittance_manager = gas_corrections.Gas_Correction_Manager()
-    l1_data = gas_transmittance_manager.read_PACE_data('test/PACE/PACE_OCI.20240411T182012.L1B.V3.nc', start_line=0, end_line=100, start_pixel=0, end_pixel=100)
-    gas_transmittance_table = gas_transmittance_manager.read_gas_transmittance_table('test/PACE/oci_gas_transmittance_cia_amf_v3.2.nc')
+    l1_data = gas_transmittance_manager.read_PACE_data(TEST_DIR + '/PACE/PACE_OCI.20240411T182012.L1B.V3.nc', start_line=0, end_line=100, start_pixel=0, end_pixel=100)
+    gas_transmittance_table = gas_transmittance_manager.read_gas_transmittance_table(TEST_DIR + '/PACE/oci_gas_transmittance_cia_amf_v3.2.nc')
     gas_transmittances = gas_corrections.n2o_transmittance(l1_data=l1_data, gas_transmittance_table=gas_transmittance_table)
 
     tg_sen_gas_correction_lib = gas_transmittances.sensor_zenith.reshape(gas_transmittance_manager.l1_data.reflectance.shape)
@@ -441,7 +443,7 @@ def test_n2o_OCSSW(read_OCSSW_n2o_transmittance_benchmark_data):
     plt.xlabel('Wavelength (nm)')
     plt.ylabel('Transmittance')
     plt.legend(['OCSSW Sensor Zenith', 'OCSSW Solar Zenith', 'Gas Lib Sensor Zenith', 'Gas Lib Solar Zenith'])
-    plt.savefig('test/PACE/n2o/transmittance_comparison.png')
+    plt.savefig(TEST_DIR + '/PACE/n2o/transmittance_comparison.png')
 
 
 # @pytest.mark.skip()
@@ -471,8 +473,8 @@ def test_no2_OCSSW(read_OCSSW_lat_lon,
     no2_strat = np.zeros((nmonths,no2_nline,no2_npixl), dtype='float64')
     no2_frac = np.zeros((no2_frac_nline,no2_frac_npixl), dtype='float64')
     
-    no2_fname = 'test/PACE/no2/no2_climatology_v2013.hdf'
-    no2_frac_fname = 'test/PACE/no2/trop_f_no2_200m.hdf'
+    no2_fname = TEST_DIR + '/PACE/no2/no2_climatology_v2013.hdf'
+    no2_frac_fname = TEST_DIR + '/PACE/no2/trop_f_no2_200m.hdf'
     
     #read no2 fraction data
     f=SD(no2_frac_fname, SDC.READ)
@@ -502,7 +504,7 @@ def test_no2_OCSSW(read_OCSSW_lat_lon,
     no2_strat = no2_strat * 1.0e15
 
     gas_correction_manager = gas_corrections.Gas_Correction_Manager()
-    l1_data = gas_correction_manager.read_PACE_data('test/PACE/PACE_OCI.20240411T182012.L1B.V3.nc', start_line=0, end_line=100, start_pixel=0, end_pixel=100)
+    l1_data = gas_correction_manager.read_PACE_data(TEST_DIR + '/PACE/PACE_OCI.20240411T182012.L1B.V3.nc', start_line=0, end_line=100, start_pixel=0, end_pixel=100)
     l1_data.num_wavelengths = len(no2_absorption_cross_section)
     
     # Interpolate no2 map to the L1B grid
@@ -551,15 +553,15 @@ def test_no2_OCSSW(read_OCSSW_lat_lon,
     plt.xlabel('Wavelength (nm)')
     plt.ylabel('Transmittance')
     plt.legend(['OCSSW Sensor Zenith', 'OCSSW Solar Zenith', 'Gas Lib Sensor Zenith', 'Gas Lib Solar Zenith', 'OCSMART Sensor Zenith', 'OCSMART Solar Zenith'])
-    plt.savefig('test/PACE/no2/transmittance_comparison.png')
+    plt.savefig(TEST_DIR + '/PACE/no2/transmittance_comparison.png')
 
 
 # @pytest.mark.skip()
 def test_o2_OCSSW_transmittance_table_option(read_OCSSW_o2_opt2_transmittance_benchmark_data):
 
     gas_transmittance_manager = gas_corrections.Gas_Correction_Manager()
-    l1_data = gas_transmittance_manager.read_PACE_data('test/PACE/PACE_OCI.20240411T182012.L1B.V3.nc', start_line=0, end_line=100, start_pixel=0, end_pixel=100)
-    gas_transmittance_table = gas_transmittance_manager.read_gas_transmittance_table('test/PACE/oci_gas_transmittance_cia_amf_v3.2.nc')
+    l1_data = gas_transmittance_manager.read_PACE_data(TEST_DIR + '/PACE/PACE_OCI.20240411T182012.L1B.V3.nc', start_line=0, end_line=100, start_pixel=0, end_pixel=100)
+    gas_transmittance_table = gas_transmittance_manager.read_gas_transmittance_table(TEST_DIR + '/PACE/oci_gas_transmittance_cia_amf_v3.2.nc')
     gas_transmittances = gas_corrections.o2_transmittance(l1_data=l1_data, 
                                                           gas_transmittance_table=gas_transmittance_table, 
                                                           oxygen_A_band_option=gas_corrections.Oxygen_A_Band_Option().TRANSMITTANCE_TABLE)
@@ -586,7 +588,7 @@ def test_o2_OCSSW_transmittance_table_option(read_OCSSW_o2_opt2_transmittance_be
     plt.xlabel('Wavelength (nm)')
     plt.ylabel('Transmittance')
     plt.legend(['OCSSW Sensor Zenith', 'OCSSW Solar Zenith', 'Gas Lib Sensor Zenith', 'Gas Lib Solar Zenith'])
-    plt.savefig('test/PACE/o2_table_option/transmittance_comparison_oxaband_opt_2.png')
+    plt.savefig(TEST_DIR + '/PACE/o2_table_option/transmittance_comparison_oxaband_opt_2.png')
 
     plt.figure()
     plt.plot(wavelength_3d, tg_sen_ocssw[0, 0, :], '-r')
@@ -597,15 +599,15 @@ def test_o2_OCSSW_transmittance_table_option(read_OCSSW_o2_opt2_transmittance_be
     plt.xlabel('Wavelength (nm)')
     plt.ylabel('Transmittance')
     plt.legend(['OCSSW Sensor Zenith', 'OCSSW Solar Zenith', 'Gas Lib Sensor Zenith', 'Gas Lib Solar Zenith'])
-    plt.savefig('test/PACE/o2_table_option/transmittance_comparison_oxaband_opt_2_A_band_zoom.png')
+    plt.savefig(TEST_DIR + '/PACE/o2_table_option/transmittance_comparison_oxaband_opt_2_A_band_zoom.png')
 
 
 # @pytest.mark.skip()
 def test_o2_OCSSW_surrounding_window_bands_option(read_OCSSW_o2_opt3_transmittance_benchmark_data):
 
     gas_transmittance_manager = gas_corrections.Gas_Correction_Manager()
-    l1_data = gas_transmittance_manager.read_PACE_data('test/PACE/PACE_OCI.20240411T182012.L1B.V3.nc', start_line=0, end_line=100, start_pixel=0, end_pixel=100)
-    gas_transmittance_table = gas_transmittance_manager.read_gas_transmittance_table('test/PACE/oci_gas_transmittance_cia_amf_v3.2.nc')
+    l1_data = gas_transmittance_manager.read_PACE_data(TEST_DIR + '/PACE/PACE_OCI.20240411T182012.L1B.V3.nc', start_line=0, end_line=100, start_pixel=0, end_pixel=100)
+    gas_transmittance_table = gas_transmittance_manager.read_gas_transmittance_table(TEST_DIR + '/PACE/oci_gas_transmittance_cia_amf_v3.2.nc')
     gas_transmittances = gas_corrections.o2_transmittance(l1_data=l1_data, 
                                                           gas_transmittance_table=gas_transmittance_table, 
                                                           oxygen_A_band_option=gas_corrections.Oxygen_A_Band_Option().SURROUNDING_WINDOW_BANDS)
@@ -632,7 +634,7 @@ def test_o2_OCSSW_surrounding_window_bands_option(read_OCSSW_o2_opt3_transmittan
     plt.xlabel('Wavelength (nm)')
     plt.ylabel('Transmittance')
     plt.legend(['OCSSW Sensor Zenith', 'OCSSW Solar Zenith', 'Gas Lib Sensor Zenith', 'Gas Lib Solar Zenith'])
-    plt.savefig('test/PACE/o2_window_bands_option/transmittance_comparison_oxaband_opt_3.png')
+    plt.savefig(TEST_DIR + '/PACE/o2_window_bands_option/transmittance_comparison_oxaband_opt_3.png')
 
     plt.figure()
     plt.plot(wavelength_3d, tg_sen_ocssw[0, 0, :], '-r')
@@ -643,15 +645,15 @@ def test_o2_OCSSW_surrounding_window_bands_option(read_OCSSW_o2_opt3_transmittan
     plt.xlabel('Wavelength (nm)')
     plt.ylabel('Transmittance')
     plt.legend(['OCSSW Sensor Zenith', 'OCSSW Solar Zenith', 'Gas Lib Sensor Zenith', 'Gas Lib Solar Zenith'])
-    plt.savefig('test/PACE/o2_window_bands_option/transmittance_comparison_oxaband_opt_3_A_band_zoom.png')
+    plt.savefig(TEST_DIR + '/PACE/o2_window_bands_option/transmittance_comparison_oxaband_opt_3_A_band_zoom.png')
 
 
 # @pytest.mark.skip()
 def test_h2o_OCSSW(read_OCSSW_h2o_transmittance_benchmark_data):
 
     gas_correction_manager = gas_corrections.Gas_Correction_Manager()
-    l1_data = gas_correction_manager.read_PACE_data('test/PACE/PACE_OCI.20240411T182012.L1B.V3.nc', start_line=0, end_line=100, start_pixel=0, end_pixel=100)
-    gas_transmittance_table = gas_correction_manager.read_gas_transmittance_table('test/PACE/oci_gas_transmittance_cia_amf_v3.2.nc')
+    l1_data = gas_correction_manager.read_PACE_data(TEST_DIR + '/PACE/PACE_OCI.20240411T182012.L1B.V3.nc', start_line=0, end_line=100, start_pixel=0, end_pixel=100)
+    gas_transmittance_table = gas_correction_manager.read_gas_transmittance_table(TEST_DIR + '/PACE/oci_gas_transmittance_cia_amf_v3.2.nc')
     gas_transmittances = gas_corrections.h2o_transmittance(l1_data=l1_data, gas_transmittance_table=gas_transmittance_table)
 
     tg_sen_gas_correction_lib = gas_transmittances.sensor_zenith.reshape(gas_correction_manager.l1_data.reflectance.shape)
@@ -677,4 +679,4 @@ def test_h2o_OCSSW(read_OCSSW_h2o_transmittance_benchmark_data):
     plt.xlabel('Wavelength (nm)')
     plt.ylabel('Transmittance')
     plt.legend(['OCSSW Sensor Zenith', 'OCSSW Solar Zenith', 'Gas Lib Sensor Zenith', 'Gas Lib Solar Zenith'])
-    plt.savefig('test/PACE/h2o/transmittance_comparison.png')
+    plt.savefig(TEST_DIR + '/PACE/h2o/transmittance_comparison.png')
