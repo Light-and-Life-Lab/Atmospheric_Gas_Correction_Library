@@ -46,7 +46,8 @@ before-all = "yum install -y epel-release && yum install -y hdf-devel"
 
 [tool.cibuildwheel.macos]
 before-all = """
-brew update;
+unset HOMEBREW_BREW_GIT_REMOTE HOMEBREW_CORE_GIT_REMOTE;
+brew update-reset;
 brew tap osgeo/osgeo4mac;
 brew trust --formula osgeo/osgeo4mac/osgeo-hdf4;
 brew install osgeo-hdf4;
