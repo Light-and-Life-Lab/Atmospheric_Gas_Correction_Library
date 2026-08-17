@@ -1,6 +1,7 @@
 name: Build wheels
 
 on:
+  workflow_dispatch:  # Allows for manual triggering of this action through the GitHub interface
   push:
     tags:
       - 'v*'     # CI will only rebuild when a new version tag (prefixed with v) is pushed
