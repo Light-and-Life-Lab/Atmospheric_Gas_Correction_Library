@@ -47,25 +47,16 @@ before-all = "yum install -y epel-release && yum install -y hdf-devel"
 
 [tool.cibuildwheel.macos]
 before-all = """
-# Install HDF4
 curl -L https://github.com/HDFGroup/hdf4/releases/download/hdf4.3.1/hdf4.3.1-macos14_clang.tar.gz -o hdf4.tar.gz;
 tar -xzf hdf4.tar.gz;
 sudo mkdir -p /usr/local/hdf4;
 sudo tar -xzf hdf4/HDF-4.3.1-Darwin.tar.gz -C /usr/local/hdf4 --strip-components=4;
-
-# Download the full LLVM Project monorepo to get CMake files necessary for OpenMP compilation
-curl -L -o llvm-project.tar.xz https://github.com;
-tar -xf llvm-project.tar.xz;
-cd llvm-project-18.1.8.src;
-
-# Create build directory and compile OpenMP
+curl -L -o openmp.tar.xz https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.8/openmp-18.1.8.src.tar.xz;
+tar -xf openmp.tar.xz;
+cd openmp-18.1.8.src;
 mkdir build;
 cd build;
-cmake ../runtimes \
-  -DLLVM_ENABLE_RUNTIMES="openmp" \
-  -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 \
-  -DCMAKE_INSTALL_PREFIX=/usr/local/libomp;
+cmake .. -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 -DCMAKE_INSTALL_PREFIX=/usr/local/libomp;
 make -j4;
 sudo make install;
 """
