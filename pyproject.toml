@@ -46,9 +46,9 @@ before-all = "yum install -y epel-release && yum install -y hdf-devel"
 
 [tool.cibuildwheel.macos]
 before-all = """
-unset HOMEBREW_BREW_GIT_REMOTE HOMEBREW_CORE_GIT_REMOTE;
-brew update-reset;
-brew tap osgeo/osgeo4mac;
-brew trust --formula osgeo/osgeo4mac/osgeo-hdf4;
-brew install osgeo-hdf4;
+curl -L https://github.com/HDFGroup/hdf4/releases/download/hdf4.3.1/hdf4.3.1-macos14_clang.tar.gz -o hdf4.tar.gz;
+tar -xzf hdf4.tar.gz;
+sudo mkdir -p /usr/local/hdf4;
+sudo tar -xzf hdf4/HDF-4.3.1-Darwin.tar.gz -C /usr/local/hdf4 --strip-components=4;
 """
+environment = { CPATH="/usr/local/hdf4/include", LIBRARY_PATH="/usr/local/hdf4/lib" }
