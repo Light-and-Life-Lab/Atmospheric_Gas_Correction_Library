@@ -13,10 +13,9 @@ set(PYBIND11_FINDPYTHON ON)
 find_package(pybind11 REQUIRED)
 
 if(APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    execute_process(COMMAND brew --prefix libomp OUTPUT_VARIABLE LIBOMP_PREFIX OUTPUT_STRIP_TRAILING_WHITESPACE)
-    set(OpenMP_CXX_FLAGS "-Xpreprocessor -fopenmp -I${LIBOMP_PREFIX}/include")
+    set(OpenMP_CXX_FLAGS "-Xpreprocessor -fopenmp -I/usr/local/libomp/include")
     set(OpenMP_CXX_LIB_NAMES "omp")
-    set(OpenMP_omp_LIBRARY "${LIBOMP_PREFIX}/lib/libomp.dylib")
+    set(OpenMP_omp_LIBRARY "/usr/local/libomp/lib/libomp.dylib")
 endif()
 
 find_package(OpenMP REQUIRED)
