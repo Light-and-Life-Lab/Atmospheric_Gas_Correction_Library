@@ -25,6 +25,13 @@ pybind11_add_module(gas_transmittance
     src/gas_transmittance_impl.cpp
 )
 
+if(APPLE)
+    set_target_properties(gas_transmittance PROPERTIES
+        BUILD_RPATH "/usr/local/libomp/lib"
+        INSTALL_RPATH "/usr/local/libomp/lib"
+    )
+endif()
+
 target_include_directories(gas_transmittance PRIVATE include)
 target_link_libraries(gas_transmittance PRIVATE OpenMP::OpenMP_CXX)
 
