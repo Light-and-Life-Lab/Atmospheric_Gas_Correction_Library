@@ -22,9 +22,18 @@ jobs:
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v4.2.0
+        env:
+          CIBW_DEBUG_KEEP_CONTAINER: "1"
 
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: cibw-wheels-${{ matrix.os }}
           path: ./wheelhouse/*.whl
+
+      - name: Setup interactive SSH debugging session
+        if: ${{ failure() }} # Only runs if the step above fails
+        uses: mxschmitt/action-tmate@v3
+        with:
+          # Restrict access to the user who triggered the workflow for security
+          limit-access-to-actor: true 
