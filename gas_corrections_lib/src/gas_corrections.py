@@ -2,7 +2,7 @@ import h5py
 import numpy as np
 from scipy import interpolate
 
-from ..gas_corrections_cpp import gas_transmittance
+from gas_corrections_cpp import gas_transmittance
 
 
 def L1_Data():
