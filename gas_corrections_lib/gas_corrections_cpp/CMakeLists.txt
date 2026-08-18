@@ -11,6 +11,14 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 set(PYBIND11_FINDPYTHON ON)
 find_package(pybind11 REQUIRED)
+
+if(APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    execute_process(COMMAND brew --prefix libomp OUTPUT_VARIABLE LIBOMP_PREFIX OUTPUT_STRIP_TRAILING_WHITESPACE)
+    set(OpenMP_CXX_FLAGS "-Xpreprocessor -fopenmp -I${LIBOMP_PREFIX}/include")
+    set(OpenMP_CXX_LIB_NAMES "omp")
+    set(OpenMP_omp_LIBRARY "${LIBOMP_PREFIX}/lib/libomp.dylib")
+endif()
+
 find_package(OpenMP REQUIRED)
 
 pybind11_add_module(gas_transmittance

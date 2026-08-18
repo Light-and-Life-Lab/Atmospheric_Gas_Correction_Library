@@ -50,5 +50,6 @@ curl -L https://github.com/HDFGroup/hdf4/releases/download/hdf4.3.1/hdf4.3.1-mac
 tar -xzf hdf4.tar.gz;
 sudo mkdir -p /usr/local/hdf4;
 sudo tar -xzf hdf4/HDF-4.3.1-Darwin.tar.gz -C /usr/local/hdf4 --strip-components=4;
+brew install libomp;
 """
 environment = { CPATH="/usr/local/hdf4/include", LIBRARY_PATH="/usr/local/hdf4/lib" }
