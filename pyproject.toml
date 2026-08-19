@@ -37,7 +37,7 @@ provider = "scikit_build_core.metadata.setuptools_scm"
 
 [tool.cibuildwheel]
 build = "cp*"  # Wheels will be built for all CPython versions subject to the versions specified by requires-python
-skip = "*-win* *-musllinux*"  # Exclude Windows and Alpine/musl Linux (leaving only macOS and manylinux)
+skip = "*-win* *-musllinux* cp315-* cp315t-*"  # Exclude Windows and Alpine/musl Linux (leaving only macOS and manylinux), and skip CPython 3.15 because it is not released yet
 test-extras = ["test"]
 test-command = "pytest --import-mode=append {project}/gas_corrections_lib/test"
 build-verbosity = 1
