@@ -10,6 +10,8 @@ jobs:
   build_wheels:
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write
     strategy:
       fail-fast: false
       matrix:
@@ -35,8 +37,6 @@ jobs:
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v4.2.0
-        env:
-          CIBW_DEBUG_KEEP_CONTAINER: "1"
 
       - uses: actions/upload-artifact@v4
         if: always()
@@ -50,3 +50,10 @@ jobs:
         with:
           # Restrict access to the user who triggered the workflow for security
           limit-access-to-actor: true 
+
+      - name: Upload wheels to release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ./wheelhouse/*.whl
+          generate_release_notes: true
