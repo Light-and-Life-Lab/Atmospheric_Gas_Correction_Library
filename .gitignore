@@ -14,3 +14,5 @@ gas_corrections_lib/gas_corrections_cpp/gas_transmittance.cpython-311-x86_64-lin
 gas_corrections_lib/gas_corrections_cpp/build/
 gas_corrections_lib/test/npy/
 gas_corrections_lib/test/HICO/
+gas_corrections_lib/test/PACE/**/*transmittance_comparison*.png
+!gas_corrections_lib/test/PACE/reference_plots/*transmittance_comparison*.png
