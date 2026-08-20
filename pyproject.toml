@@ -23,6 +23,8 @@ test = [
 [tool.scikit-build]
 cmake.source-dir = "gas_corrections_lib/gas_corrections_cpp"
 wheel.packages = ["gas_corrections_lib"]
+editable.rebuild = true
+build-dir = "build/{wheel_tag}"
 wheel.exclude = [
     "**/*.cpp",
     "**/*.hpp",
