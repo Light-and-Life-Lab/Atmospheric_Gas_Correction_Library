@@ -50,7 +50,7 @@ pip install <paste-the-wheel-url-here>
 For example:
 
 ```bash
-pip install https://github.com/Light-and-Life-Lab/Atmospheric_Gas_Correction_Library/releases/download/v0.1.3/lll_gas_corr_lib-0.1.4-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
+pip install https://github.com/Light-and-Life-Lab/Atmospheric_Gas_Correction_Library/releases/download/v0.1.7/lll_gas_corr_lib-0.1.7-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
 
 ```
 
@@ -175,16 +175,11 @@ The other six species follow the same pattern as the CO2 example above (`co_tran
 
 ## Running the test suite
 
-The test suite depends on additional packages not required for normal use (`pytest`, `pyhdf`, `matplotlib`, `netCDF4`), available as an optional extra:
-
-```bash
-pip install "gas_corrections_lib[test]" pytest
-
-```
+The test suite is not included in the published wheels — it lives in this repository alongside the source, so running it requires cloning the repo rather than just `pip install`ing a release. See [Building from source](#building-from-source) below to set up an editable install with the test extras (`pytest`, `pyhdf`, `matplotlib`, `netCDF4`).
 
 > **Note:** `pyhdf` requires the HDF4 C library to be available on your system (e.g. `libhdf4-dev` on Debian/Ubuntu). This is only needed to run the test suite, not for normal installation and use of the library.
 
-Tests can then be run with:
+Once installed, tests can be run from the repository root with:
 
 ```bash
 pytest gas_corrections_lib/test

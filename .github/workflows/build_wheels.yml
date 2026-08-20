@@ -35,17 +35,6 @@ jobs:
       - name: Git LFS Pull
         run: git lfs pull
 
-      - name: Diagnose git state before build
-        run: |
-          echo "--- git describe ---"
-          git describe --tags --long --dirty
-          echo "--- git status (tracked files only) ---"
-          git status --porcelain --untracked-files=no
-          echo "--- current HEAD ---"
-          git rev-parse HEAD
-          echo "--- tags on HEAD ---"
-          git tag --points-at HEAD
-
       - name: Build wheels
         uses: pypa/cibuildwheel@v4.2.0
 

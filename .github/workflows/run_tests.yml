@@ -23,9 +23,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.10'
+          cache: 'pip'
 
       - name: Install system dependencies
-        run: sudo apt-get update && sudo apt-get install -y libhdf4-dev
+        run: |
+          sudo sed -i 's|azure.archive.ubuntu.com|archive.ubuntu.com|g' /etc/apt/sources.list.d/*.sources 2>/dev/null || true  # Azure mirror for libHDF4 doesn't exist, force plain mirror instead to prevent lengthy retries.
+          sudo apt-get update
+          sudo apt-get install -y libhdf4-dev
 
       - run: pip install -e ".[test]"
       - run: pytest gas_corrections_lib/test
