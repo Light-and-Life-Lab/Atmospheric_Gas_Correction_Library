@@ -1,7 +1,7 @@
 
 # Atmospheric Gas Correction Library
 
-This library computes atmospheric gas transmittance values for each pixel and each wavelength in an L1 data file that is provided as input. The gas correction algorithms implemented by this library are designed to reproduce the results from NASA's [OCSSW](https://oceandata.sci.gsfc.nasa.gov/ocssw) as a standalone, C++/OpenMP-accelerated library. A Python interface is provided (via pybind11), so it can be called directly from Python workflows such as [OC-SMART](https://oceancolor.gsfc.nasa.gov/).
+This library computes atmospheric gas transmittance values for each pixel and each wavelength in an L1 data file that is provided as input. The gas correction algorithms implemented by this library are designed to reproduce the results from NASA's [OCSSW](https://oceandata.sci.gsfc.nasa.gov/ocssw) as a standalone, C++/OpenMP-accelerated library. A Python interface is provided (via pybind11), so it can be called directly from Python workflows such as [OC-SMART]([https://oceancolor.gsfc.nasa.gov/](https://github.com/Light-and-Life-Lab/OC-SMART)).
 
 Transmittance values are computed for eight molecular species:
 
@@ -175,13 +175,4 @@ The other six species follow the same pattern as the CO2 example above (`co_tran
 
 ## Running the test suite
 
-The test suite is not included in the published wheels — it lives in this repository alongside the source, so running it requires cloning the repo rather than just `pip install`ing a release. See [Building from source](#building-from-source) below to set up an editable install with the test extras (`pytest`, `pyhdf`, `matplotlib`, `netCDF4`).
-
-> **Note:** `pyhdf` requires the HDF4 C library to be available on your system (e.g. `libhdf4-dev` on Debian/Ubuntu). This is only needed to run the test suite, not for normal installation and use of the library.
-
-Once installed, tests can be run from the repository root with:
-
-```bash
-pytest gas_corrections_lib/test
-
-```
+The test suite is not included in the published wheels. See the DEVELOPMENT.md file for instructions on how to install a version of the repo for development and testing.
