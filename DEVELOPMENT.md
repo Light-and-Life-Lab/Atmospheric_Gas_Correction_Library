@@ -38,11 +38,11 @@ pip install scikit-build-core pybind11 setuptools_scm ninja cmake
 
 ## 5. Run pip install
 
-The settings `editable.rebuild = true` and `build-dir = "build/{wheel_tag}"` are set in the pyproject.toml file, which sets up the library so that it will be rebuilt on import.
-The built .so file will be placed in the directory build/{wheel_tag}, where {wheel_tag} is a directory whose name matches the wheel's naming convention (e.g. cp313-cp313-linux_x86_64).
+The flags `editable.rebuild = true` and `build-dir = "build"` are set so that the library so that it will be rebuilt on import.
+The built .so file will be placed in a directory named "build".
 
 ```bash
-pip install -e ".[test]" --no-build-isolation
+pip install -e ".[test]" --no-build-isolation -Ceditable.rebuild=true -Cbuild-dir=build
 ```
 
 ## 6. Run pytest
