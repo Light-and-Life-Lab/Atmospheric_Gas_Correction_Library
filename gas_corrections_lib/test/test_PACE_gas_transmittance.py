@@ -247,12 +247,12 @@ def test_ozone_OCSSW(read_OCSSW_lat_lon,
     ozdt = get_MET_delta_t
     ozone_absorption_cross_section, _ = read_ozone_ancillary_data
 
-    oz_lat = np.arange(-90.5,91.0,0.5)
-    oz_lon = np.arange(-180.3125,180.625,0.625)
+    oz_lat = np.arange(-90.5, 91.0, 0.5, dtype=np.float32)
+    oz_lon = np.arange(-180.3125, 180.625, 0.625, dtype=np.float32)
     oz_nline=len(oz_lat)
     oz_npixl=len(oz_lon)
     ozone=(ozone1*(1 - ozdt) + ozone2*ozdt) # interpolate in time and convert unit   
-    ozmap=np.zeros((oz_nline,oz_npixl), dtype='float64')
+    ozmap=np.zeros((oz_nline,oz_npixl), dtype='float32')
     ozmap[1:oz_nline-1,1:oz_npixl-1]=ozone
     ozmap[:,0]=ozmap[:,oz_npixl-2]
     ozmap[:,oz_npixl-1]=ozmap[:,1]
@@ -265,7 +265,7 @@ def test_ozone_OCSSW(read_OCSSW_lat_lon,
 
     # Interpolate ozone map to the L1B grid
     func = interpolate.RegularGridInterpolator((np.flip(oz_lat), oz_lon), np.flip(ozmap, 0))
-    ozone_concentration = func(np.array([l1b_lat, l1b_lon]).transpose())
+    ozone_concentration = func(np.array([l1b_lat, l1b_lon], dtype=np.float32).transpose()).astype(np.float32)
 
     ancillary_data = gas_corrections.Ancillary_Data()
     ancillary_data.ozone_absorption_cross_section = ozone_absorption_cross_section
@@ -464,19 +464,19 @@ def test_no2_OCSSW(read_OCSSW_lat_lon,
     months=range(1,13)
     nmonths=12
     #set latitude and longitude grid
-    no2_frac_lat=np.arange(91,-93,-2)
-    no2_frac_lon=np.arange(-181,183,2)
-    no2_lat=np.arange(90.125,-90.375,-0.25)
-    no2_lon=np.arange(-180.125,180.375,0.25)
+    no2_frac_lat=np.arange(91, -93, -2, dtype=np.float32)
+    no2_frac_lon=np.arange(-181, 183, 2, dtype=np.float32)
+    no2_lat=np.arange(90.125, -90.375, -0.25, dtype=np.float32)
+    no2_lon=np.arange(-180.125, 180.375, 0.25, dtype=np.float32)
     no2_frac_nline=len(no2_frac_lat)
     no2_frac_npixl=len(no2_frac_lon)
     no2_nline=len(no2_lat)
     no2_npixl=len(no2_lon)
     
-    no2_total = np.zeros((nmonths,no2_nline,no2_npixl), dtype='float64')
-    no2_tropo = np.zeros((nmonths,no2_nline,no2_npixl), dtype='float64')
-    no2_strat = np.zeros((nmonths,no2_nline,no2_npixl), dtype='float64')
-    no2_frac = np.zeros((no2_frac_nline,no2_frac_npixl), dtype='float64')
+    no2_total = np.zeros((nmonths,no2_nline,no2_npixl), dtype='float32')
+    no2_tropo = np.zeros((nmonths,no2_nline,no2_npixl), dtype='float32')
+    no2_strat = np.zeros((nmonths,no2_nline,no2_npixl), dtype='float32')
+    no2_frac = np.zeros((no2_frac_nline,no2_frac_npixl), dtype='float32')
     
     no2_fname = TEST_DIR + '/PACE/no2/no2_climatology_v2013.hdf'
     no2_frac_fname = TEST_DIR + '/PACE/no2/trop_f_no2_200m.hdf'
@@ -514,15 +514,15 @@ def test_no2_OCSSW(read_OCSSW_lat_lon,
     
     # Interpolate no2 map to the L1B grid
     func = interpolate.RegularGridInterpolator((np.flip(no2_frac_lat), no2_frac_lon), np.flip(no2_frac, 0))
-    fraction_tropospheric_no2_above_200m = func(np.array([l1b_lat, l1b_lon]).transpose())
+    fraction_tropospheric_no2_above_200m = func(np.array([l1b_lat, l1b_lon], dtype=np.float32).transpose()).astype(np.float32)
 
     no2_strat = no2_strat[int(month)-1, :, :]
     func = interpolate.RegularGridInterpolator((np.flip(no2_lat), no2_lon), np.flip(no2_strat, 0))
-    stratospheric_no2_concentration = func(np.array([l1b_lat, l1b_lon]).transpose())
+    stratospheric_no2_concentration = func(np.array([l1b_lat, l1b_lon], dtype=np.float32).transpose()).astype(np.float32)
 
     no2_tropo = no2_tropo[int(month)-1, :, :]
     func = interpolate.RegularGridInterpolator((np.flip(no2_lat), no2_lon), np.flip(no2_tropo, 0))
-    tropospheric_no2_concentration = func(np.array([l1b_lat, l1b_lon]).transpose())
+    tropospheric_no2_concentration = func(np.array([l1b_lat, l1b_lon], dtype=np.float32).transpose()).astype(np.float32)
 
     ancillary_data = gas_corrections.Ancillary_Data()
     ancillary_data.no2_absorption_cross_section = no2_absorption_cross_section
