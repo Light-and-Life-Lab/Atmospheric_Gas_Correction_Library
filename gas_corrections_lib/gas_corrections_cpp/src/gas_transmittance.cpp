@@ -14,11 +14,42 @@ static bool is_float32(const py::array& arr)
     return arr.dtype().is(py::dtype::of<float>());
 }
 
-template<typename... Arrays>
-static bool all_float32(const Arrays&... arrays)
+struct Named_Array
 {
-    // Variadic template that accepts a list of pybind arrays and checks each to see if they are all float32. Returns true only if all arrays are float32.
-    return (is_float32(arrays) && ...);
+    const char* name;
+    const py::array* array_pointer;   // Specifically use a pointer here rather than reference so that it is trivially copyable inside an initializer_list
+};
+
+static void warn_non_float32(const char* function_name, const char* field_name, const py::array& arr)
+{
+    std::string dtype_str = py::str(arr.dtype()).cast<std::string>();
+    std::string message = "\n\033[33mFloat32Warning (" + std::string(function_name) + "): '" + field_name + "' is dtype " + dtype_str + " (not float32).\n\033[0m";
+    PyErr_WarnEx(PyExc_RuntimeWarning, message.c_str(), 1);
+}
+
+static bool all_float32(const char* function_name, std::initializer_list<Named_Array> arrays)
+{
+    // Check each array's floating point type. Only returns true if all passed arrays have type float32. 
+    // Issues a warning if any are found with float64 to let the user know that intended memory savings from using float32 will not apply unless ALL arrays 
+    bool result = true;
+    for (const auto& named_array : arrays)
+    {
+        if (!is_float32(*named_array.array_pointer))
+        {
+            warn_non_float32(function_name, named_array.name, *named_array.array_pointer);
+            result = false;
+        }
+    }
+
+    if (result == false)
+    {
+        std::string message = "\n\033[33mWarning: At least one float64 array was passed to " + std::string(function_name) + ". This function will fall back to float64"
+        + " to prevent unintended errors due to loss of precision. If you were trying to save memory by using float32 arrays, resolve all Float32Warnings. "
+        + "Only once all errors are resolved will " + std::string(function_name) + " use float32 arrays for caclulation.\n\033[0m";
+        PyErr_WarnEx(PyExc_RuntimeWarning, message.c_str(), 1);
+    }
+
+    return result;
 }
 
 template<typename T>
@@ -69,7 +100,14 @@ Gas_Transmittances_PY ozone_transmittance_py(const L1_Data_PY& l1_data, const An
 
 Gas_Transmittances_PY ozone_transmittance_type_dispatcher(const L1_Data_PY& l1_data, const Ancillary_Data_PY& ancillary_data)
 {
-    bool all_arrays_are_float32 = all_float32(l1_data.cos_solar_zenith, l1_data.cos_sensor_zenith, ancillary_data.ozone_absorption_cross_section, ancillary_data.ozone_concentration);
+    bool all_arrays_are_float32 = all_float32(
+        "ozone_transmittance", 
+        {
+            {"l1_data.cos_solar_zenith", &l1_data.cos_solar_zenith},
+            {"l1_data.cos_sensor_zenith", &l1_data.cos_sensor_zenith},
+            {"ancillary_data.ozone_concentration", &ancillary_data.ozone_concentration}
+        }
+    );
 
     if (all_arrays_are_float32)
         return ozone_transmittance_py<float>(l1_data, ancillary_data);
@@ -115,7 +153,13 @@ Gas_Transmittances_PY co2_transmittance_py(const L1_Data_PY& l1_data, const Gas_
 
 Gas_Transmittances_PY co2_transmittance_type_dispatcher(const L1_Data_PY& l1_data, const Gas_Transmittance_Lookup_Table_PY& gas_transmittance_table, const bool lookup_table_has_amf_dimension) 
 {
-    bool all_arrays_are_float32 = all_float32(l1_data.cos_solar_zenith, l1_data.cos_sensor_zenith);
+    bool all_arrays_are_float32 = all_float32(
+        "co2_transmittance", 
+        {
+            {"l1_data.cos_solar_zenith", &l1_data.cos_solar_zenith},
+            {"l1_data.cos_sensor_zenith", &l1_data.cos_sensor_zenith},
+        }
+    );
 
     if (all_arrays_are_float32)
         return co2_transmittance_py<float>(l1_data, gas_transmittance_table, lookup_table_has_amf_dimension);
@@ -161,7 +205,13 @@ Gas_Transmittances_PY co_transmittance_py(const L1_Data_PY& l1_data, const Gas_T
 
 Gas_Transmittances_PY co_transmittance_type_dispatcher(const L1_Data_PY& l1_data, const Gas_Transmittance_Lookup_Table_PY& gas_transmittance_table, const bool lookup_table_has_amf_dimension) 
 {
-    bool all_arrays_are_float32 = all_float32(l1_data.cos_solar_zenith, l1_data.cos_sensor_zenith);
+    bool all_arrays_are_float32 = all_float32(
+        "co_transmittance", 
+        {
+            {"l1_data.cos_solar_zenith", &l1_data.cos_solar_zenith},
+            {"l1_data.cos_sensor_zenith", &l1_data.cos_sensor_zenith},
+        }
+    );
 
     if (all_arrays_are_float32)
         return co_transmittance_py<float>(l1_data, gas_transmittance_table, lookup_table_has_amf_dimension);
@@ -207,7 +257,13 @@ Gas_Transmittances_PY ch4_transmittance_py(const L1_Data_PY& l1_data, const Gas_
 
 Gas_Transmittances_PY ch4_transmittance_type_dispatcher(const L1_Data_PY& l1_data, const Gas_Transmittance_Lookup_Table_PY& gas_transmittance_table, const bool lookup_table_has_amf_dimension) 
 {
-    bool all_arrays_are_float32 = all_float32(l1_data.cos_solar_zenith, l1_data.cos_sensor_zenith);
+    bool all_arrays_are_float32 = all_float32(
+        "ch4_transmittance", 
+        {
+            {"l1_data.cos_solar_zenith", &l1_data.cos_solar_zenith},
+            {"l1_data.cos_sensor_zenith", &l1_data.cos_sensor_zenith},
+        }
+    );
 
     if (all_arrays_are_float32)
         return ch4_transmittance_py<float>(l1_data, gas_transmittance_table, lookup_table_has_amf_dimension);
@@ -257,7 +313,14 @@ Gas_Transmittances_PY o2_transmittance_py(const L1_Data_PY& l1_data, const Gas_T
 
 Gas_Transmittances_PY o2_transmittance_type_dispatcher(const L1_Data_PY& l1_data, const Gas_Transmittance_Lookup_Table_PY& gas_transmittance_table, const bool lookup_table_has_amf_dimension, Oxygen_A_Band_Option oxygen_A_band_option) 
 {
-    bool all_arrays_are_float32 = all_float32(l1_data.cos_solar_zenith, l1_data.cos_sensor_zenith, l1_data.reflectance, l1_data.wavelengths);
+    bool all_arrays_are_float32 = all_float32(
+        "o2_transmittance", 
+        {
+            {"l1_data.cos_solar_zenith", &l1_data.cos_solar_zenith},
+            {"l1_data.cos_sensor_zenith", &l1_data.cos_sensor_zenith},
+            {"l1_data.reflectance", &l1_data.reflectance},
+        }
+    );
 
     if (all_arrays_are_float32)
         return o2_transmittance_py<float>(l1_data, gas_transmittance_table, lookup_table_has_amf_dimension, oxygen_A_band_option);
@@ -304,7 +367,13 @@ Gas_Transmittances_PY n2o_transmittance_py(const L1_Data_PY& l1_data, const Gas_
 
 Gas_Transmittances_PY n2o_transmittance_type_dispatcher(const L1_Data_PY& l1_data, const Gas_Transmittance_Lookup_Table_PY& gas_transmittance_table, const bool lookup_table_has_amf_dimension) 
 {
-    bool all_arrays_are_float32 = all_float32(l1_data.cos_solar_zenith, l1_data.cos_sensor_zenith);
+    bool all_arrays_are_float32 = all_float32(
+        "n2o_transmittance", 
+        {
+            {"l1_data.cos_solar_zenith", &l1_data.cos_solar_zenith},
+            {"l1_data.cos_sensor_zenith", &l1_data.cos_sensor_zenith},
+        }
+    );
 
     if (all_arrays_are_float32)
         return n2o_transmittance_py<float>(l1_data, gas_transmittance_table, lookup_table_has_amf_dimension);
@@ -358,9 +427,16 @@ Gas_Transmittances_PY no2_transmittance_py(const L1_Data_PY& l1_data, const Anci
 
 Gas_Transmittances_PY no2_transmittance_type_dispatcher(const L1_Data_PY& l1_data, const Ancillary_Data_PY& ancillary_data)
 {
-    bool all_arrays_are_float32 = all_float32(l1_data.cos_solar_zenith, l1_data.cos_sensor_zenith, 
-                                    ancillary_data.no2_absorption_cross_section, ancillary_data.fraction_tropospheric_no2_above_200m, 
-                                    ancillary_data.tropospheric_no2_concentration, ancillary_data.stratospheric_no2_concentration);
+    bool all_arrays_are_float32 = all_float32(
+        "no2_transmittance", 
+        {
+            {"l1_data.cos_solar_zenith", &l1_data.cos_solar_zenith},
+            {"l1_data.cos_sensor_zenith", &l1_data.cos_sensor_zenith},
+            {"ancillary_data.fraction_tropospheric_no2_above_200m", &ancillary_data.fraction_tropospheric_no2_above_200m},
+            {"ancillary_data.tropospheric_no2_concentration", &ancillary_data.tropospheric_no2_concentration},
+            {"ancillary_data.stratospheric_no2_concentration", &ancillary_data.stratospheric_no2_concentration},
+        }
+    );
 
     if (all_arrays_are_float32)
         return no2_transmittance_py<float>(l1_data, ancillary_data);
@@ -424,8 +500,15 @@ Gas_Transmittances_PY h2o_transmittance_py(const L1_Data_PY& l1_data, const Anci
 
 Gas_Transmittances_PY h2o_transmittance_type_dispatcher(const L1_Data_PY& l1_data, const Ancillary_Data_PY& ancillary_data, const Gas_Transmittance_Lookup_Table_PY& gas_transmittance_table, const bool lookup_table_has_amf_dimension) 
 {
-    bool all_arrays_are_float32 = all_float32(l1_data.cos_solar_zenith, l1_data.cos_sensor_zenith, l1_data.reflectance, l1_data.wavelengths,
-                                    ancillary_data.precipitable_water, ancillary_data.water_vapor_bands);
+    bool all_arrays_are_float32 = all_float32(
+        "h2o_transmittance", 
+        {
+            {"l1_data.cos_solar_zenith", &l1_data.cos_solar_zenith},
+            {"l1_data.cos_sensor_zenith", &l1_data.cos_sensor_zenith},
+            {"l1_data.reflectance", &l1_data.reflectance},
+            {"ancillary_data.precipitable_water", &ancillary_data.precipitable_water},
+        }
+    );
 
     if (all_arrays_are_float32)
         return h2o_transmittance_py<float>(l1_data, ancillary_data, gas_transmittance_table, lookup_table_has_amf_dimension);

@@ -27,7 +27,7 @@ int32_t get_index_lowerbound(double* table_val, int num_val, float val)
 }
 
 
-int32_t get_index_upperbound(float *table_val, int32_t num_val, float val) {
+int32_t get_index_upperbound(double *table_val, int32_t num_val, float val) {
     int32_t index;
 
     for (index = 0; index < num_val; index++)
@@ -72,7 +72,7 @@ int windex(double wave, T* twave, int ntwave)
 
     for (int iw = 0; iw < ntwave; iw++) 
     {
-        double twave_val = static_cast<double>(twave[iw])
+        double twave_val = static_cast<double>(twave[iw]);
 
         /* break on exact match */
         if (twave_val == wave) 
@@ -118,7 +118,8 @@ double get_airmass_oxygen(L1_Data<T>* l1_data, Gas_Transmittance_Lookup_Table* g
     int num_airmass = gas_transmittance_table->num_amf_grid_points;
     int gas_transmittance_table_row_offset = band_absorp*num_airmass;
     
-    for (int i = 0; i < num_airmass; i++) 
+    int i{};
+    for (i = 0; i < num_airmass; i++) 
     {
         if (trans_o2_true >= gas_transmittance_table->o2_transmittance[gas_transmittance_table_row_offset + i])
             break;
@@ -253,7 +254,7 @@ void ozone_transmittance(L1_Data<T>* l1_data, Ancillary_Data<T>* ancillary_data,
     }
 }
 
-
+template<typename T>
 void co2_transmittance(L1_Data<T>* l1_data, Gas_Transmittance_Lookup_Table* gas_transmittance_table, Gas_Transmittances<T>* gas_transmittances, bool lookup_table_has_amf_dimension)
 {
     #pragma omp parallel for
@@ -290,8 +291,8 @@ void co2_transmittance(L1_Data<T>* l1_data, Gas_Transmittance_Lookup_Table* gas_
             }
 
             gas_transmittances->solar_zenith[row_offset + iw] = static_cast<T>(solar_zenith);
-            gas_transmittances->total[row_offset + iw] = static_cast<T>(sensor_zenith);
-            gas_transmittances->sensor_zenith[row_offset + iw] = static_cast<T>(total);
+            gas_transmittances->sensor_zenith[row_offset + iw] = static_cast<T>(sensor_zenith);
+            gas_transmittances->total[row_offset + iw] = static_cast<T>(total);
         }
     }
 }
@@ -557,14 +558,14 @@ void no2_transmittance(L1_Data<T>* l1_data, Ancillary_Data<T>* ancillary_data, G
                 // }
                 // else
                 // {
-                    sensor_zenith = std::exp(-(no2_optical_depth_to_200m * sec));
-                    total = sensor_zenith * solar_zenith;
+                    double sensor_zenith = std::exp(-(no2_optical_depth_to_200m * sec));
+                    double total = sensor_zenith * solar_zenith;
                 // }
-            }
 
-            gas_transmittances->solar_zenith[row_offset + iw] = static_cast<T>(solar_zenith);
-            gas_transmittances->sensor_zenith[row_offset + iw] = static_cast<T>(sensor_zenith);
-            gas_transmittances->total[row_offset + iw] = static_cast<T>(total);
+                gas_transmittances->solar_zenith[row_offset + iw] = static_cast<T>(solar_zenith);
+                gas_transmittances->sensor_zenith[row_offset + iw] = static_cast<T>(sensor_zenith);
+                gas_transmittances->total[row_offset + iw] = static_cast<T>(total);
+            }
         }
     }
 }
@@ -574,7 +575,6 @@ void no2_transmittance(L1_Data<T>* l1_data, Ancillary_Data<T>* ancillary_data, G
 template<typename T>
 void h2o_transmittance(L1_Data<T>* l1_data, Ancillary_Data<T>* ancillary_data, Gas_Transmittance_Lookup_Table* gas_transmittance_table, Gas_Transmittances<T>* gas_transmittances, bool lookup_table_has_amf_dimension) 
 {
-    std::cout << "It compiled the new version!!!" << std::endl;
     // #pragma omp parallel for
     for (int ip = 0; ip < l1_data->num_pixels; ip++)
     {
@@ -600,9 +600,9 @@ void h2o_transmittance(L1_Data<T>* l1_data, Ancillary_Data<T>* ancillary_data, G
             for (int iw = 0; iw < ancillary_data->num_water_vapor_bands;) 
             {
                 total_columnar_water_vapor += get_wv_band_ratio(l1_data, gas_transmittance_table, ip, 
-                    static_cast<double)(ancillary_data->water_vapor_bands[iw]), 
+                    static_cast<double>(ancillary_data->water_vapor_bands[iw]), 
                     static_cast<double>(ancillary_data->water_vapor_bands[iw + 1]),
-                    static_cast<double(ancillary_data->water_vapor_bands[iw + 2]), 
+                    static_cast<double>(ancillary_data->water_vapor_bands[iw + 2]), 
                     amf_total);
                 iw += 3;
             }
