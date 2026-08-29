@@ -100,6 +100,8 @@ Gas_Transmittances_PY ozone_transmittance_py(const L1_Data_PY& l1_data, const An
 
 Gas_Transmittances_PY ozone_transmittance_type_dispatcher(const L1_Data_PY& l1_data, const Ancillary_Data_PY& ancillary_data)
 {
+    // Note: ancillary_data_c.ozone_absorption_cross_section is intentionally excluded from checking because 
+    // the cross sections are only defined for at most a few hundred wavelengths, so the size of that array is not impactful enough to warrant worrying about float32 vs float64
     bool all_arrays_are_float32 = all_float32(
         "ozone_transmittance", 
         {
@@ -313,6 +315,8 @@ Gas_Transmittances_PY o2_transmittance_py(const L1_Data_PY& l1_data, const Gas_T
 
 Gas_Transmittances_PY o2_transmittance_type_dispatcher(const L1_Data_PY& l1_data, const Gas_Transmittance_Lookup_Table_PY& gas_transmittance_table, const bool lookup_table_has_amf_dimension, Oxygen_A_Band_Option oxygen_A_band_option) 
 {
+    // Note: l1_data_c.wavelengths is intentionally excluded from checking because there will be at most a few hundred wavelengths, 
+    // so the size of that array is not impactful enough to warrant worrying about float32 vs float64.
     bool all_arrays_are_float32 = all_float32(
         "o2_transmittance", 
         {
@@ -427,6 +431,8 @@ Gas_Transmittances_PY no2_transmittance_py(const L1_Data_PY& l1_data, const Anci
 
 Gas_Transmittances_PY no2_transmittance_type_dispatcher(const L1_Data_PY& l1_data, const Ancillary_Data_PY& ancillary_data)
 {
+    // Note: ancillary_data_c.no2_absorption_cross_section is intentionally excluded from checking because 
+    // the cross sections are only defined for at most a few hundred wavelengths, so the size of that array is not impactful enough to warrant worrying about float32 vs float64
     bool all_arrays_are_float32 = all_float32(
         "no2_transmittance", 
         {
@@ -500,6 +506,9 @@ Gas_Transmittances_PY h2o_transmittance_py(const L1_Data_PY& l1_data, const Anci
 
 Gas_Transmittances_PY h2o_transmittance_type_dispatcher(const L1_Data_PY& l1_data, const Ancillary_Data_PY& ancillary_data, const Gas_Transmittance_Lookup_Table_PY& gas_transmittance_table, const bool lookup_table_has_amf_dimension) 
 {
+    // Note: l1_data_c.wavelengths is intentionally excluded from checking because there will be at most a few hundred wavelengths, 
+    // so the size of that array is not impactful enough to warrant worrying about float32 vs float64.
+    // Similarly, ancillary_data_c.water_vapor_bands is only 3 values, not worth worrying about.
     bool all_arrays_are_float32 = all_float32(
         "h2o_transmittance", 
         {
