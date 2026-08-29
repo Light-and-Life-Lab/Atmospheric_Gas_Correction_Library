@@ -75,26 +75,26 @@ class Gas_Correction_Manager:
             end_pixel = kwargs.get("end_pixel", None)
 
             with h5py.File(l1_filename, 'r') as f:
-                solar_zenith = 0.01*np.array(f['/geolocation_data/solar_zenith'][start_line:end_line, start_pixel:end_pixel])
-                sensor_zenith = 0.01*np.array(f['/geolocation_data/sensor_zenith'][start_line:end_line, start_pixel:end_pixel])
+                solar_zenith = 0.01*np.array(f['/geolocation_data/solar_zenith'][start_line:end_line, start_pixel:end_pixel], dtype=np.float32)
+                sensor_zenith = 0.01*np.array(f['/geolocation_data/sensor_zenith'][start_line:end_line, start_pixel:end_pixel], dtype=np.float32)
                 l1_data.cos_solar_zenith = np.cos(np.deg2rad(solar_zenith))
                 l1_data.cos_sensor_zenith = np.cos(np.deg2rad(sensor_zenith))
 
-                l1_data.latitude = np.flip(np.array(f['/geolocation_data/latitude']), 0)
-                l1_data.longitude = np.flip(np.array(f['/geolocation_data/longitude']), 0)
+                l1_data.latitude = np.flip(np.array(f['/geolocation_data/latitude'], dtype=np.float32), 0)
+                l1_data.longitude = np.flip(np.array(f['/geolocation_data/longitude'], dtype=np.float32), 0)
 
-                blue_wavelengths = np.array(f['/sensor_band_parameters/blue_wavelength'][1:])
-                red_wavelengths = np.array(f['/sensor_band_parameters/red_wavelength'][3:])
-                sensor_wavelengths = np.zeros(len(blue_wavelengths) + len(red_wavelengths))
+                blue_wavelengths = np.array(f['/sensor_band_parameters/blue_wavelength'][1:], dtype=np.float32)
+                red_wavelengths = np.array(f['/sensor_band_parameters/red_wavelength'][3:], dtype=np.float32)
+                sensor_wavelengths = np.zeros(len(blue_wavelengths) + len(red_wavelengths), dtype=np.float32)
                 sensor_wavelengths[0:len(blue_wavelengths)] = blue_wavelengths
                 sensor_wavelengths[len(blue_wavelengths):] = red_wavelengths
 
-                blue_rhot = np.array(f['/observation_data/rhot_blue'][1:, start_line:end_line, start_pixel:end_pixel])
-                red_rhot = np.array(f['/observation_data/rhot_red'][3:, start_line:end_line, start_pixel:end_pixel])
+                blue_rhot = np.array(f['/observation_data/rhot_blue'][1:, start_line:end_line, start_pixel:end_pixel], dtype=np.float32)
+                red_rhot = np.array(f['/observation_data/rhot_red'][3:, start_line:end_line, start_pixel:end_pixel], dtype=np.float32)
                 assert(blue_rhot.shape[1] == red_rhot.shape[1])
                 assert(blue_rhot.shape[2] == red_rhot.shape[2])
 
-                rhot = np.zeros((blue_rhot.shape[0] + red_rhot.shape[0], blue_rhot.shape[1], blue_rhot.shape[2]))
+                rhot = np.zeros((blue_rhot.shape[0] + red_rhot.shape[0], blue_rhot.shape[1], blue_rhot.shape[2]), dtype=np.float32)
                 rhot[0:len(blue_wavelengths), :, :] = blue_rhot
                 rhot[len(blue_wavelengths):, :, :] = red_rhot
                 rhot = np.rollaxis(rhot, 0, 3)
@@ -778,8 +778,8 @@ def h2o_transmittance(**kwargs):
 
     ancillary_data = gas_transmittance.Ancillary_Data()
 
-    ancillary_data.precipitable_water = np.zeros(l1_data.cos_solar_zenith.size)
-    ancillary_data.water_vapor_bands = np.array([782, 817, 857], dtype=np.float64)
+    ancillary_data.precipitable_water = np.zeros(l1_data.cos_solar_zenith.size, dtype=np.float32)
+    ancillary_data.water_vapor_bands = np.array([782, 817, 857], dtype=np.float32)
     ancillary_data.num_water_vapor_bands = ancillary_data.water_vapor_bands.size
 
     f = interpolate.interp1d(gas_transmittance_table.wavelengths, gas_transmittance_table.h2o_transmittance, axis = 1)
