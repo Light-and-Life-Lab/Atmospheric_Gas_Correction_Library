@@ -41,6 +41,8 @@ struct Ancillary_Data
 
 struct Gas_Transmittance_Lookup_Table
 {
+    // Note: this class doesn't need to be templated because the lookup tables are fixed files, small enough that changing from double to float only saves at most a few MB
+    // Not worth optimizing compared to the other arrays which can each take up multiple GB for large images (e.g. PACE)
     // From e.g. oci_gas_transmittance_cia_amf_v3.2.nc
     double* co2_transmittance{};
     double* co_transmittance{};
@@ -85,7 +87,6 @@ struct Gas_Transmittances
 {
     T* solar_zenith{};
     T* sensor_zenith{};
-    T* total{};
 };
 
 enum Oxygen_A_Band_Option

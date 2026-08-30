@@ -1,6 +1,7 @@
 #ifndef PYBIND_INTERFACE_TYPES_H
 #define PYBIND_INTERFACE_TYPES_H
 
+#include <optional>
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 
@@ -73,10 +74,45 @@ struct Gas_Transmittances_PY
 {
 public:
     Gas_Transmittances_PY(){};
+
+    pybind11::array get_solar_zenith() const
+    {
+        return solar_zenith_;
+    }
+
+    pybind11::array get_sensor_zenith() const
+    {
+        return sensor_zenith_;
+    }
+
+    pybind11::array get_total() const
+    {
+        // Since total is always derivable from solar and sensor zenith transmittances, no need to store the whole total array in memory, especially if caller doesn't end up using it.
+        // Lazily evaluate the total array so that it is only computed and taking up memory if the caller specifically asks for it.
+        if (!total_.has_value())
+        {
+            // Can just import numpy from pybind here to do the array multiplication
+            static pybind11::object np_multiply = pybind11::module_::import("numpy").attr("multiply");  // Needs to be static here so that numpy isn't re-imported every time this branch runs.
+            total_ = np_multiply(solar_zenith_, sensor_zenith_);
+        }
+
+        return *total_;
+    }
+
+    void set_solar_zenith(const pybind11::array& solar_zenith)
+    {
+        solar_zenith_ = solar_zenith;
+    }
+
+    void set_sensor_zenith(const pybind11::array& sensor_zenith)
+    {
+        sensor_zenith_ = sensor_zenith;
+    }
     
-    pybind11::array solar_zenith{};
-    pybind11::array sensor_zenith{};
-    pybind11::array total{};
+private:
+    pybind11::array solar_zenith_{};
+    pybind11::array sensor_zenith_{};
+    mutable std::optional<pybind11::array> total_{};
 };
 
 #endif // PYBIND_INTERFACE_TYPES_H

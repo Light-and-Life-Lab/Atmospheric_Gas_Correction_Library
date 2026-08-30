@@ -249,7 +249,6 @@ void ozone_transmittance(L1_Data<T>* l1_data, Ancillary_Data<T>* ancillary_data,
 
             gas_transmittances->solar_zenith[row_offset + iw] = static_cast<T>(solar_zenith);
             gas_transmittances->sensor_zenith[row_offset + iw] = static_cast<T>(sensor_zenith);
-            gas_transmittances->total[row_offset + iw] = static_cast<T>(solar_zenith * sensor_zenith);
         }
     }
 }
@@ -292,7 +291,6 @@ void co2_transmittance(L1_Data<T>* l1_data, Gas_Transmittance_Lookup_Table* gas_
 
             gas_transmittances->solar_zenith[row_offset + iw] = static_cast<T>(solar_zenith);
             gas_transmittances->sensor_zenith[row_offset + iw] = static_cast<T>(sensor_zenith);
-            gas_transmittances->total[row_offset + iw] = static_cast<T>(total);
         }
     }
 }
@@ -335,7 +333,6 @@ void co_transmittance(L1_Data<T>* l1_data, Gas_Transmittance_Lookup_Table* gas_t
 
             gas_transmittances->solar_zenith[row_offset + iw] = static_cast<T>(solar_zenith);
             gas_transmittances->sensor_zenith[row_offset + iw] = static_cast<T>(sensor_zenith);
-            gas_transmittances->total[row_offset + iw] = static_cast<T>(total);
         }
     }
 }
@@ -378,7 +375,6 @@ void ch4_transmittance(L1_Data<T>* l1_data, Gas_Transmittance_Lookup_Table* gas_
 
             gas_transmittances->solar_zenith[row_offset + iw] = static_cast<T>(solar_zenith);
             gas_transmittances->sensor_zenith[row_offset + iw] = static_cast<T>(sensor_zenith);
-            gas_transmittances->total[row_offset + iw] = static_cast<T>(total);
         }
     }
 }
@@ -468,7 +464,6 @@ void o2_transmittance(L1_Data<T>* l1_data, Gas_Transmittance_Lookup_Table* gas_t
 
             gas_transmittances->solar_zenith[ipb + iw] = static_cast<T>(solar_zenith);
             gas_transmittances->sensor_zenith[ipb + iw] = static_cast<T>(sensor_zenith);
-            gas_transmittances->total[ipb + iw] = static_cast<T>(total);
         }
     }
 }
@@ -511,7 +506,6 @@ void n2o_transmittance(L1_Data<T>* l1_data, Gas_Transmittance_Lookup_Table* gas_
 
             gas_transmittances->solar_zenith[row_offset + iw] = static_cast<T>(solar_zenith);
             gas_transmittances->sensor_zenith[row_offset + iw] = static_cast<T>(sensor_zenith);
-            gas_transmittances->total[row_offset + iw] = static_cast<T>(total);
         }
     }
 }
@@ -564,7 +558,6 @@ void no2_transmittance(L1_Data<T>* l1_data, Ancillary_Data<T>* ancillary_data, G
 
                 gas_transmittances->solar_zenith[row_offset + iw] = static_cast<T>(solar_zenith);
                 gas_transmittances->sensor_zenith[row_offset + iw] = static_cast<T>(sensor_zenith);
-                gas_transmittances->total[row_offset + iw] = static_cast<T>(total);
             }
         }
     }
@@ -716,7 +709,6 @@ void h2o_transmittance(L1_Data<T>* l1_data, Ancillary_Data<T>* ancillary_data, G
 
             gas_transmittances->solar_zenith[row_offset + iw] = static_cast<T>(solar_zenith);
             gas_transmittances->sensor_zenith[row_offset + iw] = static_cast<T>(sensor_zenith);
-            gas_transmittances->total[row_offset + iw] = static_cast<T>(total);
         }
     }
 }
