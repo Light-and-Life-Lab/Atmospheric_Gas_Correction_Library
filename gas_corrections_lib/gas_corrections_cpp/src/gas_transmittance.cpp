@@ -8,10 +8,13 @@
 
 namespace py = pybind11;
 
-static bool is_float32(const py::array& arr)
+static bool is_convertible_to_float32_without_loss_of_precision(const py::array& arr)
 {
-    // Returns true as long as the elements of the array are float32
-    return arr.dtype().is(py::dtype::of<float>());
+    // Returns true as long as the elements of the array are float32, or safely convertible to float32 without loss of precision,
+    // i.e. float16, int16 or smaller are ok, int32 not ok (large integer values not safely representable as float32), float64 and larger not ok (narrowing).
+    // Numpy already has an implementation that checks for this, just import that rather than re-implementing it.
+    static py::object np = py::module_::import("numpy");
+    return np.attr("can_cast")(arr.dtype(), py::dtype::of<float>(), "safe").cast<bool>();
 }
 
 struct Named_Array
@@ -34,7 +37,7 @@ static bool all_float32(const char* function_name, std::initializer_list<Named_A
     bool result = true;
     for (const auto& named_array : arrays)
     {
-        if (!is_float32(*named_array.array_pointer))
+        if (!is_convertible_to_float32_without_loss_of_precision(*named_array.array_pointer))
         {
             warn_non_float32(function_name, named_array.name, *named_array.array_pointer);
             result = false;
@@ -43,9 +46,9 @@ static bool all_float32(const char* function_name, std::initializer_list<Named_A
 
     if (result == false)
     {
-        std::string message = "\n\033[33mWarning: At least one float64 array was passed to " + std::string(function_name) + ". This function will fall back to float64"
-        + " to prevent unintended errors due to loss of precision. If you were trying to save memory by using float32 arrays, resolve all Float32Warnings. "
-        + "Only once all errors are resolved will " + std::string(function_name) + " use float32 arrays for caclulation.\n\033[0m";
+        std::string message = "\n\033[33mWarning: At least one array was passed to " + std::string(function_name) + " that could not be safely converted to float32 without loss of precision. "
+        + "This function will fall back to float64 to prevent unintended errors due to loss of precision. If you were trying to save memory by using smaller arrays, resolve all Float32Warnings. "
+        + "Only once all warnings are resolved will " + std::string(function_name) + " use float32 arrays for caclulation.\n\033[0m";
         PyErr_WarnEx(PyExc_RuntimeWarning, message.c_str(), 1);
     }
 
