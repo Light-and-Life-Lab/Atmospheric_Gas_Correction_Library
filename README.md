@@ -23,16 +23,16 @@ Pre-built wheels for **Linux** and **macOS** are published on the [Releases page
 
 Each release lists several `.whl` files, one per combination of Python version and platform. Each wheel has the format {distribution}-{version}-{python tag}-{abi tag}-{platform tag}.whl. Identify the wheel that matches your machine, for example if you are running with Python 3.10 on MacOS 11, the wheel name will look like:
 
-lll_gas_corr_lib-0.1.4-cp310-cp310-macosx_11_0_arm64.whl
+`lll_gas_corr_lib-0.1.4-cp310-cp310-macosx_11_0_arm64.whl`
 
 Similarly, Python 3.10 on Linux would look like:
 
-lll_gas_corr_lib-0.1.4-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
+`lll_gas_corr_lib-0.1.4-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl`
 
 If you are unsure of your Python version, run:
 
 ```bash
-python3 --version
+`python3 --version`
 
 ```
 
@@ -43,14 +43,14 @@ The `cp3XX` in the filename should match your major/minor version (e.g. Python 3
 Right-click the appropriate file on the [Releases page](https://github.com/Light-and-Life-Lab/Atmospheric_Gas_Correction_Library/releases) to copy its link, then run the following from the terminal:
 
 ```bash
-pip install <paste-the-wheel-url-here>
+`python -m pip install <paste-the-wheel-url-here>`
 
 ```
 
 For example:
 
 ```bash
-pip install https://github.com/Light-and-Life-Lab/Atmospheric_Gas_Correction_Library/releases/download/v0.1.7/lll_gas_corr_lib-0.1.7-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
+`python -m pip install https://github.com/Light-and-Life-Lab/Atmospheric_Gas_Correction_Library/releases/download/v0.1.7/lll_gas_corr_lib-0.1.7-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl`
 
 ```
 
