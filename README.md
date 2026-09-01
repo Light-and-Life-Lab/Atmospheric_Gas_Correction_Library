@@ -32,7 +32,7 @@ Similarly, Python 3.10 on Linux would look like:
 If you are unsure of your Python version, run:
 
 ```bash
-`python3 --version`
+python3 --version
 
 ```
 
@@ -43,14 +43,14 @@ The `cp3XX` in the filename should match your major/minor version (e.g. Python 3
 Right-click the appropriate file on the [Releases page](https://github.com/Light-and-Life-Lab/Atmospheric_Gas_Correction_Library/releases) to copy its link, then run the following from the terminal:
 
 ```bash
-`python -m pip install <paste-the-wheel-url-here>`
+python -m pip install <paste-the-wheel-url-here>
 
 ```
 
 For example:
 
 ```bash
-`python -m pip install https://github.com/Light-and-Life-Lab/Atmospheric_Gas_Correction_Library/releases/download/v0.1.7/lll_gas_corr_lib-0.1.7-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl`
+python -m pip install https://github.com/Light-and-Life-Lab/Atmospheric_Gas_Correction_Library/releases/download/v0.1.7/lll_gas_corr_lib-0.1.7-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
 
 ```
 
