@@ -94,7 +94,7 @@ public:
             // Can just import numpy from pybind here to do the array multiplication
             static pybind11::object np_multiply = pybind11::module_::import("numpy").attr("multiply");  // Needs to be static here so that numpy isn't re-imported every time this branch runs.
             total_ = np_multiply(solar_zenith_, sensor_zenith_);
-        }
+        });
 
         return *total_;
     }
