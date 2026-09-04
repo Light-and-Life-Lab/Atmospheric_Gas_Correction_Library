@@ -89,7 +89,7 @@ public:
     {
         // Since total is always derivable from solar and sensor zenith transmittances, no need to store the whole total array in memory, especially if caller doesn't end up using it.
         // Lazily evaluate the total array so that it is only computed and taking up memory if the caller specifically asks for it.
-        if (!total_.has_value())
+        std::call_once(total_once_, [this]()
         {
             // Can just import numpy from pybind here to do the array multiplication
             static pybind11::object np_multiply = pybind11::module_::import("numpy").attr("multiply");  // Needs to be static here so that numpy isn't re-imported every time this branch runs.
