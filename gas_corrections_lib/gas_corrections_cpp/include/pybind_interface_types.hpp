@@ -90,12 +90,12 @@ public:
         // Since total is always derivable from solar and sensor zenith transmittances, no need to store the whole total array in memory, especially if caller doesn't end up using it.
         // Lazily evaluate the total array so that it is only computed and taking up memory if the caller specifically asks for it.
         // std::call_once guarantees the computation happens exactly once even if multiple threads call get_total() concurrently on the same instance.
-+        std::call_once(*total_once_flag_, [this]()
-+        {
-+            // Can just import numpy from pybind here to do the array multiplication
-+            static pybind11::object np_multiply = pybind11::module_::import("numpy").attr("multiply");  // Needs to be static here so that numpy isn't re-imported every time this branch runs.
-+            total_ = np_multiply(solar_zenith_, sensor_zenith_);
-+        });
+        std::call_once(*total_once_flag_, [this]()
+        {
+            // Can just import numpy from pybind here to do the array multiplication
+            static pybind11::object np_multiply = pybind11::module_::import("numpy").attr("multiply");  // Needs to be static here so that numpy isn't re-imported every time this branch runs.
+            total_ = np_multiply(solar_zenith_, sensor_zenith_);
+        });
 
         return *total_;
     }
