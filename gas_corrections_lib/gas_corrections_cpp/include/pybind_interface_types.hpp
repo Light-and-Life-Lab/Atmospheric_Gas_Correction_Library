@@ -113,6 +113,7 @@ private:
     pybind11::array solar_zenith_{};
     pybind11::array sensor_zenith_{};
     mutable std::optional<pybind11::array> total_{};
+    mutable std::once_flag total_once_;
 };
 
 #endif // PYBIND_INTERFACE_TYPES_H
