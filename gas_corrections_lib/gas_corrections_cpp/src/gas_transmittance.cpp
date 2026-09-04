@@ -536,7 +536,7 @@ Gas_Transmittances_PY h2o_transmittance_type_dispatcher(const L1_Data_PY& l1_dat
 }
 
 
-PYBIND11_MODULE(gas_transmittance, m) 
+PYBIND11_MODULE(gas_transmittance, m, py::mod_gil_not_used()) 
 {
     py::class_<Ancillary_Data_PY>(m, "Ancillary_Data", py::module_local())
         .def(py::init<>())

@@ -78,7 +78,6 @@ struct L1_Data
 
     int num_pixels{};
     int num_wavelengths{};
-
 };
 
 
